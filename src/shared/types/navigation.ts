@@ -1,0 +1,69 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
+
+export type RootStackParamList = {
+  Auth: NavigatorScreenParams<AuthStackParamList>;
+  Main: NavigatorScreenParams<MainTabParamList>;
+};
+
+export type AuthStackParamList = {
+  Welcome: undefined;
+  Login: undefined;
+  Signup: undefined;
+  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
+};
+
+export type OnboardingStackParamList = {
+  ProfileSetup: undefined;
+  SportsSelection: undefined;
+  SkillLevel: undefined;
+  Preferences: undefined;
+};
+
+export type MainTabParamList = {
+  Discovery: NavigatorScreenParams<DiscoveryStackParamList>;
+  Events: NavigatorScreenParams<EventsStackParamList>;
+  MatchZone: NavigatorScreenParams<MatchZoneStackParamList>;
+  Chat: NavigatorScreenParams<ChatStackParamList>;
+  Profile: NavigatorScreenParams<ProfileStackParamList>;
+};
+
+export type DiscoveryStackParamList = {
+  DiscoveryScreen: undefined;
+  ProfileDetail: { userId: string };
+  MatchModal: { matchId: string };
+  FiltersModal: undefined;
+};
+
+export type EventsStackParamList = {
+  EventsList: undefined;
+  EventDetails: { eventId: string };
+  CreateEvent: undefined;
+  EventParticipants: { eventId: string };
+};
+
+export type MatchZoneStackParamList = {
+  MatchZoneScreen: undefined;
+  CoachProfile: { coachId: string };
+  CourtDetails: { courtId: string };
+  BookingScreen: { coachId?: string; courtId?: string };
+};
+
+export type ChatStackParamList = {
+  ChatList: undefined;
+  ChatScreen: { chatId: string };
+  MatchProfile: { userId: string };
+};
+
+export type ProfileStackParamList = {
+  ProfileScreen: undefined;
+  EditProfile: undefined;
+  Settings: undefined;
+  Notifications: undefined;
+  HelpSupport: undefined;
+};
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}

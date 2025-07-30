@@ -153,6 +153,50 @@ export const translations: Translations = {
     en: 'Language',
     fr: 'Langue',
   },
+  
+  'common.minimum': {
+    en: 'Minimum',
+    fr: 'Minimum',
+  },
+  'common.maximum': {
+    en: 'Maximum',
+    fr: 'Maximum',
+  },
+  'common.within': {
+    en: 'Within',
+    fr: 'À moins de',
+  },
+  'common.selectDateTime': {
+    en: 'Select Date & Time',
+    fr: 'Sélectionner Date et Heure',
+  },
+  'common.addPhoto': {
+    en: 'Add Photo',
+    fr: 'Ajouter Photo',
+  },
+  
+  'discovery.commonSports': {
+    en: 'Sports in common',
+    fr: 'Sports en commun',
+  },
+  'discovery.otherSports': {
+    en: 'Other sports',
+    fr: 'Autres sports',
+  },
+  
+  'common.selectAll': {
+    en: 'Select All',
+    fr: 'Tout sélectionner',
+  },
+  
+  'discovery.sendMessage': {
+    en: 'Send Message',
+    fr: 'Envoyer un message',
+  },
+  'discovery.keepSwiping': {
+    en: 'Keep Swiping',
+    fr: 'Continuer',
+  },
 };
 
 class I18nService {

@@ -1,17 +1,21 @@
 import React from 'react';
-import { TouchableOpacity, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, ViewStyle, TextStyle, ActivityIndicator, View } from 'react-native';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Typography } from '../Typography';
 import { theme } from '../../../theme';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 
 export interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'iconButton';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
   fullWidth?: boolean;
   onPress: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  label?: string;
+  icon?: string;
+  iconFamily?: 'Ionicons' | 'MaterialCommunityIcons' | 'MaterialIcons';
   style?: ViewStyle;
   textStyle?: TextStyle;
   testID?: string;
@@ -52,11 +56,9 @@ const getButtonStyle = (
   const variantStyles: Record<string, ViewStyle> = {
     primary: {
       backgroundColor: disabled ? theme.colors.secondary[300] : theme.colors.primary.main,
-      ...theme.shadows.sm,
     },
     secondary: {
       backgroundColor: disabled ? theme.colors.secondary[200] : theme.colors.secondary.main,
-      ...theme.shadows.sm,
     },
     outline: {
       backgroundColor: 'transparent',
@@ -65,6 +67,17 @@ const getButtonStyle = (
     },
     ghost: {
       backgroundColor: 'transparent',
+    },
+    danger: {
+      backgroundColor: disabled ? theme.colors.secondary[300] : theme.colors.status.error,
+    },
+    iconButton: {
+      backgroundColor: 'transparent',
+      width: size === 'sm' ? 32 : size === 'lg' ? 48 : 40,
+      height: size === 'sm' ? 32 : size === 'lg' ? 48 : 40,
+      borderRadius: (size === 'sm' ? 32 : size === 'lg' ? 48 : 40) / 2,
+      paddingHorizontal: 0,
+      paddingVertical: 0,
     },
   };
 
@@ -82,15 +95,32 @@ const getTextColor = (variant: ButtonProps['variant'], disabled: boolean): strin
 
   switch (variant) {
     case 'primary':
-      return theme.colors.text.inverse;
+      return theme.colors.text.primary;
     case 'secondary':
       return theme.colors.text.primary;
     case 'outline':
       return theme.colors.primary.main;
     case 'ghost':
       return theme.colors.primary.main;
+    case 'danger':
+      return theme.colors.text.primary;
+    case 'iconButton':
+      return theme.colors.text.primary;
     default:
-      return theme.colors.text.inverse;
+      return theme.colors.text.primary;
+  }
+};
+
+const getIconComponent = (iconName: string, iconFamily: string, size: number, color: string) => {
+  const iconProps = { name: iconName as any, size, color };
+  
+  switch (iconFamily) {
+    case 'MaterialCommunityIcons':
+      return <MaterialCommunityIcons {...iconProps} />;
+    case 'MaterialIcons':
+      return <MaterialIcons {...iconProps} />;
+    default:
+      return <Ionicons {...iconProps} />;
   }
 };
 
@@ -102,6 +132,9 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   onPress,
   children,
+  label,
+  icon,
+  iconFamily = 'Ionicons',
   style,
   textStyle,
   testID,
@@ -109,10 +142,10 @@ export const Button: React.FC<ButtonProps> = ({
   const handlePress = () => {
     if (disabled || loading) return;
     
-    logEvent(Events.SCREEN_VIEWED, {
-      action: 'button_pressed',
+    logEvent(Events.BUTTON_PRESSED, {
       variant,
       size,
+      label: label || 'button',
     });
     
     onPress();
@@ -120,6 +153,10 @@ export const Button: React.FC<ButtonProps> = ({
 
   const buttonStyle = getButtonStyle(variant, size, disabled || loading, fullWidth);
   const textColor = getTextColor(variant, disabled || loading);
+  const iconSize = size === 'sm' ? 16 : size === 'lg' ? 24 : 20;
+  
+  const content = children || label;
+  const isIconOnly = variant === 'iconButton' || (icon && !content);
 
   return (
     <TouchableOpacity
@@ -133,16 +170,25 @@ export const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator 
           size="small" 
           color={textColor}
-          style={{ marginRight: theme.spacing.sm }}
+          style={!isIconOnly ? { marginRight: theme.spacing.sm } : undefined}
         />
-      ) : null}
-      <Typography
-        variant="button"
-        color={textColor}
-        style={textStyle}
-      >
-        {children}
-      </Typography>
+      ) : (
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {icon && getIconComponent(icon, iconFamily, iconSize, textColor)}
+          {content && (
+            <Typography
+              variant="button"
+              color={textColor}
+              style={[
+                textStyle,
+                icon && !isIconOnly && { marginLeft: theme.spacing.sm }
+              ] as any}
+            >
+              {content}
+            </Typography>
+          )}
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

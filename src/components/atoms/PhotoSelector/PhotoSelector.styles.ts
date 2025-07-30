@@ -1,0 +1,58 @@
+import { StyleSheet } from 'react-native';
+import { theme } from '../../../theme';
+
+export const styles = StyleSheet.create({
+  container: {
+    marginBottom: theme.spacing.md,
+  },
+  label: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.medium,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
+  },
+  selector: {
+    backgroundColor: theme.colors.surface.primary,
+    borderWidth: 2,
+    borderColor: theme.colors.border.primary,
+    borderStyle: 'dashed',
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 120,
+  },
+  selectorDisabled: {
+    backgroundColor: theme.colors.surface.secondary,
+    opacity: 0.6,
+  },
+  selectorWithImage: {
+    borderStyle: 'solid',
+    padding: theme.spacing.sm,
+  },
+  placeholderContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginTop: theme.spacing.sm,
+    textAlign: 'center',
+  },
+  previewContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.sm,
+  },
+  previewImage: {
+    width: 60,
+    height: 60,
+    borderRadius: theme.borderRadius.sm,
+  },
+  previewImageSingle: {
+    width: 100,
+    height: 100,
+    borderRadius: theme.borderRadius.md,
+  },
+});

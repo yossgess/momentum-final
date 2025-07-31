@@ -19,8 +19,8 @@ export const WelcomeScreen: React.FC = () => {
   }, []);
 
   const handleLogin = () => {
-    logEvent(Events.LOGIN_ATTEMPTED, { source: 'welcome_screen' });
-    navigation.navigate('Login');
+    logEvent(Events.BUTTON_PRESSED, { buttonName: 'SignIn' });
+    navigation.navigate('SignIn');
   };
 
   const handleSignup = () => {

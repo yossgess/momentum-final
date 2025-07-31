@@ -475,6 +475,64 @@ export const translations: Translations = {
     fr: 'Ajouter une Notification Test',
   },
 
+  // Auth
+  'auth.welcomeBack': {
+    en: 'Welcome back!',
+    fr: 'Bon retour !',
+  },
+  'auth.subtitle': {
+    en: 'Let\'s get you in and start challenging.',
+    fr: 'Connectons-nous et commençons à défier.',
+  },
+  'auth.email': {
+    en: 'Email',
+    fr: 'Email',
+  },
+  'auth.emailPlaceholder': {
+    en: 'Enter your email',
+    fr: 'Entrez votre email',
+  },
+  'auth.password': {
+    en: 'Password',
+    fr: 'Mot de passe',
+  },
+  'auth.passwordPlaceholder': {
+    en: 'Enter your password',
+    fr: 'Entrez votre mot de passe',
+  },
+  'auth.signIn': {
+    en: 'Sign In',
+    fr: 'Se connecter',
+  },
+  'auth.noAccount': {
+    en: 'Don\'t have an account?',
+    fr: 'Pas de compte ?',
+  },
+  'auth.signUp': {
+    en: 'Create one',
+    fr: 'Créer un compte',
+  },
+  'auth.forgotPassword': {
+    en: 'Forgot your password?',
+    fr: 'Mot de passe oublié ?',
+  },
+  'auth.errorInvalidCredentials': {
+    en: 'Invalid email or password',
+    fr: 'Email ou mot de passe invalide',
+  },
+  'auth.loading': {
+    en: 'Logging in...',
+    fr: 'Connexion en cours...',
+  },
+  'auth.login': {
+    en: 'Sign In',
+    fr: 'Se connecter',
+  },
+  'auth.signup': {
+    en: 'Sign Up',
+    fr: 'S\'inscrire',
+  },
+
   // Onboarding
   'onboarding.title1': {
     en: 'Find Your Sports Buddy',

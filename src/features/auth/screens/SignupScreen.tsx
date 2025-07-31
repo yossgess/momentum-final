@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Typography } from '../../../components/atoms/Typography';
@@ -20,7 +20,8 @@ export const SignupScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userType, setUserType] = useState<'enthusiast' | 'coach'>('enthusiast');
+  // MVP: Default to enthusiast only, no user type selection
+  const userType = 'enthusiast';
   const [errors, setErrors] = useState<{ 
     email?: string; 
     password?: string; 
@@ -71,11 +72,15 @@ export const SignupScreen: React.FC = () => {
   };
 
   const handleLoginNavigation = () => {
-    navigation.navigate('Login');
+    navigation.navigate('SignIn');
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView 
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <Typography variant="h2" color={theme.colors.text.primary} align="center">
           {t('auth.signup')}
@@ -92,25 +97,7 @@ export const SignupScreen: React.FC = () => {
       </View>
 
       <View style={styles.form}>
-        <View style={styles.userTypeContainer}>
-          <Button
-            variant={userType === 'enthusiast' ? 'primary' : 'outline'}
-            size="md"
-            onPress={() => setUserType('enthusiast')}
-            style={styles.userTypeButton}
-          >
-            Sports Enthusiast
-          </Button>
-          
-          <Button
-            variant={userType === 'coach' ? 'primary' : 'outline'}
-            size="md"
-            onPress={() => setUserType('coach')}
-            style={styles.userTypeButton}
-          >
-            Coach
-          </Button>
-        </View>
+        {/* MVP: User type selector removed - defaulting to sports enthusiast */}
 
         <Input
           label={t('auth.email')}
@@ -161,7 +148,7 @@ export const SignupScreen: React.FC = () => {
           Already have an account? {t('auth.login')}
         </Button>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -170,27 +157,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background.primary,
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing['3xl'],
+    paddingVertical: theme.spacing.xl, // Added vertical padding for better distribution
   },
   header: {
+    alignItems: 'center',
     marginBottom: theme.spacing['2xl'],
+    paddingTop: theme.spacing['3xl'], // Increased top padding to move header down
   },
   subtitle: {
     marginTop: theme.spacing.md,
   },
   form: {
     flex: 1,
-  },
-  userTypeContainer: {
-    flexDirection: 'row',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
-  },
-  userTypeButton: {
-    flex: 1,
+    justifyContent: 'center', // Center the form content vertically
+    paddingVertical: theme.spacing.lg, // Added vertical padding to form
   },
   signupButton: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing['3xl'], // Increased for better separation
+    marginBottom: theme.spacing.lg, // Increased bottom margin
   },
 });

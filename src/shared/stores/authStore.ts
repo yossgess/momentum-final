@@ -20,11 +20,11 @@ export interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: { id: 'test-user', email: 'test@momentum.app' } as User, // Mock user for testing
+  user: null, // No user initially - user must sign in
   session: null,
   isLoading: false,
-  isAuthenticated: true, // Set to true for testing DiscoveryScreen
-  userType: 'enthusiast', // Set default user type for testing
+  isAuthenticated: false, // Set to false so SignInScreen appears after onboarding
+  userType: null, // No user type initially
 
   setUser: (user) => {
     set({ user, isAuthenticated: !!user });

@@ -9,7 +9,7 @@ export type RootStackParamList = {
 export type AuthStackParamList = {
   OnboardingSlider: undefined;
   Welcome: undefined;
-  Login: undefined;
+  SignIn: undefined;
   Signup: undefined;
   Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
 };

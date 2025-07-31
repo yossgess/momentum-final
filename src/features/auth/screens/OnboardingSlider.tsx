@@ -5,7 +5,9 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
 import PagerView from 'react-native-pager-view';
 import { useNavigation } from '@react-navigation/native';
 import { Typography } from '../../../components/atoms/Typography';
@@ -28,6 +30,11 @@ export const OnboardingSlider: React.FC = () => {
     // Log onboarding started
     logEvent(Events.ONBOARDING_STARTED, {
       totalSlides: onboardingSlides.length,
+    });
+
+    // Preload all images for faster navigation
+    onboardingSlides.forEach((slide) => {
+      ExpoImage.prefetch(slide.image);
     });
   }, []);
 
@@ -57,30 +64,44 @@ export const OnboardingSlider: React.FC = () => {
   };
 
   const handlePageSelected = (event: any) => {
-    setCurrentPage(event.nativeEvent.position);
+    const newPage = event.nativeEvent.position;
+    setCurrentPage(newPage);
+  };
+
+  const handlePageScrollStateChanged = (event: any) => {
+    // This ensures immediate visual feedback during swipe gestures
+    const state = event.nativeEvent.pageScrollState;
+    if (state === 'idle') {
+      // Force re-render when scroll completes
+      setCurrentPage(prev => prev);
+    }
   };
 
   const renderPaginationDots = () => {
     return (
       <View style={styles.paginationContainer}>
-        {onboardingSlides.map((_, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.paginationDot,
-              {
-                backgroundColor:
-                  index === currentPage
+        {onboardingSlides.map((_, index) => {
+          const isActive = index === currentPage;
+          return (
+            <TouchableOpacity
+              key={`dot-${index}`}
+              style={[
+                styles.paginationDot,
+                {
+                  backgroundColor: isActive
                     ? theme.colors.primary.main
                     : theme.colors.secondary[300],
-              },
-            ]}
-            onPress={() => {
-              pagerRef.current?.setPage(index);
-              setCurrentPage(index);
-            }}
-          />
-        ))}
+                  transform: [{ scale: isActive ? 1.2 : 1 }],
+                },
+              ]}
+              onPress={() => {
+                setCurrentPage(index);
+                pagerRef.current?.setPage(index);
+              }}
+              activeOpacity={0.7}
+            />
+          );
+        })}
       </View>
     );
   };
@@ -89,10 +110,14 @@ export const OnboardingSlider: React.FC = () => {
     return (
       <View key={index} style={styles.slideContainer}>
         <View style={styles.imageContainer}>
-          <Image
+          <ExpoImage
             source={slide.image}
-            style={styles.illustration as any}
-            resizeMode="cover"
+            style={styles.illustration}
+            contentFit="cover"
+            priority="high"
+            cachePolicy="memory-disk"
+            placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
+            transition={200}
           />
           <View style={styles.darkOverlay} />
         </View>
@@ -129,6 +154,9 @@ export const OnboardingSlider: React.FC = () => {
         style={styles.pagerView}
         initialPage={0}
         onPageSelected={handlePageSelected}
+        onPageScrollStateChanged={handlePageScrollStateChanged}
+        pageMargin={0}
+        overdrag={false}
       >
         {onboardingSlides.map((slide, index) => renderSlide(slide, index))}
       </PagerView>

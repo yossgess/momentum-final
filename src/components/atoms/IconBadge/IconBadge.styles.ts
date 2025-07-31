@@ -6,7 +6,17 @@ export const styles = StyleSheet.create({
     position: 'relative',
   },
   iconContainer: {
-    padding: theme.spacing.sm,
+    borderRadius: 50,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 56,
+    height: 56,
+    elevation: 4,
+    shadowColor: theme.colors.shadow.dark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
   },
   badge: {
     position: 'absolute',

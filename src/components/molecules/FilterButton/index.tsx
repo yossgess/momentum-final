@@ -28,31 +28,19 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
       ]}
       onPress={handlePress}
     >
-      <View style={styles.content}>
-        <Ionicons
-          name="funnel"
-          size={20}
-          color={active ? theme.colors.primary.main : theme.colors.text.secondary}
-        />
-        
-        {label && (
-          <Typography
-            variant="body"
-            color={active ? theme.colors.primary.main : theme.colors.text.secondary}
-            style={styles.label}
-          >
-            {label}
+      <Ionicons
+        name="funnel"
+        size={28}
+        color={theme.colors.text.primary}
+      />
+      
+      {badgeCount > 0 && (
+        <View style={styles.badge}>
+          <Typography variant="caption" color="primary" style={styles.badgeText}>
+            {badgeCount > 9 ? '9+' : badgeCount}
           </Typography>
-        )}
-        
-        {badgeCount > 0 && (
-          <View style={styles.badge}>
-            <Typography variant="caption" color={theme.colors.text.primary}>
-              {badgeCount}
-            </Typography>
-          </View>
-        )}
-      </View>
+        </View>
+      )}
     </Pressable>
   );
 };

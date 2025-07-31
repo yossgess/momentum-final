@@ -3,16 +3,20 @@ import { theme } from '../../../theme';
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.surface.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.border.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
+    borderRadius: 50,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 56,
+    height: 56,
+    elevation: 4,
+    shadowColor: theme.colors.shadow.dark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
   },
   containerActive: {
-    borderColor: theme.colors.primary.main,
-    backgroundColor: theme.colors.primary[50],
+    // Active state styling if needed
   },
   content: {
     flexDirection: 'row',
@@ -22,12 +26,20 @@ export const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   badge: {
-    backgroundColor: theme.colors.primary.main,
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: theme.colors.status.error,
     borderRadius: theme.borderRadius.full,
-    paddingHorizontal: theme.spacing.xs,
-    paddingVertical: 2,
-    marginLeft: theme.spacing.sm,
-    minWidth: 20,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: theme.colors.text.primary,
+    fontSize: 10,
+    fontWeight: theme.typography.fontWeight.bold,
   },
 });

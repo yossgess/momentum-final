@@ -19,9 +19,9 @@ export const IconBadge: React.FC<IconBadgeProps> = ({
 }) => {
   const getIconSize = () => {
     switch (size) {
-      case 'sm': return 20;
-      case 'lg': return 28;
-      default: return 24;
+      case 'sm': return 24;
+      case 'lg': return 32;
+      default: return 28;
     }
   };
 

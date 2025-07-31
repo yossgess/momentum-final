@@ -52,7 +52,7 @@ export const CommonSportsDisplay: React.FC<CommonSportsDisplayProps> = ({
       
       {userSports.length > 0 && (
         <View style={styles.section}>
-          <Typography variant="caption" color="secondary" style={styles.sectionTitle}>
+          <Typography variant="caption" color="primary" style={styles.sectionTitle}>
             {t('discovery.otherSports')} ({userSports.length})
           </Typography>
           

@@ -14,29 +14,24 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
   onSwipeRight,
   onPressImage,
   style,
+  fullScreen = false,
 }) => {
   const handleImagePress = (imageIndex: number) => {
     logEvent(Events.PROFILE_VIEWED, { profileId: profile.id, imageIndex });
     onPressImage?.(imageIndex);
   };
 
-  const handleSwipeLeft = () => {
-    logEvent(Events.PROFILE_SWIPED_LEFT, { profileId: profile.id });
-    onSwipeLeft();
-  };
-
-  const handleSwipeRight = () => {
-    logEvent(Events.PROFILE_SWIPED_RIGHT, { profileId: profile.id });
-    onSwipeRight();
-  };
-
   return (
-    <View style={[styles.container, style]}>
+    <View style={[
+      fullScreen ? styles.fullScreenContainer : styles.container, 
+      style
+    ]}>
+      {/* Full-screen image carousel */}
       <ScrollView 
         horizontal 
         pagingEnabled 
         showsHorizontalScrollIndicator={false}
-        style={styles.imageCarousel}
+        style={styles.fullCarousel}
       >
         {profile.images.map((image, index) => (
           <Pressable
@@ -49,6 +44,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
         ))}
       </ScrollView>
 
+      {/* Image indicators */}
       <View style={styles.imageIndicators}>
         {profile.images.map((_, index) => (
           <View
@@ -61,25 +57,18 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
         ))}
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Typography variant="h2" color="primary" weight="bold">
-            {profile.name}, {profile.age}
+      {/* Single consolidated text container at bottom left */}
+      <View style={styles.bottomLeftContainer}>
+        <Typography variant="h2" color="primary" weight="bold" style={styles.nameText}>
+          {profile.name}, {profile.age}
+        </Typography>
+        
+        <View style={styles.locationRow}>
+          <Ionicons name="location-outline" size={16} color={theme.colors.text.primary} />
+          <Typography variant="body" color="primary" style={styles.locationText}>
+            {profile.location}
           </Typography>
-          
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={16} color={theme.colors.text.secondary} />
-            <Typography variant="body" color="secondary" style={styles.locationText}>
-              {profile.location}
-            </Typography>
-          </View>
         </View>
-
-        {profile.bio && (
-          <Typography variant="body" color="secondary" style={styles.bio} numberOfLines={3}>
-            {profile.bio}
-          </Typography>
-        )}
 
         <CommonSportsDisplay
           sharedSports={profile.sharedSports || []}
@@ -87,16 +76,6 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
           showTitle={false}
           style={styles.sports}
         />
-
-        <View style={styles.actions}>
-          <Pressable style={styles.nopeButton} onPress={handleSwipeLeft}>
-            <Ionicons name="close" size={24} color={theme.colors.status.error} />
-          </Pressable>
-          
-          <Pressable style={styles.likeButton} onPress={handleSwipeRight}>
-            <Ionicons name="heart" size={24} color={theme.colors.status.success} />
-          </Pressable>
-        </View>
       </View>
     </View>
   );

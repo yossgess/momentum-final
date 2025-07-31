@@ -1,5 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { MainTabParamList } from '../shared/types/navigation';
 import { DiscoveryNavigator } from './DiscoveryNavigator';
 import { EventsNavigator } from './EventsNavigator';
@@ -28,16 +30,30 @@ export const TabNavigator: React.FC = () => {
           backgroundColor: theme.colors.surface.primary,
           borderTopColor: theme.colors.border.primary,
           borderTopWidth: 1,
-          paddingBottom: 8,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 8,
-          height: 60,
+          height: Platform.OS === 'ios' ? 85 : 65,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 8,
+          shadowColor: theme.colors.shadow.dark,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
         tabBarActiveTintColor: theme.colors.primary.main,
         tabBarInactiveTintColor: theme.colors.text.tertiary,
         tabBarLabelStyle: {
           fontSize: theme.typography.fontSize.xs,
           fontFamily: theme.typography.fontFamily.medium,
+          marginTop: 4,
         },
+        tabBarIconStyle: {
+          marginBottom: 2,
+        },
+        tabBarHideOnKeyboard: false,
       }}
     >
       <Tab.Screen
@@ -46,7 +62,7 @@ export const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: t('nav.discovery'),
           tabBarIcon: ({ color, size }) => (
-            <></>
+            <Ionicons name="compass" size={size} color={color} />
           ),
         }}
         listeners={{
@@ -59,7 +75,7 @@ export const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: t('nav.events'),
           tabBarIcon: ({ color, size }) => (
-            <></>
+            <Ionicons name="calendar" size={size} color={color} />
           ),
         }}
         listeners={{
@@ -72,7 +88,7 @@ export const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: t('nav.matchzone'),
           tabBarIcon: ({ color, size }) => (
-            <></>
+            <MaterialCommunityIcons name="trophy" size={size} color={color} />
           ),
         }}
         listeners={{
@@ -85,7 +101,7 @@ export const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: t('nav.chat'),
           tabBarIcon: ({ color, size }) => (
-            <></>
+            <Ionicons name="chatbubbles" size={size} color={color} />
           ),
         }}
         listeners={{
@@ -98,7 +114,7 @@ export const TabNavigator: React.FC = () => {
         options={{
           tabBarLabel: t('nav.profile'),
           tabBarIcon: ({ color, size }) => (
-            <></>
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
         listeners={{

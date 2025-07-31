@@ -29,13 +29,6 @@ export const SportChip: React.FC<SportChipProps> = ({
       disabled={disabled}
     >
       <View style={styles.content}>
-        <Ionicons
-          name={sport.icon as any}
-          size={size === 'sm' ? 16 : size === 'lg' ? 24 : 20}
-          color={selected ? theme.colors.text.primary : theme.colors.text.secondary}
-          style={styles.icon}
-        />
-        
         <Typography
           variant={size === 'sm' ? 'caption' : 'body'}
           color={selected ? 'primary' : 'secondary'}

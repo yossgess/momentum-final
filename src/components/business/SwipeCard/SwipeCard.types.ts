@@ -23,4 +23,5 @@ export interface SwipeCardProps {
   onSwipeRight: () => void;
   onPressImage?: (imageIndex: number) => void;
   style?: any;
+  fullScreen?: boolean; // Enable full-screen mode for DiscoveryScreen
 }

@@ -180,8 +180,8 @@ export const translations: Translations = {
     fr: 'Sports en commun',
   },
   'discovery.otherSports': {
-    en: 'Other sports',
-    fr: 'Autres sports',
+    en: 'Common Sports',
+    fr: 'Sports communs',
   },
   
   'common.selectAll': {
@@ -196,6 +196,44 @@ export const translations: Translations = {
   'discovery.keepSwiping': {
     en: 'Keep Swiping',
     fr: 'Continuer',
+  },
+
+  // New DiscoveryScreen translations
+  'discover.title': {
+    en: 'Discovery',
+    fr: 'Découverte',
+  },
+  'discover.challenge': {
+    en: 'Challenge',
+    fr: 'Défier',
+  },
+  'discover.nope': {
+    en: 'Pass',
+    fr: 'Passer',
+  },
+  'discover.revert': {
+    en: 'Undo',
+    fr: 'Annuler',
+  },
+  'discover.matchAccepted': {
+    en: 'Challenge Accepted!',
+    fr: 'Défi accepté !',
+  },
+  'discover.sendMessage': {
+    en: 'Send Message',
+    fr: 'Envoyer un message',
+  },
+  'discover.continue': {
+    en: 'Continue',
+    fr: 'Continuer',
+  },
+  'discover.distance': {
+    en: 'km away',
+    fr: 'km',
+  },
+  'discover.commonSportsCount': {
+    en: 'sports in common',
+    fr: 'sports en commun',
   },
 };
 

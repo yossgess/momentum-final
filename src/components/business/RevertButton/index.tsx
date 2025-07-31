@@ -1,12 +1,12 @@
 import React from 'react';
-import { Pressable, Text } from 'react-native';
+import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ChallengeButtonProps } from './ChallengeButton.types';
-import { styles } from './ChallengeButton.styles';
+import { RevertButtonProps } from './RevertButton.types';
+import { styles } from './RevertButton.styles';
 import { theme } from '../../../theme';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 
-export const ChallengeButton: React.FC<ChallengeButtonProps> = ({
+export const RevertButton: React.FC<RevertButtonProps> = ({
   onPress,
   disabled = false,
   size = 'lg',
@@ -14,7 +14,7 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({
 }) => {
   const handlePress = () => {
     if (disabled) return;
-    logEvent(Events.CHALLENGE_BUTTON_PRESSED, { size });
+    logEvent(Events.BUTTON_PRESSED, { buttonType: 'revert', size });
     onPress();
   };
 
@@ -30,9 +30,9 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({
       disabled={disabled}
     >
       <Ionicons
-        name="radio-button-on"
+        name="arrow-undo"
         size={size === 'sm' ? 20 : size === 'lg' ? 32 : 24}
-        color={disabled ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF'}
+        color={disabled ? theme.colors.text.tertiary : theme.colors.text.secondary}
       />
     </Pressable>
   );

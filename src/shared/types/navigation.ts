@@ -1,11 +1,13 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
+  OnboardingSlider: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
 };
 
 export type AuthStackParamList = {
+  OnboardingSlider: undefined;
   Welcome: undefined;
   Login: undefined;
   Signup: undefined;

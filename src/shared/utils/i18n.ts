@@ -474,6 +474,40 @@ export const translations: Translations = {
     en: 'Add Test Notification',
     fr: 'Ajouter une Notification Test',
   },
+
+  // Onboarding
+  'onboarding.title1': {
+    en: 'Find Your Sports Buddy',
+    fr: 'Trouvez Votre Partenaire Sportif',
+  },
+  'onboarding.subtitle1': {
+    en: 'Swipe, connect and challenge athletes nearby.',
+    fr: 'Glissez, connectez-vous et défiez les athlètes à proximité.',
+  },
+  'onboarding.title2': {
+    en: 'Join Exciting Events',
+    fr: 'Rejoignez des Événements Passionnants',
+  },
+  'onboarding.subtitle2': {
+    en: 'Discover and join sport events around you.',
+    fr: 'Découvrez et rejoignez des événements sportifs autour de vous.',
+  },
+  'onboarding.title3': {
+    en: 'Compete on Real Courts',
+    fr: 'Compétitionnez sur de Vrais Terrains',
+  },
+  'onboarding.subtitle3': {
+    en: 'Book courts and challenge players near you.',
+    fr: 'Réservez des terrains et défiez les joueurs près de chez vous.',
+  },
+  'onboarding.ctaNext': {
+    en: 'Next',
+    fr: 'Suivant',
+  },
+  'onboarding.ctaStart': {
+    en: 'Get Started',
+    fr: 'Commencer',
+  },
 };
 
 class I18nService {

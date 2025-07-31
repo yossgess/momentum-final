@@ -132,4 +132,10 @@ export const Events = {
   DATE_TIME_SELECTED: 'date_time_selected',
   CHALLENGE_BUTTON_PRESSED: 'challenge_button_pressed',
   NOPE_BUTTON_PRESSED: 'nope_button_pressed',
+  
+  // Onboarding
+  ONBOARDING_STARTED: 'onboarding_started',
+  ONBOARDING_NEXT: 'onboarding_next',
+  ONBOARDING_COMPLETED: 'onboarding_completed',
+  ONBOARDING_SKIPPED: 'onboarding_skipped',
 } as const;

@@ -19,7 +19,7 @@ export const translations: Translations = {
     fr: 'Événements',
   },
   'nav.matchzone': {
-    en: 'MatchZone',
+    en: 'Arena',
     fr: 'Zone Match',
   },
   'nav.chat': {

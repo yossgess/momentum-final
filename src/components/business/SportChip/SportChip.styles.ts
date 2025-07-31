@@ -7,9 +7,9 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   filled: {
-    backgroundColor: theme.colors.overlay.darker,
+    backgroundColor: theme.colors.text.primary, // white
     borderWidth: 2,
-    borderColor: theme.colors.overlay.medium,
+    borderColor: theme.colors.primary.main, // green
     shadowColor: theme.colors.shadow.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
@@ -17,9 +17,9 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   outlined: {
-    backgroundColor: theme.colors.surface.secondary,
+    backgroundColor: theme.colors.text.primary, // white
     borderWidth: 2,
-    borderColor: theme.colors.border.primary,
+    borderColor: theme.colors.primary.main, // green
     shadowColor: theme.colors.shadow.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.6,
@@ -37,8 +37,8 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   selected: {
-    backgroundColor: theme.colors.primary.main,
-    borderColor: theme.colors.overlay.medium,
+    backgroundColor: theme.colors.primary.main, // green
+    borderColor: theme.colors.text.primary, // white
     borderWidth: 2,
     shadowColor: theme.colors.shadow.dark,
     shadowOffset: { width: 0, height: 3 },

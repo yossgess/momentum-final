@@ -75,8 +75,9 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 120, // Positioned at 120 pixels from bottom
     left: theme.spacing.lg,
-    maxWidth: '70%', // Slightly smaller to show more photo
+    right: theme.spacing.lg, // Use right constraint instead of maxWidth
     padding: theme.spacing.sm, // Reduced padding to be less intrusive
+    overflow: 'visible', // Ensure content is not clipped
   },
   actionButtonsOverlay: {
     position: 'absolute',
@@ -127,6 +128,8 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
   sports: {
+    marginTop: theme.spacing.sm,
     marginBottom: theme.spacing.lg,
+    overflow: 'visible', // Prevent sports chips from being clipped
   },
 });

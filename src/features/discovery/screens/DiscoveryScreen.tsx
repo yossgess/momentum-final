@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 // Components
 import { Typography } from '../../../components/atoms/Typography';
@@ -20,17 +21,22 @@ import { ChallengeButton } from '../../../components/business/ChallengeButton';
 import { NopeButton } from '../../../components/business/NopeButton';
 import { RevertButton } from '../../../components/business/RevertButton';
 import { MatchModal } from '../../../components/business/MatchModal';
+import { FilterModal } from '../components/FilterModal';
 
 // Utils & Types
 import { theme } from '../../../theme';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { t } from '../../../shared/utils/i18n';
 import { mockProfiles, MockProfile } from '../mockProfiles';
+import { useDiscoverFiltersStore } from '../components/useDiscoverFiltersStore';
+import { getSportIcon } from '../../../constants/sportIcons';
+import { useNotificationsStore } from '../../notifications/store/notifications.store';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const DiscoveryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   
   // State management
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
@@ -38,8 +44,21 @@ export const DiscoveryScreen: React.FC = () => {
   const [skippedProfiles, setSkippedProfiles] = useState<MockProfile[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [matchedProfile, setMatchedProfile] = useState<MockProfile | null>(null);
-  const [hasNewMatches, setHasNewMatches] = useState(false);
-  const [activeFilters, setActiveFilters] = useState(0);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
+  // Filter store
+  const { distance, ageRange, gender, sports, isApplied } = useDiscoverFiltersStore();
+  
+  // Notifications store
+  const unreadCount = useNotificationsStore(state => state.getUnreadCount());
+  
+  // Calculate active filters count
+  const activeFilters = (
+    (distance !== 25 ? 1 : 0) +
+    (ageRange[0] !== 18 || ageRange[1] !== 35 ? 1 : 0) +
+    (gender !== 'any' ? 1 : 0) +
+    (sports.length > 0 ? 1 : 0)
+  );
 
   // Animation refs
   const cardAnimatedValue = useRef(new Animated.Value(0)).current;
@@ -49,8 +68,26 @@ export const DiscoveryScreen: React.FC = () => {
   // Mock current user for MatchModal
   const currentUser = {
     id: 'current_user',
-    name: 'You',
-    image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=600&fit=crop'
+    email: 'current@example.com',
+    firstName: 'You',
+    lastName: 'User',
+    age: 25,
+    gender: 'male' as const,
+    bio: 'Current user',
+    photos: ['https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=600&fit=crop'],
+    location: {
+      latitude: 0,
+      longitude: 0,
+      city: 'City',
+      country: 'Country'
+    },
+    sports: [],
+    preferences: {
+      ageRange: [18, 35] as [number, number],
+      maxDistance: 25,
+      genderPreference: 'both' as const,
+      sportsInterests: []
+    }
   };
 
   useEffect(() => {
@@ -91,7 +128,6 @@ export const DiscoveryScreen: React.FC = () => {
     if (isMutualChallenge) {
       setMatchedProfile(currentProfile);
       setShowMatchModal(true);
-      setHasNewMatches(true);
       logEvent(Events.MATCH_CREATED, { 
         profileId: currentProfile.id,
         profileName: currentProfile.name 
@@ -153,13 +189,22 @@ export const DiscoveryScreen: React.FC = () => {
   // Handle Filter button
   const handleFilterPress = () => {
     logEvent(Events.BUTTON_PRESSED, { buttonType: 'filter', screenName: 'Discovery' });
-    // TODO: Navigate to filters screen
+    setShowFilterModal(true);
+  };
+
+  // Handle Filter Modal close
+  const handleFilterModalClose = () => {
+    setShowFilterModal(false);
   };
 
   // Handle Notification button
   const handleNotificationPress = () => {
-    logEvent(Events.NOTIFICATION_PRESSED, { screenName: 'Discovery' });
-    // TODO: Navigate to notifications/matches screen
+    logEvent(Events.NOTIFICATION_PRESSED, { 
+      screenName: 'Discovery',
+      unreadCount 
+    });
+    // Navigate to notifications screen in Profile stack
+    (navigation as any).navigate('Profile', { screen: 'Notifications' });
   };
 
   // Handle Match Modal actions
@@ -225,7 +270,7 @@ export const DiscoveryScreen: React.FC = () => {
             sports: currentProfile.sports.map((sportName, index) => ({
               id: `sport_${index}`,
               name: sportName,
-              icon: 'fitness',
+              icon: getSportIcon(sportName),
             })),
           }}
           onSwipeLeft={handleNope}
@@ -244,12 +289,40 @@ export const DiscoveryScreen: React.FC = () => {
         currentUser={currentUser}
         matchedUser={matchedProfile ? {
           id: matchedProfile.id,
-          name: matchedProfile.name,
-          image: matchedProfile.images[0]
+          email: `${matchedProfile.name.toLowerCase().replace(' ', '.')}@example.com`,
+          firstName: matchedProfile.name.split(' ')[0] || matchedProfile.name,
+          lastName: matchedProfile.name.split(' ')[1] || '',
+          age: matchedProfile.age,
+          gender: 'male' as const,
+          bio: matchedProfile.bio || '',
+          photos: matchedProfile.images,
+          location: {
+            latitude: 0,
+            longitude: 0,
+            city: 'City',
+            country: 'Country'
+          },
+          sports: matchedProfile.sports?.map(sport => ({
+            name: sport,
+            skillLevel: 'intermediate' as const,
+            yearsPlaying: 2
+          })) || [],
+          preferences: {
+            ageRange: [18, 35] as [number, number],
+            maxDistance: 25,
+            genderPreference: 'both' as const,
+            sportsInterests: matchedProfile.sports || []
+          }
         } : currentUser}
         onSendMessage={handleSendMessage}
         onKeepSwiping={handleKeepSwiping}
         onClose={handleCloseModal}
+      />
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={showFilterModal}
+        onClose={handleFilterModalClose}
       />
 
       {/* Top Corner Buttons Overlay - Positioned last for proper layering */}
@@ -261,7 +334,7 @@ export const DiscoveryScreen: React.FC = () => {
       />
       
       <NotificationButton
-        badgeCount={hasNewMatches ? 1 : 0}
+        badgeCount={unreadCount}
         onPress={handleNotificationPress}
         style={styles.topRightButton}
       />

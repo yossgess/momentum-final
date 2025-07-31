@@ -41,7 +41,7 @@ export const mockProfiles: MockProfile[] = [
     name: "Emma",
     age: 24,
     distance: 1.8,
-    sports: ["Swimming", "Volleyball", "Hiking"],
+    sports: ["Swimming", "Volleyball", "Walking"],
     images: [
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop",
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop"
@@ -54,7 +54,7 @@ export const mockProfiles: MockProfile[] = [
     name: "Marcus",
     age: 28,
     distance: 3.2,
-    sports: ["Soccer", "Boxing", "Cycling"],
+    sports: ["Football", "Crossfit", "Cycling"],
     images: [
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=600&fit=crop",
       "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=600&fit=crop"
@@ -67,7 +67,7 @@ export const mockProfiles: MockProfile[] = [
     name: "Aria",
     age: 22,
     distance: 4.7,
-    sports: ["Dance", "Pilates", "Rock Climbing"],
+    sports: ["Fitness", "Pilate", "Cycling"],
     images: [
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop",
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop"

@@ -26,6 +26,7 @@ export const NotificationButton: React.FC<NotificationButtonProps> = ({
       <IconBadge
         icon="notifications"
         badgeCount={badgeCount}
+        showBadge={badgeCount > 0}
         onPress={handlePress}
       />
     </Pressable>

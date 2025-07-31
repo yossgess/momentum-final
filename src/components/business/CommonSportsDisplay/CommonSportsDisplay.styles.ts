@@ -20,12 +20,16 @@ export const styles = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 0,
+    overflow: 'visible', // Prevent clipping
   },
   chipsContainer: {
     flexDirection: 'row',
     paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs, // Add vertical padding to prevent cropping
+    overflow: 'visible', // Ensure chips are not clipped
   },
   chip: {
     marginRight: theme.spacing.sm,
+    marginBottom: theme.spacing.xs, // Add bottom margin for better spacing
   },
 });

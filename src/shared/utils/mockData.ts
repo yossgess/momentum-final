@@ -1,18 +1,10 @@
-import { Sport } from '../types/sports';
 import { Event } from '../../components/business/EventCard/EventCard.types';
 import { Coach } from '../../components/business/CoachCard/CoachCard.types';
 import { Court } from '../../components/business/CourtCard/CourtCard.types';
 
-export const mockSports: Sport[] = [
-  { id: '1', name: 'Tennis', icon: 'tennisball', skillLevel: 'Intermediate' },
-  { id: '2', name: 'Football', icon: 'football', skillLevel: 'Advanced' },
-  { id: '3', name: 'Basketball', icon: 'basketball', skillLevel: 'Beginner' },
-  { id: '4', name: 'Swimming', icon: 'water', skillLevel: 'Intermediate' },
-  { id: '5', name: 'Running', icon: 'walk', skillLevel: 'Advanced' },
-  { id: '6', name: 'Cycling', icon: 'bicycle', skillLevel: 'Intermediate' },
-  { id: '7', name: 'Volleyball', icon: 'american-football', skillLevel: 'Beginner' },
-  { id: '8', name: 'Badminton', icon: 'tennisball', skillLevel: 'Intermediate' },
-];
+// NOTE: Sports data has been moved to the canonical source at:
+// src/constants/sports.ts - use `allSports` for complete Sport objects
+// This ensures consistency across the entire application
 
 export const mockEvents: Event[] = [
   {

@@ -6,7 +6,6 @@ export interface Sport {
 }
 
 export interface SportFilterChipsGroupProps {
-  availableFilters: Sport[];
   selectedFilters: string[];
   onChange: (selectedIds: string[]) => void;
   title?: string;

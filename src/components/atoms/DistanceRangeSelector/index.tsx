@@ -1,60 +1,61 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import { View } from 'react-native';
-import { View as Slider } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../Typography';
+import { OneThumbRangeSelector } from '../OneThumbRangeSelector';
 import { DistanceRangeSelectorProps } from './DistanceRangeSelector.types';
 import { styles } from './DistanceRangeSelector.styles';
 import { theme } from '../../../theme';
-import { logEvent, Events } from '../../../shared/utils/analytics';
+import { logEvent } from '../../../shared/utils/analytics';
 import { t } from '../../../shared/utils/i18n';
 
 export const DistanceRangeSelector: React.FC<DistanceRangeSelectorProps> = ({
-  min = 0,
-  max = 50,
-  step = 1,
-  initialValue = 25,
+  value,
   onChange,
-  label,
-  icon = 'location-outline',
+  min = 1,
+  max = 100,
+  step = 1,
   style,
 }) => {
-  const [value, setValue] = useState(initialValue);
-
-  const handleChange = (newValue: number) => {
-    const roundedValue = Math.round(newValue);
-    setValue(roundedValue);
-    onChange(roundedValue);
-    logEvent(Events.DISTANCE_RANGE_CHANGED, { distance: roundedValue });
-  };
+  const handleChange = useCallback((newValue: number) => {
+    onChange(newValue);
+    logEvent('DistanceSelector_Changed', { distance: newValue });
+  }, [onChange]);
 
   return (
     <View style={[styles.container, style]}>
-      {label && (
-        <Typography variant="body" color="primary" weight="medium" style={styles.label}>
-          {label}
-        </Typography>
-      )}
+      <Typography 
+        variant="body" 
+        color="primary" 
+        weight="bold" 
+        style={styles.label}
+      >
+        {t('filters.distance')}
+      </Typography>
       
       <View style={styles.valueContainer}>
-        {icon && (
-          <Ionicons
-            name={icon as any}
-            size={24}
-            color={theme.colors.primary.main}
-            style={styles.icon}
-          />
-        )}
+        <Ionicons
+          name="location-outline"
+          size={24}
+          color={theme.colors.primary.main}
+          style={styles.icon}
+        />
         <Typography variant="h3" color="primary">
           {t('common.within')} {value} km
         </Typography>
       </View>
       
-      <View style={styles.slider}>
-        <Typography variant="caption" color="secondary">
-          Slider component requires @react-native-community/slider
-        </Typography>
-      </View>
+      <OneThumbRangeSelector
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={handleChange}
+        activeTrackColor={theme.colors.primary.main}
+        trackColor={theme.colors.surface.secondary}
+        thumbColor={theme.colors.primary.main}
+        style={styles.slider}
+      />
       
       <View style={styles.rangeLabels}>
         <Typography variant="caption" color="tertiary">

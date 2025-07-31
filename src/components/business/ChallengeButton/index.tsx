@@ -30,7 +30,7 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({
       disabled={disabled}
     >
       <Ionicons
-        name="radio-button-on"
+        name="flag"
         size={size === 'sm' ? 20 : size === 'lg' ? 32 : 24}
         color={disabled ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF'}
       />

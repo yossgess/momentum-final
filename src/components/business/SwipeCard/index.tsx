@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, Pressable, Image, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../../atoms/Typography';
 import { CommonSportsDisplay } from '../CommonSportsDisplay';
+import { ImageCarousel } from '../ImageCarousel';
 import { SwipeCardProps } from './SwipeCard.types';
 import { styles } from './SwipeCard.styles';
 import { theme } from '../../../theme';
@@ -16,9 +17,15 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
   style,
   fullScreen = false,
 }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   const handleImagePress = (imageIndex: number) => {
     logEvent(Events.PROFILE_VIEWED, { profileId: profile.id, imageIndex });
     onPressImage?.(imageIndex);
+  };
+
+  const handleIndexChange = (newIndex: number) => {
+    setActiveIndex(newIndex);
   };
 
   return (
@@ -27,35 +34,12 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
       style
     ]}>
       {/* Full-screen image carousel */}
-      <ScrollView 
-        horizontal 
-        pagingEnabled 
-        showsHorizontalScrollIndicator={false}
+      <ImageCarousel
+        images={profile.images}
+        onImagePress={handleImagePress}
+        onIndexChange={handleIndexChange}
         style={styles.fullCarousel}
-      >
-        {profile.images.map((image, index) => (
-          <Pressable
-            key={index}
-            onPress={() => handleImagePress(index)}
-            style={styles.imageContainer}
-          >
-            <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      {/* Image indicators */}
-      <View style={styles.imageIndicators}>
-        {profile.images.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.indicator,
-              index === 0 && styles.activeIndicator,
-            ]}
-          />
-        ))}
-      </View>
+      />
 
       {/* Single consolidated text container at bottom left */}
       <View style={styles.bottomLeftContainer}>

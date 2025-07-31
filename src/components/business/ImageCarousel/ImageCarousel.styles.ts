@@ -8,7 +8,11 @@ export const styles = StyleSheet.create({
   scrollView: {
     height: 400,
   },
+  imageContainer: {
+    height: '100%',
+  },
   image: {
+    width: '100%',
     height: '100%',
   },
   indicators: {

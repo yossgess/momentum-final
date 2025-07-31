@@ -28,11 +28,20 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <Pressable style={[styles.container, style]} onPress={handlePress}>
-      <Image
-        source={event.image ? { uri: event.image } : require('../../../assets/placeholder-event.png')}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      {event.image ? (
+        <Image
+          source={{ uri: event.image }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={[styles.image, styles.placeholderContainer]}>
+          <Ionicons name="calendar-outline" size={32} color={theme.colors.text.tertiary} />
+          <Typography variant="caption" color="tertiary" style={{ marginTop: 4 }}>
+            Event
+          </Typography>
+        </View>
+      )}
       
       <View style={styles.content}>
         <Typography variant="body" color="primary" weight="semibold" numberOfLines={2}>

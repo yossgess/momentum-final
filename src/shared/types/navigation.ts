@@ -11,14 +11,7 @@ export type AuthStackParamList = {
   Welcome: undefined;
   SignIn: undefined;
   Signup: undefined;
-  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
-};
-
-export type OnboardingStackParamList = {
-  ProfileSetup: undefined;
-  SportsSelection: undefined;
-  SkillLevel: undefined;
-  Preferences: undefined;
+  OnboardingForm: undefined;
 };
 
 export type MainTabParamList = {

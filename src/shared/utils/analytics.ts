@@ -138,4 +138,7 @@ export const Events = {
   ONBOARDING_NEXT: 'onboarding_next',
   ONBOARDING_COMPLETED: 'onboarding_completed',
   ONBOARDING_SKIPPED: 'onboarding_skipped',
+  ONBOARDING_FORM_FIELD_UPDATED: 'onboarding_form_field_updated',
+  ONBOARDING_STEP_COMPLETED: 'onboarding_step_completed',
+  ONBOARDING_FORM_SUBMITTED: 'onboarding_form_submitted',
 } as const;

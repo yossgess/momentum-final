@@ -65,6 +65,8 @@ export const SignupScreen: React.FC = () => {
     try {
       await signup(email, password, userType);
       logEvent(Events.SIGNUP_SUCCESS, { email, userType });
+      // Navigate to onboarding form to complete profile setup
+      navigation.navigate('OnboardingForm');
     } catch (error) {
       logEvent(Events.SIGNUP_FAILED, { email, userType, error: String(error) });
       Alert.alert('Signup Failed', 'Please try again.');

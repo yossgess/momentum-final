@@ -17,6 +17,11 @@ export const styles = StyleSheet.create({
     width: '100%',
     height: 120,
   },
+  placeholderContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface.secondary,
+  },
   content: {
     padding: theme.spacing.md,
   },

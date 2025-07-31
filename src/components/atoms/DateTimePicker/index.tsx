@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Platform } from 'react-native';
-// import DateTimePicker from '@react-native-community/datetimepicker';
+import { View, Text, Pressable, Platform, Modal } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../Typography';
 import { DateTimePickerProps } from './DateTimePicker.types';
@@ -72,12 +72,54 @@ export const DateTimePickerComponent: React.FC<DateTimePickerProps> = ({
         />
       </Pressable>
 
-      {show && (
-        <View style={styles.picker}>
-          <Typography variant="caption" color="secondary">
-            DateTimePicker requires @react-native-community/datetimepicker
-          </Typography>
-        </View>
+      {Platform.OS === 'ios' ? (
+        <Modal
+          visible={show}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShow(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalHeader}>
+                <Pressable onPress={() => setShow(false)}>
+                  <Typography variant="body" color={theme.colors.primary.main}>
+                    {t('common.cancel')}
+                  </Typography>
+                </Pressable>
+                <Typography variant="h4" color="primary">
+                  {label || t('common.selectDate')}
+                </Typography>
+                <Pressable onPress={() => setShow(false)}>
+                  <Typography variant="body" color={theme.colors.primary.main}>
+                    {t('common.done')}
+                  </Typography>
+                </Pressable>
+              </View>
+              <DateTimePicker
+                value={value || new Date()}
+                mode={mode}
+                display="spinner"
+                onChange={handleChange}
+                minimumDate={minimumDate}
+                maximumDate={maximumDate}
+                textColor={theme.colors.text.primary}
+                accentColor={theme.colors.primary.main}
+              />
+            </View>
+          </View>
+        </Modal>
+      ) : (
+        show && (
+          <DateTimePicker
+            value={value || new Date()}
+            mode={mode}
+            display="default"
+            onChange={handleChange}
+            minimumDate={minimumDate}
+            maximumDate={maximumDate}
+          />
+        )
       )}
     </View>
   );

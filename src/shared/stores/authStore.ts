@@ -15,6 +15,7 @@ export interface AuthState {
   setLoading: (loading: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, userType: 'enthusiast' | 'coach') => Promise<void>;
+  completeOnboarding: () => void;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
@@ -79,7 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const mockUser = { id: '1', email } as User;
-      set({ user: mockUser, isAuthenticated: true, userType });
+      set({ user: mockUser, isAuthenticated: false, userType }); // Don't mark as authenticated until onboarding is complete
       
       logEvent(Events.SIGNUP_SUCCESS, { userId: mockUser.id, userType });
     } catch (error) {
@@ -88,6 +89,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } finally {
       setLoading(false);
     }
+  },
+
+  completeOnboarding: () => {
+    set({ isAuthenticated: true });
+    logEvent(Events.ONBOARDING_COMPLETED);
   },
 
   logout: async () => {

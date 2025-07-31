@@ -75,12 +75,8 @@ export const SignInScreen: React.FC = () => {
         logEvent(Events.LOGIN_SUCCESS, { email });
         // Navigate to main app (HomeStack/Discover)
         // Note: This would typically be handled by auth state management
-        Alert.alert('Success', 'Sign in successful! (Mock authentication)', [
-          { text: 'OK', onPress: () => {
-            // In real implementation, this would trigger auth state change
-            // navigation.navigate('HomeStack');
-          }}
-        ]);
+        // Navigate to onboarding form to complete profile setup
+        navigation.navigate('OnboardingForm');
       } else {
         throw new Error(t('auth.errorInvalidCredentials'));
       }

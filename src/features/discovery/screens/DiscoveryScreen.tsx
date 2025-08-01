@@ -217,8 +217,10 @@ export const DiscoveryScreen: React.FC = () => {
       unreadCount: notificationCount,
     });
     
-    // TODO: Navigate to notifications/matches screen
-    console.log('Navigate to notifications');
+    // Navigate to notifications screen in Profile tab
+    navigation.navigate('Profile', { 
+      screen: 'Notifications' 
+    });
   };
 
   // Handle Match Modal actions

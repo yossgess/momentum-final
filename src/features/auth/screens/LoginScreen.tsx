@@ -11,7 +11,7 @@ import { useAuthStore } from '../../../shared/stores/authStore';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { AuthStackParamList } from '../../../shared/types/navigation';
 
-type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Login'>;
+type LoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'SignIn'>;
 
 export const LoginScreen: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();

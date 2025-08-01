@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Slider from '@react-native-community/slider';
+// import Slider from '@react-native-community/slider'; // Placeholder - requires native module
 import { theme } from '../../../theme';
 
 export interface OneThumbRangeSelectorProps {
@@ -38,18 +38,11 @@ export const OneThumbRangeSelector: React.FC<OneThumbRangeSelectorProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <Slider
-        style={styles.slider}
-        minimumValue={min}
-        maximumValue={max}
-        step={step}
-        value={value}
-        onValueChange={handleValueChange}
-        disabled={disabled}
-        minimumTrackTintColor={activeTrackColor}
-        maximumTrackTintColor={trackColor}
-        thumbTintColor={thumbColor}
-      />
+      {/* Slider placeholder - requires @react-native-community/slider */}
+      <View style={styles.slider}>
+        <View style={[styles.track, { backgroundColor: trackColor }]} />
+        <View style={[styles.thumb, { backgroundColor: thumbColor }]} />
+      </View>
     </View>
   );
 };

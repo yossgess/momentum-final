@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Platform, Modal } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// import DateTimePicker from '@react-native-community/datetimepicker'; // Placeholder - requires native module
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../Typography';
 import { DateTimePickerProps } from './DateTimePicker.types';
@@ -96,29 +96,18 @@ export const DateTimePickerComponent: React.FC<DateTimePickerProps> = ({
                   </Typography>
                 </Pressable>
               </View>
-              <DateTimePicker
-                value={value || new Date()}
-                mode={mode}
-                display="spinner"
-                onChange={handleChange}
-                minimumDate={minimumDate}
-                maximumDate={maximumDate}
-                textColor={theme.colors.text.primary}
-                accentColor={theme.colors.primary.main}
-              />
+              {/* DateTimePicker placeholder - requires @react-native-community/datetimepicker */}
+              <Typography variant="body" color={theme.colors.text.secondary}>
+                DateTimePicker placeholder - native module required
+              </Typography>
             </View>
           </View>
         </Modal>
       ) : (
         show && (
-          <DateTimePicker
-            value={value || new Date()}
-            mode={mode}
-            display="default"
-            onChange={handleChange}
-            minimumDate={minimumDate}
-            maximumDate={maximumDate}
-          />
+          <Typography variant="body" color={theme.colors.text.secondary}>
+            DateTimePicker placeholder - native module required
+          </Typography>
         )
       )}
     </View>

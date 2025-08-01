@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Image as ExpoImage } from 'expo-image';
+import { Image as ExpoImage } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useNavigation } from '@react-navigation/native';
 import { Typography } from '../../../components/atoms/Typography';
@@ -113,11 +113,7 @@ export const OnboardingSlider: React.FC = () => {
           <ExpoImage
             source={slide.image}
             style={styles.illustration}
-            contentFit="cover"
-            priority="high"
-            cachePolicy="memory-disk"
-            placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
-            transition={200}
+            resizeMode="cover"
           />
           <View style={styles.darkOverlay} />
         </View>

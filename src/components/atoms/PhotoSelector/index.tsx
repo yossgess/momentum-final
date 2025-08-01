@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Image, Alert, ScrollView, ActionSheetIOS, Platform } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+// import * as ImagePicker from 'expo-image-picker'; // Placeholder - requires native module
 import { Ionicons } from '@expo/vector-icons';
 import { PhotoSelectorProps, PhotoData } from './PhotoSelector.types';
 import { styles } from './PhotoSelector.styles';
@@ -22,27 +22,19 @@ export const PhotoSelector: React.FC<PhotoSelectorProps> = ({
   const [loading, setLoading] = useState(false);
 
   const requestPermissions = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        t('photo.permissionRequired'),
-        t('photo.permissionMessage')
-      );
-      return false;
-    }
-    return true;
+    Alert.alert(
+      t('photo.permissionRequired'),
+      'Photo picker requires expo-image-picker module'
+    );
+    return false;
   };
 
   const requestCameraPermissions = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        t('photo.cameraPermissionRequired'),
-        t('photo.cameraPermissionMessage')
-      );
-      return false;
-    }
-    return true;
+    Alert.alert(
+      t('photo.cameraPermissionRequired'),
+      'Camera picker requires expo-image-picker module'
+    );
+    return false;
   };
 
   const generatePhotoId = () => {
@@ -58,28 +50,7 @@ export const PhotoSelector: React.FC<PhotoSelectorProps> = ({
     setLoading(true);
 
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const newPhoto: PhotoData = {
-          uri: result.assets[0].uri,
-          id: generatePhotoId(),
-        };
-        const updatedPhotos = [...photos, newPhoto];
-        onPhotosChange(updatedPhotos);
-        
-        // Set as main photo if it's the first photo
-        if (photos.length === 0) {
-          onMainPhotoChange(0);
-        }
-        
-        logEvent(Events.PHOTO_UPLOADED, { uri: newPhoto.uri, totalPhotos: updatedPhotos.length });
-      }
+      Alert.alert('Photo Selection', 'Photo picker requires expo-image-picker module');
     } catch (error) {
       console.error('Error selecting photo:', error);
       Alert.alert(t('photo.error'), t('photo.selectError'));
@@ -97,27 +68,7 @@ export const PhotoSelector: React.FC<PhotoSelectorProps> = ({
     setLoading(true);
 
     try {
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const newPhoto: PhotoData = {
-          uri: result.assets[0].uri,
-          id: generatePhotoId(),
-        };
-        const updatedPhotos = [...photos, newPhoto];
-        onPhotosChange(updatedPhotos);
-        
-        // Set as main photo if it's the first photo
-        if (photos.length === 0) {
-          onMainPhotoChange(0);
-        }
-        
-        logEvent(Events.PHOTO_UPLOADED, { uri: newPhoto.uri, totalPhotos: updatedPhotos.length });
-      }
+      Alert.alert('Camera', 'Camera requires expo-image-picker module');
     } catch (error) {
       console.error('Error taking photo:', error);
       Alert.alert(t('photo.error'), t('photo.cameraError'));
@@ -213,22 +164,7 @@ export const PhotoSelector: React.FC<PhotoSelectorProps> = ({
     setLoading(true);
 
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const updatedPhotos = [...photos];
-        updatedPhotos[index] = {
-          uri: result.assets[0].uri,
-          id: generatePhotoId(),
-        };
-        onPhotosChange(updatedPhotos);
-        logEvent(Events.PHOTO_REPLACED, { index, newUri: result.assets[0].uri });
-      }
+      Alert.alert('Replace Photo', 'Photo replacement requires expo-image-picker module');
     } catch (error) {
       console.error('Error replacing photo:', error);
       Alert.alert(t('photo.error'), t('photo.replaceError'));

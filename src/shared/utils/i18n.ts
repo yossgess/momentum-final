@@ -301,6 +301,175 @@ export const translations: Translations = {
     fr: 'Continuer',
   },
 
+  'onboarding.form.title': {
+    en: 'Complete Your Profile',
+    fr: 'Complétez votre profil',
+  },
+  'onboarding.form.subtitle': {
+    en: 'Tell us about yourself to find the perfect sports partners',
+    fr: 'Parlez-nous de vous pour trouver les partenaires sportifs parfaits',
+  },
+  'onboarding.form.step': {
+    en: 'Step',
+    fr: 'Étape',
+  },
+  'onboarding.form.of': {
+    en: 'of',
+    fr: 'sur',
+  },
+  'onboarding.form.fullName': {
+    en: 'Full Name',
+    fr: 'Nom complet',
+  },
+  'onboarding.form.fullNamePlaceholder': {
+    en: 'Enter your full name',
+    fr: 'Entrez votre nom complet',
+  },
+  'onboarding.form.dateOfBirth': {
+    en: 'Date of Birth',
+    fr: 'Date de naissance',
+  },
+  'onboarding.form.gender': {
+    en: 'Gender',
+    fr: 'Genre',
+  },
+  'onboarding.form.man': {
+    en: 'Man',
+    fr: 'Homme',
+  },
+  'onboarding.form.woman': {
+    en: 'Woman',
+    fr: 'Femme',
+  },
+  'onboarding.form.interestedIn': {
+    en: 'Interested In',
+    fr: 'Intéressé par',
+  },
+  'onboarding.form.men': {
+    en: 'Men',
+    fr: 'Hommes',
+  },
+  'onboarding.form.women': {
+    en: 'Women',
+    fr: 'Femmes',
+  },
+  'onboarding.form.any': {
+    en: 'Anyone',
+    fr: 'Tout le monde',
+  },
+  'onboarding.form.preferredSports': {
+    en: 'Preferred Sports',
+    fr: 'Sports préférés',
+  },
+  'onboarding.form.availability': {
+    en: 'Availability',
+    fr: 'Disponibilité',
+  },
+  'onboarding.form.days': {
+    en: 'Days',
+    fr: 'Jours',
+  },
+  'onboarding.form.periods': {
+    en: 'Time Periods',
+    fr: 'Périodes',
+  },
+  'onboarding.form.monday': {
+    en: 'Monday',
+    fr: 'Lundi',
+  },
+  'onboarding.form.tuesday': {
+    en: 'Tuesday',
+    fr: 'Mardi',
+  },
+  'onboarding.form.wednesday': {
+    en: 'Wednesday',
+    fr: 'Mercredi',
+  },
+  'onboarding.form.thursday': {
+    en: 'Thursday',
+    fr: 'Jeudi',
+  },
+  'onboarding.form.friday': {
+    en: 'Friday',
+    fr: 'Vendredi',
+  },
+  'onboarding.form.saturday': {
+    en: 'Saturday',
+    fr: 'Samedi',
+  },
+  'onboarding.form.sunday': {
+    en: 'Sunday',
+    fr: 'Dimanche',
+  },
+  'onboarding.form.morning': {
+    en: 'Morning',
+    fr: 'Matin',
+  },
+  'onboarding.form.afternoon': {
+    en: 'Afternoon',
+    fr: 'Après-midi',
+  },
+  'onboarding.form.evening': {
+    en: 'Evening',
+    fr: 'Soir',
+  },
+  'onboarding.form.photos.label': {
+    en: 'Photos',
+    fr: 'Photos',
+  },
+  'onboarding.form.photos.description': {
+    en: 'Add up to 5 photos to show your personality',
+    fr: 'Ajoutez jusqu\'à 5 photos pour montrer votre personnalité',
+  },
+  'onboarding.form.back': {
+    en: 'Back',
+    fr: 'Retour',
+  },
+  'onboarding.form.continue': {
+    en: 'Continue',
+    fr: 'Continuer',
+  },
+  'onboarding.form.finish': {
+    en: 'Finish',
+    fr: 'Terminer',
+  },
+  'onboarding.form.submitting': {
+    en: 'Creating your profile...',
+    fr: 'Création de votre profil...',
+  },
+  'onboarding.form.error.minLength': {
+    en: 'Name must be at least 2 characters',
+    fr: 'Le nom doit contenir au moins 2 caractères',
+  },
+  'onboarding.form.error.invalidDate': {
+    en: 'Please select a valid date',
+    fr: 'Veuillez sélectionner une date valide',
+  },
+  'onboarding.form.error.minAge': {
+    en: 'You must be at least 18 years old',
+    fr: 'Vous devez avoir au moins 18 ans',
+  },
+  'onboarding.form.error.selectGender': {
+    en: 'Please select your gender',
+    fr: 'Veuillez sélectionner votre genre',
+  },
+  'onboarding.form.error.selectInterest': {
+    en: 'Please select your interest',
+    fr: 'Veuillez sélectionner votre intérêt',
+  },
+  'onboarding.form.error.selectSports': {
+    en: 'Please select at least one sport',
+    fr: 'Veuillez sélectionner au moins un sport',
+  },
+  'onboarding.form.error.selectAvailability': {
+    en: 'Please select your availability',
+    fr: 'Veuillez sélectionner votre disponibilité',
+  },
+  'onboarding.form.error.submitFailed': {
+    en: 'Failed to create profile. Please try again.',
+    fr: 'Échec de la création du profil. Veuillez réessayer.',
+  },
+
   // New DiscoveryScreen translations
   'discover.title': {
     en: 'Discovery',
@@ -504,41 +673,33 @@ export const translations: Translations = {
     en: 'Password',
     fr: 'Mot de passe',
   },
-  'auth.passwordPlaceholder': {
-    en: 'Enter your password',
-    fr: 'Entrez votre mot de passe',
-  },
   'auth.signIn': {
-    en: 'Sign In',
-    fr: 'Se connecter',
-  },
-  'auth.noAccount': {
-    en: 'Don\'t have an account?',
-    fr: 'Pas de compte ?',
-  },
-  'auth.signUp': {
-    en: 'Create one',
-    fr: 'Créer un compte',
-  },
-  'auth.forgotPassword': {
-    en: 'Forgot your password?',
-    fr: 'Mot de passe oublié ?',
-  },
-  'auth.errorInvalidCredentials': {
-    en: 'Invalid email or password',
-    fr: 'Email ou mot de passe invalide',
-  },
-  'auth.loading': {
-    en: 'Logging in...',
-    fr: 'Connexion en cours...',
-  },
-  'auth.login': {
     en: 'Sign In',
     fr: 'Se connecter',
   },
   'auth.signup': {
     en: 'Sign Up',
     fr: 'S\'inscrire',
+  },
+  'auth.passwordPlaceholder': {
+    en: 'Enter your password',
+    fr: 'Entrez votre mot de passe',
+  },
+  'auth.forgotPassword': {
+    en: 'Forgot Password?',
+    fr: 'Mot de passe oublié ?',
+  },
+  'auth.noAccount': {
+    en: "Don't have an account?",
+    fr: "Vous n'avez pas de compte ?",
+  },
+  'auth.loading': {
+    en: 'Loading...',
+    fr: 'Chargement...',
+  },
+  'auth.errorInvalidCredentials': {
+    en: 'Invalid email or password',
+    fr: 'E-mail ou mot de passe invalide',
   },
 
   // Onboarding
@@ -575,171 +736,6 @@ export const translations: Translations = {
     fr: 'Commencer',
   },
 
-  // Onboarding Form
-  'onboarding.form.title': {
-    en: 'Complete Your Profile',
-    fr: 'Complétez Votre Profil',
-  },
-  'onboarding.form.subtitle': {
-    en: 'Help us find your perfect sports partner',
-    fr: 'Aidez-nous à trouver votre partenaire sportif idéal',
-  },
-  'onboarding.form.fullName': {
-    en: 'Full Name',
-    fr: 'Nom Complet',
-  },
-  'onboarding.form.fullNamePlaceholder': {
-    en: 'Enter your full name',
-    fr: 'Entrez votre nom complet',
-  },
-  'onboarding.form.dateOfBirth': {
-    en: 'Date of Birth',
-    fr: 'Date de Naissance',
-  },
-  'onboarding.form.gender': {
-    en: 'Gender',
-    fr: 'Genre',
-  },
-  'onboarding.form.man': {
-    en: 'Man',
-    fr: 'Homme',
-  },
-  'onboarding.form.woman': {
-    en: 'Woman',
-    fr: 'Femme',
-  },
-  'onboarding.form.interestedIn': {
-    en: 'Interested In',
-    fr: 'Intéressé Par',
-  },
-  'onboarding.form.men': {
-    en: 'Men',
-    fr: 'Hommes',
-  },
-  'onboarding.form.women': {
-    en: 'Women',
-    fr: 'Femmes',
-  },
-  'onboarding.form.any': {
-    en: 'Any',
-    fr: 'Tous',
-  },
-  'onboarding.form.preferredSports': {
-    en: 'Preferred Sports',
-    fr: 'Sports Préférés',
-  },
-  'onboarding.form.availability': {
-    en: 'Availability',
-    fr: 'Disponibilité',
-  },
-  'onboarding.form.days': {
-    en: 'Days',
-    fr: 'Jours',
-  },
-  'onboarding.form.periods': {
-    en: 'Time Periods',
-    fr: 'Périodes',
-  },
-  'onboarding.form.monday': {
-    en: 'Monday',
-    fr: 'Lundi',
-  },
-  'onboarding.form.tuesday': {
-    en: 'Tuesday',
-    fr: 'Mardi',
-  },
-  'onboarding.form.wednesday': {
-    en: 'Wednesday',
-    fr: 'Mercredi',
-  },
-  'onboarding.form.thursday': {
-    en: 'Thursday',
-    fr: 'Jeudi',
-  },
-  'onboarding.form.friday': {
-    en: 'Friday',
-    fr: 'Vendredi',
-  },
-  'onboarding.form.saturday': {
-    en: 'Saturday',
-    fr: 'Samedi',
-  },
-  'onboarding.form.sunday': {
-    en: 'Sunday',
-    fr: 'Dimanche',
-  },
-  'onboarding.form.morning': {
-    en: 'Morning',
-    fr: 'Matin',
-  },
-  'onboarding.form.afternoon': {
-    en: 'Afternoon',
-    fr: 'Après-midi',
-  },
-  'onboarding.form.evening': {
-    en: 'Evening',
-    fr: 'Soir',
-  },
-  'onboarding.form.continue': {
-    en: 'Continue',
-    fr: 'Continuer',
-  },
-  'onboarding.form.back': {
-    en: 'Back',
-    fr: 'Retour',
-  },
-  'onboarding.form.finish': {
-    en: 'Finish',
-    fr: 'Terminer',
-  },
-  'onboarding.form.step': {
-    en: 'Step',
-    fr: 'Étape',
-  },
-  'onboarding.form.of': {
-    en: 'of',
-    fr: 'sur',
-  },
-  'onboarding.form.error.required': {
-    en: 'This field is required',
-    fr: 'Ce champ est obligatoire',
-  },
-  'onboarding.form.error.minLength': {
-    en: 'Name must be at least 2 characters',
-    fr: 'Le nom doit contenir au moins 2 caractères',
-  },
-  'onboarding.form.error.invalidDate': {
-    en: 'Please select a valid date',
-    fr: 'Veuillez sélectionner une date valide',
-  },
-  'onboarding.form.error.minAge': {
-    en: 'You must be at least 18 years old',
-    fr: 'Vous devez avoir au moins 18 ans',
-  },
-  'onboarding.form.error.selectGender': {
-    en: 'Please select your gender',
-    fr: 'Veuillez sélectionner votre genre',
-  },
-  'onboarding.form.error.selectInterest': {
-    en: 'Please select your interest',
-    fr: 'Veuillez sélectionner votre intérêt',
-  },
-  'onboarding.form.error.selectSports': {
-    en: 'Please select at least one sport',
-    fr: 'Veuillez sélectionner au moins un sport',
-  },
-  'onboarding.form.error.selectAvailability': {
-    en: 'Please select your availability',
-    fr: 'Veuillez sélectionner votre disponibilité',
-  },
-  'onboarding.form.submitting': {
-    en: 'Creating your profile...',
-    fr: 'Création de votre profil...',
-  },
-  'onboarding.form.error.submitFailed': {
-    en: 'Failed to create profile. Please try again.',
-    fr: 'Échec de la création du profil. Veuillez réessayer.',
-  },
   
   // Photo selector translations
   'photo.permissionRequired': {
@@ -821,14 +817,6 @@ export const translations: Translations = {
   'photo.addYourFirstPhoto': {
     en: 'Add your first photo to get started',
     fr: 'Ajoutez votre première photo pour commencer',
-  },
-  'onboarding.form.photos.label': {
-    en: 'Add Your Best Photos',
-    fr: 'Ajoutez vos meilleures photos',
-  },
-  'onboarding.form.photos.description': {
-    en: 'Upload up to 5 photos. Tap on a photo to set it as your main photo, replace, or delete it.',
-    fr: 'Téléchargez jusqu\'à 5 photos. Appuyez sur une photo pour la définir comme photo principale, la remplacer ou la supprimer.',
   },
 };
 

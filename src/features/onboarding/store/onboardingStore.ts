@@ -21,6 +21,7 @@ export interface OnboardingState {
   totalSteps: number;
   isLoading: boolean;
   error: string | null;
+  hasSeenOnboarding: boolean;
   
   // Actions
   updateFormData: (data: Partial<OnboardingFormData>) => void;
@@ -31,6 +32,7 @@ export interface OnboardingState {
   setError: (error: string | null) => void;
   resetForm: () => void;
   prefillFromSocialAuth: (name?: string, dateOfBirth?: Date) => void;
+  markOnboardingAsSeen: () => void;
 }
 
 const initialFormData: OnboardingFormData = {
@@ -53,6 +55,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   totalSteps: 3,
   isLoading: false,
   error: null,
+  hasSeenOnboarding: false,
 
   updateFormData: (data) => {
     set((state) => ({
@@ -103,5 +106,9 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
         dateOfBirth: dateOfBirth || state.formData.dateOfBirth,
       },
     }));
+  },
+
+  markOnboardingAsSeen: () => {
+    set({ hasSeenOnboarding: true });
   },
 }));

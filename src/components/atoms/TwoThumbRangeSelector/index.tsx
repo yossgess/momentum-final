@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { RangeSlider } from '@react-native-assets/slider';
+// import { RangeSlider } from '@react-native-assets/slider'; // Placeholder - requires native module
 import { theme } from '../../../theme';
 
 export interface TwoThumbRangeSelectorProps {
@@ -60,20 +60,13 @@ export const TwoThumbRangeSelector: React.FC<TwoThumbRangeSelectorProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <RangeSlider
-        style={styles.slider}
-        minimumValue={min}
-        maximumValue={max}
-        step={step}
-        range={value}
-        onValueChange={handleValueChange}
-        outboundColor={trackColor}
-        inboundColor={activeTrackColor}
-        thumbTintColor={thumbColor}
-        thumbSize={thumbSize}
-        trackHeight={trackHeight}
-        enabled={!disabled}
-      />
+      {/* RangeSlider placeholder - requires @react-native-assets/slider */}
+      <View style={styles.slider}>
+        <View style={[styles.rail, { backgroundColor: trackColor, height: trackHeight }]} />
+        <View style={[styles.railSelected, { backgroundColor: activeTrackColor, height: trackHeight, width: '50%' }]} />
+        <View style={[styles.thumb, { backgroundColor: thumbColor, width: thumbSize, height: thumbSize, left: '20%' }]} />
+        <View style={[styles.thumb, { backgroundColor: thumbColor, width: thumbSize, height: thumbSize, left: '70%' }]} />
+      </View>
     </View>
   );
 };

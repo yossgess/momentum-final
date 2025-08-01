@@ -4,8 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../../../components/atoms/Typography';
 import { Button } from '../../../components/atoms/Button';
-import { DistanceRangeSelector } from '../../../components/atoms/DistanceRangeSelector';
-import { AgeRangeSelector } from '../../../components/atoms/AgeRangeSelector';
+import { DistanceSlider, AgeRangeSlider } from '../../../components/molecules/FilterSlider';
 import { theme } from '../../../theme';
 import { t } from '../../../shared/utils/i18n';
 import { logEvent } from '../../../shared/utils/analytics';
@@ -140,25 +139,47 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           style={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          {/* Distance Selector - Component has built-in label */}
-          <DistanceRangeSelector
-            value={distanceKm}
-            onChange={handleDistanceChange}
-            min={1}
-            max={100}
-            step={5}
-            style={styles.selectorSpacing}
-          />
+          {/* Distance Slider - New stable component */}
+          <View style={styles.sectionContainer}>
+            <Typography 
+              variant="body" 
+              color="primary" 
+              weight="bold" 
+              style={styles.sectionLabel}
+            >
+              {t('filters.distance')}
+            </Typography>
+            <DistanceSlider
+              value={distanceKm}
+              onValueChange={handleDistanceChange}
+              min={10}
+              max={100}
+              step={1}
+              unit="km"
+              testID="filter-distance-slider"
+            />
+          </View>
 
-          {/* Age Range Selector - Component has built-in label */}
-          <AgeRangeSelector
-            value={ageRange}
-            onChange={handleAgeRangeChange}
-            min={18}
-            max={70}
-            step={1}
-            style={styles.selectorSpacing}
-          />
+          {/* Age Range Slider - New stable component */}
+          <View style={styles.sectionContainer}>
+            <Typography 
+              variant="body" 
+              color="primary" 
+              weight="bold" 
+              style={styles.sectionLabel}
+            >
+              {t('filters.ageRange')}
+            </Typography>
+            <AgeRangeSlider
+              values={ageRange}
+              onValuesChange={handleAgeRangeChange}
+              min={18}
+              max={65}
+              step={1}
+              unit="years"
+              testID="filter-age-range-slider"
+            />
+          </View>
 
           {/* Gender Selector */}
           {renderGenderSelector()}

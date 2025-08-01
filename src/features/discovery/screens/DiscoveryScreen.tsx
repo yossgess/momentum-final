@@ -45,7 +45,7 @@ export const DiscoveryScreen: React.FC = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   // Filter store
-  const { distance, ageRange, gender, sports, isApplied } = useDiscoverFiltersStore();
+  const { distanceKm, ageRange, gender, sports, isApplied } = useDiscoverFiltersStore();
   
   // Map filter store to service layer format
   const discoveryFilters: DiscoveryFilters = useMemo(() => ({
@@ -53,8 +53,8 @@ export const DiscoveryScreen: React.FC = () => {
     interestedIn: gender === 'men' ? 'men' : gender === 'women' ? 'women' : 'any',
     ageRange: ageRange,
     sports: sports.length > 0 ? sports : undefined,
-    distanceKm: distance, // Map distance from filter store
-  }), [gender, ageRange, sports, distance]);
+    distanceKm: distanceKm, // Now using consistent field name
+  }), [gender, ageRange, sports, distanceKm]);
   
   // Discovery hook with integrated service layer
   const {
@@ -77,7 +77,7 @@ export const DiscoveryScreen: React.FC = () => {
   
   // Calculate active filters count
   const activeFilters = (
-    (distance !== 25 ? 1 : 0) +
+    (distanceKm !== 25 ? 1 : 0) +
     (ageRange[0] !== 18 || ageRange[1] !== 35 ? 1 : 0) +
     (gender !== 'any' ? 1 : 0) +
     (sports.length > 0 ? 1 : 0)
@@ -217,9 +217,12 @@ export const DiscoveryScreen: React.FC = () => {
       unreadCount: notificationCount,
     });
     
-    // Navigate to notifications screen in Profile tab
-    navigation.navigate('Profile', { 
-      screen: 'Notifications' 
+    // Navigate to notifications screen in Profile tab through Main navigator
+    navigation.navigate('Main', { 
+      screen: 'Profile',
+      params: {
+        screen: 'Notifications'
+      }
     });
   };
 

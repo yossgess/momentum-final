@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { logEvent } from '../../../shared/utils/analytics';
 
 export interface DiscoverFilters {
-  distance: number; // Distance in kilometers
+  distanceKm: number; // Distance in kilometers - renamed to match service layer
   ageRange: [number, number];
   gender: 'men' | 'women' | 'any';
   sports: string[];
@@ -10,7 +10,7 @@ export interface DiscoverFilters {
 
 interface DiscoverFiltersStore extends DiscoverFilters {
   // Actions
-  setDistance: (distance: number) => void;
+  setDistance: (distanceKm: number) => void;
   setAgeRange: (ageRange: [number, number]) => void;
   setGender: (gender: 'men' | 'women' | 'any') => void;
   setSports: (sports: string[]) => void;
@@ -22,7 +22,7 @@ interface DiscoverFiltersStore extends DiscoverFilters {
 }
 
 const defaultFilters: DiscoverFilters = {
-  distance: 25, // Default 25km radius
+  distanceKm: 25, // Default 25km radius
   ageRange: [18, 35],
   gender: 'any',
   sports: [],
@@ -34,9 +34,9 @@ export const useDiscoverFiltersStore = create<DiscoverFiltersStore>((set, get) =
   isApplied: false,
 
   // Actions
-  setDistance: (distance: number) => {
-    set({ distance });
-    logEvent('Filter_Distance_Changed', { distance });
+  setDistance: (distanceKm: number) => {
+    set({ distanceKm });
+    logEvent('Filter_Distance_Changed', { distanceKm });
   },
 
   setAgeRange: (ageRange: [number, number]) => {
@@ -73,7 +73,7 @@ export const useDiscoverFiltersStore = create<DiscoverFiltersStore>((set, get) =
     set({ isApplied: true });
     
     logEvent('Filter_Applied', {
-      distance: state.distance,
+      distanceKm: state.distanceKm,
       minAge: state.ageRange[0],
       maxAge: state.ageRange[1],
       gender: state.gender,

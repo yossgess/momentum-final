@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../Typography';
-import { OneThumbRangeSelector } from '../OneThumbRangeSelector';
 import { DistanceRangeSelectorProps } from './DistanceRangeSelector.types';
 import { styles } from './DistanceRangeSelector.styles';
 import { theme } from '../../../theme';
@@ -14,13 +13,19 @@ export const DistanceRangeSelector: React.FC<DistanceRangeSelectorProps> = ({
   onChange,
   min = 1,
   max = 100,
-  step = 1,
+  step = 5,
   style,
 }) => {
   const handleChange = useCallback((newValue: number) => {
     onChange(newValue);
     logEvent('DistanceSelector_Changed', { distance: newValue });
   }, [onChange]);
+
+  // Generate distance options based on step
+  const distanceOptions = [];
+  for (let i = min; i <= max; i += step) {
+    distanceOptions.push(i);
+  }
 
   return (
     <View style={[styles.container, style]}>
@@ -45,17 +50,31 @@ export const DistanceRangeSelector: React.FC<DistanceRangeSelectorProps> = ({
         </Typography>
       </View>
       
-      <OneThumbRangeSelector
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={handleChange}
-        activeTrackColor={theme.colors.primary.main}
-        trackColor={theme.colors.surface.secondary}
-        thumbColor={theme.colors.primary.main}
-        style={styles.slider}
-      />
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.optionsContainer}
+        contentContainerStyle={styles.optionsContent}
+      >
+        {distanceOptions.map((distance) => (
+          <TouchableOpacity
+            key={distance}
+            style={[
+              styles.optionButton,
+              value === distance && styles.optionButtonActive
+            ]}
+            onPress={() => handleChange(distance)}
+          >
+            <Typography
+              variant="button"
+              color={value === distance ? 'primary' : 'secondary'}
+              weight={value === distance ? 'bold' : 'normal'}
+            >
+              {distance}
+            </Typography>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
       
       <View style={styles.rangeLabels}>
         <Typography variant="caption" color="tertiary">

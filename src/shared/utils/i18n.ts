@@ -110,6 +110,14 @@ export const translations: Translations = {
     en: 'Age Range',
     fr: 'Tranche d\'âge',
   },
+  'filters.minAge': {
+    en: 'Min Age',
+    fr: 'Âge min',
+  },
+  'filters.maxAge': {
+    en: 'Max Age',
+    fr: 'Âge max',
+  },
   'filters.gender': {
     en: 'Gender',
     fr: 'Genre',
@@ -140,7 +148,7 @@ export const translations: Translations = {
   },
 
   'profile.age': {
-    en: 'years old',
+    en: 'years',
     fr: 'ans',
   },
   'profile.bio': {

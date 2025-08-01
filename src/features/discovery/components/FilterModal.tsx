@@ -22,7 +22,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onClose,
 }) => {
   const {
-    distance,
+    distanceKm,
     ageRange,
     gender,
     sports,
@@ -140,27 +140,25 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           style={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          {/* Distance Selector */}
-          <View style={styles.sectionContainer}>
-            <DistanceRangeSelector
-              value={distance}
-              onChange={handleDistanceChange}
-              min={1}
-              max={100}
-              step={1}
-            />
-          </View>
+          {/* Distance Selector - Component has built-in label */}
+          <DistanceRangeSelector
+            value={distanceKm}
+            onChange={handleDistanceChange}
+            min={1}
+            max={100}
+            step={5}
+            style={styles.selectorSpacing}
+          />
 
-          {/* Age Range Selector */}
-          <View style={styles.sectionContainer}>
-            <AgeRangeSelector
-              value={ageRange}
-              onChange={handleAgeRangeChange}
-              min={18}
-              max={70}
-              step={1}
-            />
-          </View>
+          {/* Age Range Selector - Component has built-in label */}
+          <AgeRangeSelector
+            value={ageRange}
+            onChange={handleAgeRangeChange}
+            min={18}
+            max={70}
+            step={1}
+            style={styles.selectorSpacing}
+          />
 
           {/* Gender Selector */}
           {renderGenderSelector()}
@@ -240,6 +238,9 @@ const styles = StyleSheet.create({
   },
   sportsContainer: {
     alignItems: 'center',
+  },
+  selectorSpacing: {
+    marginBottom: theme.spacing.lg,
   },
   footer: {
     flexDirection: 'row',

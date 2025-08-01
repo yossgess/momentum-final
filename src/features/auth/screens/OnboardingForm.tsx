@@ -19,6 +19,8 @@ import {
   Loader,
 } from '../../../components';
 import { SportChip } from '../../../components/business/SportChip';
+import { PhotoSelector } from '../../../components/atoms/PhotoSelector';
+import { PhotoData } from '../../../components/atoms/PhotoSelector/PhotoSelector.types';
 
 import { useOnboardingStore } from '../../onboarding/store/onboardingStore';
 import { useAuthStore } from '../../../shared/stores/authStore';
@@ -398,6 +400,35 @@ export const OnboardingForm: React.FC = () => {
                 {formErrors.availability}
               </Typography>
             )}
+            
+            <View>
+              <Typography variant="h3" style={{ marginBottom: theme.spacing.sm }}>
+                {t('onboarding.form.photos.label')}
+              </Typography>
+              <Typography variant="body" style={{ marginBottom: theme.spacing.md, color: theme.colors.text.secondary }}>
+                {t('onboarding.form.photos.description')}
+              </Typography>
+              
+              <PhotoSelector
+                photos={formData.photos}
+                mainPhotoIndex={formData.mainPhotoIndex}
+                onPhotosChange={(photos: PhotoData[]) => {
+                  updateFormData({ photos });
+                  logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'photos', value: photos.length });
+                }}
+                onMainPhotoChange={(index: number) => {
+                  updateFormData({ mainPhotoIndex: index });
+                  logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'mainPhotoIndex', value: index });
+                }}
+                maxImages={5}
+              />
+              
+              {formErrors.photos && (
+                <Typography variant="caption" style={{ color: '#FF6B6B', marginTop: theme.spacing.sm }}>
+                  {formErrors.photos}
+                </Typography>
+              )}
+            </View>
           </View>
         );
 

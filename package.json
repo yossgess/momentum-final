@@ -42,7 +42,8 @@
     "rn-range-slider": "^2.2.2",
     "zod": "^4.0.14",
     "zustand": "^5.0.6",
-    "@react-native-community/datetimepicker": "8.4.1"
+    "@react-native-community/datetimepicker": "8.4.1",
+    "expo-image-picker": "~16.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

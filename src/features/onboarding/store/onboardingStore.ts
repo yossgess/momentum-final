@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { PhotoData } from '../../../components/atoms/PhotoSelector/PhotoSelector.types';
 
 export interface OnboardingFormData {
   fullName: string;
@@ -10,7 +11,8 @@ export interface OnboardingFormData {
     days: string[];
     periods: string[];
   };
-  profilePhoto?: string;
+  photos: PhotoData[];
+  mainPhotoIndex: number;
 }
 
 export interface OnboardingState {
@@ -41,6 +43,8 @@ const initialFormData: OnboardingFormData = {
     days: [],
     periods: [],
   },
+  photos: [],
+  mainPhotoIndex: 0,
 };
 
 export const useOnboardingStore = create<OnboardingState>((set, get) => ({

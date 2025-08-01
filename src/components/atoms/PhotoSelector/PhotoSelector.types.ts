@@ -1,10 +1,16 @@
+export interface PhotoData {
+  uri: string;
+  id: string;
+}
+
 export interface PhotoSelectorProps {
-  value?: string | string[];
-  onChange: (value: string | string[]) => void;
+  photos?: PhotoData[];
+  mainPhotoIndex?: number;
+  onPhotosChange: (photos: PhotoData[]) => void;
+  onMainPhotoChange: (index: number) => void;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
-  multiple?: boolean;
   maxImages?: number;
   style?: any;
 }

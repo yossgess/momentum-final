@@ -740,6 +740,96 @@ export const translations: Translations = {
     en: 'Failed to create profile. Please try again.',
     fr: 'Échec de la création du profil. Veuillez réessayer.',
   },
+  
+  // Photo selector translations
+  'photo.permissionRequired': {
+    en: 'Permission Required',
+    fr: 'Autorisation requise',
+  },
+  'photo.permissionMessage': {
+    en: 'Please allow access to your photo library to upload images.',
+    fr: 'Veuillez autoriser l\'accès à votre photothèque pour télécharger des images.',
+  },
+  'photo.cameraPermissionRequired': {
+    en: 'Camera Permission Required',
+    fr: 'Autorisation de caméra requise',
+  },
+  'photo.cameraPermissionMessage': {
+    en: 'Please allow camera access to take photos.',
+    fr: 'Veuillez autoriser l\'accès à la caméra pour prendre des photos.',
+  },
+  'photo.selectPhoto': {
+    en: 'Select Photo',
+    fr: 'Sélectionner une photo',
+  },
+  'photo.selectPhotoMessage': {
+    en: 'Choose how you\'d like to add a photo',
+    fr: 'Choisissez comment vous souhaitez ajouter une photo',
+  },
+  'photo.camera': {
+    en: 'Camera',
+    fr: 'Caméra',
+  },
+  'photo.gallery': {
+    en: 'Photo Library',
+    fr: 'Photothèque',
+  },
+  'photo.error': {
+    en: 'Error',
+    fr: 'Erreur',
+  },
+  'photo.selectError': {
+    en: 'Failed to select photo. Please try again.',
+    fr: 'Échec de la sélection de photo. Veuillez réessayer.',
+  },
+  'photo.cameraError': {
+    en: 'Failed to take photo. Please try again.',
+    fr: 'Échec de la prise de photo. Veuillez réessayer.',
+  },
+  'photo.replaceError': {
+    en: 'Failed to replace photo. Please try again.',
+    fr: 'Échec du remplacement de photo. Veuillez réessayer.',
+  },
+  'photo.photoOptions': {
+    en: 'Photo Options',
+    fr: 'Options de photo',
+  },
+  'photo.setAsMain': {
+    en: 'Set as Main Photo',
+    fr: 'Définir comme photo principale',
+  },
+  'photo.replace': {
+    en: 'Replace Photo',
+    fr: 'Remplacer la photo',
+  },
+  'photo.delete': {
+    en: 'Delete Photo',
+    fr: 'Supprimer la photo',
+  },
+  'photo.deletePhoto': {
+    en: 'Delete Photo',
+    fr: 'Supprimer la photo',
+  },
+  'photo.deletePhotoMessage': {
+    en: 'Are you sure you want to delete this photo?',
+    fr: 'Êtes-vous sûr de vouloir supprimer cette photo ?',
+  },
+  'photo.addPhoto': {
+    en: 'Add Photo',
+    fr: 'Ajouter une photo',
+  },
+  'photo.addYourFirstPhoto': {
+    en: 'Add your first photo to get started',
+    fr: 'Ajoutez votre première photo pour commencer',
+  },
+  'onboarding.form.photos.label': {
+    en: 'Add Your Best Photos',
+    fr: 'Ajoutez vos meilleures photos',
+  },
+  'onboarding.form.photos.description': {
+    en: 'Upload up to 5 photos. Tap on a photo to set it as your main photo, replace, or delete it.',
+    fr: 'Téléchargez jusqu\'à 5 photos. Appuyez sur une photo pour la définir comme photo principale, la remplacer ou la supprimer.',
+  },
 };
 
 class I18nService {

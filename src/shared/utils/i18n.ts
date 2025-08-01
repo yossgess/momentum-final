@@ -80,6 +80,16 @@ export const translations: Translations = {
     fr: 'Maximum',
   },
 
+  // Auth translations
+  'auth.login': {
+    en: 'Login',
+    fr: 'Connexion',
+  },
+  'auth.signUp': {
+    en: 'Sign Up',
+    fr: 'S’inscrire',
+  },
+
   'filters.title': {
     en: 'Filters',
     fr: 'Filtres',

@@ -79,6 +79,14 @@ export const translations: Translations = {
     en: 'Maximum',
     fr: 'Maximum',
   },
+  'common.loading': {
+    en: 'Loading...',
+    fr: 'Chargement...',
+  },
+  'common.retry': {
+    en: 'Retry',
+    fr: 'Réessayer',
+  },
 
   // Auth translations
   'auth.login': {
@@ -163,6 +171,26 @@ export const translations: Translations = {
   'discovery.match': {
     en: "It's a Match!",
     fr: 'Match trouvé !',
+  },
+  'discovery.error.title': {
+    en: 'Error Loading Profiles',
+    fr: 'Erreur de chargement des profils',
+  },
+  'discovery.noMoreProfiles': {
+    en: 'No More Profiles',
+    fr: 'Plus de profils',
+  },
+  'discovery.tryAdjustingFilters': {
+    en: 'Try adjusting your filters to find more people',
+    fr: 'Essayez d\'ajuster vos filtres pour trouver plus de personnes',
+  },
+  'discovery.refreshProfiles': {
+    en: 'Refresh',
+    fr: 'Actualiser',
+  },
+  'discovery.loading': {
+    en: 'Loading profiles...',
+    fr: 'Chargement des profils...',
   },
 
   // Sports categories - short labels to prevent wrapping

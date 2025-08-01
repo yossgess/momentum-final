@@ -12,7 +12,7 @@ import { RootStackParamList } from '../shared/types/navigation';
 import { logEvent, Events } from '../shared/utils/analytics';
 
 // Development mode flag - set to true to always show full onboarding flow for testing
-const DEV_MODE_RESET_ONBOARDING = true; // Change to false for production
+const DEV_MODE_RESET_ONBOARDING = false; // Change to false for production
 
 const Stack = createStackNavigator<RootStackParamList>();
 

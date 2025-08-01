@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 // Components
 import { Typography } from '../../../components/atoms/Typography';
 import { Loader } from '../../../components/atoms/Loader';
+import { EmptyState } from '../../../components/molecules/EmptyState';
 import { FilterButton } from '../../../components/molecules/FilterButton';
 import { NotificationButton } from '../../../components/atoms/NotificationButton';
 import { SwipeCard } from '../../../components/business/SwipeCard';
@@ -50,8 +51,7 @@ export const DiscoveryScreen: React.FC = () => {
   const discoveryFilters: DiscoveryFilters = useMemo(() => ({
     gender: gender === 'men' ? 'man' : gender === 'women' ? 'woman' : undefined,
     interestedIn: gender === 'men' ? 'men' : gender === 'women' ? 'women' : 'any',
-    minAge: ageRange[0],
-    maxAge: ageRange[1],
+    ageRange: ageRange,
     sports: sports.length > 0 ? sports : undefined,
     distanceKm: distance, // Map distance from filter store
   }), [gender, ageRange, sports, distance]);
@@ -308,20 +308,14 @@ export const DiscoveryScreen: React.FC = () => {
           />
         </Animated.View>
       ) : !isLoading && !hasProfiles ? (
-        <View style={styles.emptyState}>
-          <Typography 
-            variant="h2" 
-            style={styles.emptyTitle}
-          >
-            {t('discovery.noMoreProfiles')}
-          </Typography>
-          <Typography 
-            variant="body" 
-            style={styles.emptySubtitle}
-          >
-            {t('discovery.tryAdjustingFilters')}
-          </Typography>
-        </View>
+        <EmptyState
+          icon="people-outline"
+          title={t('discovery.noMoreProfiles')}
+          description={t('discovery.tryAdjustingFilters')}
+          actionLabel={t('discovery.refreshProfiles')}
+          onAction={refreshProfiles}
+          style={styles.emptyState}
+        />
       ) : null}
 
       {/* Match Modal */}

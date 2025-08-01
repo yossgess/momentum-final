@@ -76,21 +76,35 @@ export const OnboardingForm: React.FC = () => {
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>(formData.availability.periods);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Mock mutation for submitting to Supabase
   const submitMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock success/failure
-      if (Math.random() > 0.1) {
-        return { success: true };
-      } else {
-        throw new Error('Submission failed');
+      const { user } = useAuthStore.getState();
+      if (!user) throw new Error('No authenticated user');
+
+      const uploadedPhotoUrls: string[] = [];
+      for (const photo of data.photos) {
+        const fileName = `avatar_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
+        try {
+          const { storageService } = await import('../../../shared/services/storageService');
+          const publicUrl = await storageService.uploadAvatar(user.id, photo.uri, fileName);
+          uploadedPhotoUrls.push(publicUrl);
+        } catch (error) {
+          console.warn('Failed to upload photo:', error);
+          uploadedPhotoUrls.push(photo.uri);
+        }
       }
+
+      const updatedFormData = {
+        ...data,
+        photos: uploadedPhotoUrls.map((url, index) => ({ uri: url, id: `uploaded_${index}` })),
+      };
+
+      const { profilesService } = await import('../../../shared/services/profilesService');
+      await profilesService.createProfile(user.id, updatedFormData);
+      
+      return { success: true };
     },
     onSuccess: () => {
-      // Mark user as fully authenticated, which will trigger navigation to Main app
       completeOnboarding();
     },
     onError: (error: any) => {

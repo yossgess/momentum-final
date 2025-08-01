@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { User, Session } from '@supabase/supabase-js';
 import { logEvent, Events } from '../utils/analytics';
+import { authService } from '../services/authService';
+import { supabase } from '../../config/supabase';
 
 export interface AuthState {
   user: User | null;
@@ -15,9 +17,11 @@ export interface AuthState {
   setLoading: (loading: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, userType: 'enthusiast' | 'coach') => Promise<void>;
+  signInWithOAuth: (provider: 'google' | 'facebook') => Promise<void>;
   completeOnboarding: () => void;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -52,17 +56,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     try {
       setLoading(true);
-      logEvent(Events.LOGIN_ATTEMPTED, { email });
-      
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser = { id: '1', email } as User;
-      set({ user: mockUser, isAuthenticated: true });
-      
-      logEvent(Events.LOGIN_SUCCESS, { userId: mockUser.id });
+      const { user, session } = await authService.signIn(email, password);
+      set({ user, session, isAuthenticated: true });
     } catch (error) {
-      logEvent(Events.LOGIN_FAILED, { email, error: String(error) });
       throw error;
     } finally {
       setLoading(false);
@@ -74,17 +70,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     try {
       setLoading(true);
-      logEvent(Events.SIGNUP_ATTEMPTED, { email, userType });
-      
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser = { id: '1', email } as User;
-      set({ user: mockUser, isAuthenticated: false, userType }); // Don't mark as authenticated until onboarding is complete
-      
-      logEvent(Events.SIGNUP_SUCCESS, { userId: mockUser.id, userType });
+      const { user, session } = await authService.signUp(email, password);
+      set({ user, session, isAuthenticated: false, userType });
     } catch (error) {
-      logEvent(Events.SIGNUP_FAILED, { email, userType, error: String(error) });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  },
+
+  signInWithOAuth: async (provider: 'google' | 'facebook') => {
+    const { setLoading } = get();
+    
+    try {
+      setLoading(true);
+      await authService.signInWithOAuth(provider);
+    } catch (error) {
       throw error;
     } finally {
       setLoading(false);
@@ -100,7 +101,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user } = get();
     
     try {
-      
+      await authService.signOut();
       logEvent(Events.LOGOUT, { userId: user?.id });
       set({ user: null, session: null, isAuthenticated: false, userType: null });
     } catch (error) {
@@ -111,10 +112,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshSession: async () => {
     try {
-      console.log('Session refreshed');
+      const { data, error } = await supabase.auth.refreshSession();
+      if (error) throw error;
+      
+      set({ session: data.session, user: data.user });
     } catch (error) {
       console.error('Session refresh error:', error);
       throw error;
+    }
+  },
+
+  initialize: async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        set({ session, user: session.user, isAuthenticated: true });
+      }
+
+      supabase.auth.onAuthStateChange((event, session) => {
+        set({ session, user: session?.user || null, isAuthenticated: !!session });
+        
+        if (event === 'SIGNED_IN') {
+          logEvent(Events.LOGIN_SUCCESS, { userId: session?.user?.id });
+        } else if (event === 'SIGNED_OUT') {
+          logEvent(Events.LOGOUT);
+        }
+      });
+    } catch (error) {
+      console.error('Auth initialization error:', error);
     }
   },
 }));

@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { logEvent, Events } from './src/shared/utils/analytics';
+import { useAuthStore } from './src/shared/stores/authStore';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -19,6 +20,8 @@ export default function App() {
     logEvent(Events.APP_OPENED, {
       timestamp: new Date().toISOString(),
     });
+
+    useAuthStore.getState().initialize();
   }, []);
 
   return (

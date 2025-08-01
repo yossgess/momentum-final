@@ -67,19 +67,9 @@ export const SignInScreen: React.FC = () => {
     });
 
     try {
-      // Mock authentication logic
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      
-      // Check mock credentials
-      if (email === MOCK_EMAIL && password === MOCK_PASSWORD) {
-        logEvent(Events.LOGIN_SUCCESS, { email });
-        // Navigate to main app (HomeStack/Discover)
-        // Note: This would typically be handled by auth state management
-        // Navigate to onboarding form to complete profile setup
-        navigation.navigate('OnboardingForm');
-      } else {
-        throw new Error(t('auth.errorInvalidCredentials'));
-      }
+      const { useAuthStore } = await import('../../../shared/stores/authStore');
+      await useAuthStore.getState().login(email, password);
+      logEvent(Events.LOGIN_SUCCESS, { email });
     } catch (error) {
       logEvent(Events.LOGIN_FAILED, { 
         email, 
@@ -90,6 +80,20 @@ export const SignInScreen: React.FC = () => {
         'Sign In Failed', 
         error instanceof Error ? error.message : t('auth.errorInvalidCredentials')
       );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+    try {
+      setIsLoading(true);
+      const { useAuthStore } = await import('../../../shared/stores/authStore');
+      await useAuthStore.getState().signInWithOAuth(provider);
+      logEvent(Events.LOGIN_SUCCESS, { provider });
+    } catch (error) {
+      logEvent(Events.LOGIN_FAILED, { provider, error: String(error) });
+      Alert.alert('Error', `Failed to sign in with ${provider}. Please try again.`);
     } finally {
       setIsLoading(false);
     }
@@ -192,6 +196,31 @@ export const SignInScreen: React.FC = () => {
           >
             {isLoading ? t('auth.loading') : t('auth.signIn')}
           </Button>
+
+          {/* OAuth Buttons */}
+          <View style={styles.oauthContainer}>
+            <Button
+              variant="outline"
+              size="lg"
+              fullWidth
+              onPress={() => handleOAuthSignIn('google')}
+              loading={isLoading}
+              style={styles.oauthButton}
+            >
+              Continue with Google
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="lg"
+              fullWidth
+              onPress={() => handleOAuthSignIn('facebook')}
+              loading={isLoading}
+              style={styles.oauthButton}
+            >
+              Continue with Facebook
+            </Button>
+          </View>
 
           {/* Divider */}
           <View style={styles.dividerContainer}>
@@ -303,5 +332,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface.secondary,
     borderRadius: theme.borderRadius.md,
     alignItems: 'center',
+  },
+  oauthContainer: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+  },
+  oauthButton: {
+    marginBottom: theme.spacing.sm,
   },
 });

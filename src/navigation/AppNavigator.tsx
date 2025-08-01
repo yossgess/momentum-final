@@ -2,7 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuthStore } from '../shared/stores/authStore';
-import { useOnboardingStore } from '../stores/onboardingStore';
+import { useUserStore } from '../shared/stores/userStore';
+import { useOnboardingStore } from '../features/onboarding/store/onboardingStore';
 import { AuthNavigator } from './AuthNavigator';
 import { TabNavigator } from './TabNavigator';
 import { OnboardingSlider } from '../features/auth/screens/OnboardingSlider';
@@ -12,8 +13,21 @@ import { logEvent, Events } from '../shared/utils/analytics';
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const AppNavigator: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { hasSeenOnboarding } = useOnboardingStore();
+
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      logEvent(Events.SCREEN_VIEWED, { screenName: 'Main' });
+      
+      const { loadProfile } = useUserStore.getState();
+      loadProfile(user.id, user.email || '').catch(console.error);
+    } else if (user && !isAuthenticated) {
+      logEvent(Events.SCREEN_VIEWED, { screenName: 'Onboarding' });
+    } else {
+      logEvent(Events.SCREEN_VIEWED, { screenName: 'Auth' });
+    }
+  }, [isAuthenticated, user]);
 
   const handleNavigationStateChange = () => {
     logEvent(Events.SCREEN_VIEWED, {

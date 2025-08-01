@@ -15,7 +15,7 @@ type SignupScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Signu
 
 export const SignupScreen: React.FC = () => {
   const navigation = useNavigation<SignupScreenNavigationProp>();
-  const { signup, isLoading } = useAuthStore();
+  const { signup, signInWithOAuth, isLoading } = useAuthStore();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,11 +65,20 @@ export const SignupScreen: React.FC = () => {
     try {
       await signup(email, password, userType);
       logEvent(Events.SIGNUP_SUCCESS, { email, userType });
-      // Navigate to onboarding form to complete profile setup
-      navigation.navigate('OnboardingForm');
     } catch (error) {
       logEvent(Events.SIGNUP_FAILED, { email, userType, error: String(error) });
       Alert.alert('Signup Failed', 'Please try again.');
+    }
+  };
+
+  const handleOAuthSignUp = async (provider: 'google' | 'facebook') => {
+    try {
+      const { signInWithOAuth } = useAuthStore.getState();
+      await signInWithOAuth(provider);
+      logEvent(Events.SIGNUP_SUCCESS, { provider, userType });
+    } catch (error) {
+      logEvent(Events.SIGNUP_FAILED, { provider, userType, error: String(error) });
+      Alert.alert('Error', `Failed to sign up with ${provider}. Please try again.`);
     }
   };
 
@@ -141,6 +150,30 @@ export const SignupScreen: React.FC = () => {
           {t('auth.signup')}
         </Button>
 
+        <View style={styles.oauthContainer}>
+          <Button
+            variant="outline"
+            size="lg"
+            fullWidth
+            onPress={() => handleOAuthSignUp('google')}
+            loading={isLoading}
+            style={styles.oauthButton}
+          >
+            Continue with Google
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="lg"
+            fullWidth
+            onPress={() => handleOAuthSignUp('facebook')}
+            loading={isLoading}
+            style={styles.oauthButton}
+          >
+            Continue with Facebook
+          </Button>
+        </View>
+
         <Button
           variant="ghost"
           size="md"
@@ -177,5 +210,12 @@ const styles = StyleSheet.create({
   signupButton: {
     marginTop: theme.spacing['3xl'], // Increased for better separation
     marginBottom: theme.spacing.lg, // Increased bottom margin
+  },
+  oauthContainer: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+  },
+  oauthButton: {
+    marginBottom: theme.spacing.sm,
   },
 });

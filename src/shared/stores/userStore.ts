@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { logEvent, Events } from '../utils/analytics';
+import { profilesService } from '../services/profilesService';
+import { ProfileUpdate } from '../types/database';
 
 export interface UserProfile {
   id: string;
@@ -45,6 +47,7 @@ export interface UserState {
   isLoading: boolean;
   
   setProfile: (profile: UserProfile) => void;
+  loadProfile: (userId: string, email: string) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   setLoading: (loading: boolean) => void;
   addSport: (sport: UserProfile['sports'][0]) => void;
@@ -68,6 +71,25 @@ export const useUserStore = create<UserState>((set, get) => ({
     });
   },
 
+  loadProfile: async (userId: string, email: string) => {
+    const { setLoading } = get();
+    
+    try {
+      setLoading(true);
+      const profileRow = await profilesService.getProfile(userId);
+      
+      if (profileRow) {
+        const userProfile = profilesService.convertToUserProfile(profileRow, email);
+        set({ profile: userProfile });
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  },
+
   updateProfile: async (updates) => {
     const { profile, setLoading } = get();
     if (!profile) return;
@@ -75,8 +97,20 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       setLoading(true);
       
+      const profileUpdates: ProfileUpdate = {};
+      if (updates.firstName || updates.lastName) {
+        profileUpdates.full_name = `${updates.firstName || profile.firstName} ${updates.lastName || profile.lastName}`.trim();
+      }
+      if (updates.photos) {
+        profileUpdates.avatar_urls = updates.photos;
+      }
+      if (updates.preferences?.sportsInterests) {
+        profileUpdates.preferred_sports = updates.preferences.sportsInterests;
+      }
       
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (Object.keys(profileUpdates).length > 0) {
+        await profilesService.updateProfile(profile.id, profileUpdates);
+      }
       
       const updatedProfile = { ...profile, ...updates };
       set({ profile: updatedProfile });

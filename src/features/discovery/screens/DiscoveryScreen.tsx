@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
   SafeAreaView,
   Animated,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
 // Components
 import { Typography } from '../../../components/atoms/Typography';
-import { IconBadge } from '../../../components/atoms/IconBadge';
+import { Loader } from '../../../components/atoms/Loader';
 import { FilterButton } from '../../../components/molecules/FilterButton';
 import { NotificationButton } from '../../../components/atoms/NotificationButton';
 import { SwipeCard } from '../../../components/business/SwipeCard';
@@ -27,10 +28,11 @@ import { FilterModal } from '../components/FilterModal';
 import { theme } from '../../../theme';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { t } from '../../../shared/utils/i18n';
-import { mockProfiles, MockProfile } from '../mockProfiles';
 import { useDiscoverFiltersStore } from '../components/useDiscoverFiltersStore';
 import { getSportIcon } from '../../../constants/sportIcons';
-import { useNotificationsStore } from '../../notifications/store/notifications.store';
+import { useDiscovery } from '../../../shared/hooks/useDiscovery';
+import { DiscoveryFilters } from '../../../shared/services/discoveryService';
+import { ProfileRow } from '../../../shared/types/database';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -38,19 +40,40 @@ export const DiscoveryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   
-  // State management
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [profiles] = useState<MockProfile[]>(mockProfiles);
-  const [skippedProfiles, setSkippedProfiles] = useState<MockProfile[]>([]);
-  const [showMatchModal, setShowMatchModal] = useState(false);
-  const [matchedProfile, setMatchedProfile] = useState<MockProfile | null>(null);
+  // Local state
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   // Filter store
   const { distance, ageRange, gender, sports, isApplied } = useDiscoverFiltersStore();
   
-  // Notifications store
-  const unreadCount = useNotificationsStore(state => state.getUnreadCount());
+  // Map filter store to service layer format
+  const discoveryFilters: DiscoveryFilters = useMemo(() => ({
+    gender: gender === 'men' ? 'man' : gender === 'women' ? 'woman' : undefined,
+    interestedIn: gender === 'men' ? 'men' : gender === 'women' ? 'women' : 'any',
+    minAge: ageRange[0],
+    maxAge: ageRange[1],
+    sports: sports.length > 0 ? sports : undefined,
+    // Note: distance filtering will be added to service layer later
+  }), [gender, ageRange, sports]);
+  
+  // Discovery hook with integrated service layer
+  const {
+    currentProfile,
+    hasProfiles,
+    notificationCount,
+    showMatchModal,
+    matchedProfile,
+    isLoading,
+    error,
+    handleSwipe,
+    handleRevert,
+    canRevert,
+    refreshProfiles,
+    handleMatchModalOpen,
+    handleMatchModalClose,
+    isSwipeLoading,
+    isRevertLoading,
+  } = useDiscovery(discoveryFilters);
   
   // Calculate active filters count
   const activeFilters = (
@@ -63,9 +86,7 @@ export const DiscoveryScreen: React.FC = () => {
   // Animation refs
   const cardAnimatedValue = useRef(new Animated.Value(0)).current;
 
-  const currentProfile = profiles[currentProfileIndex];
-
-  // Mock current user for MatchModal
+  // Mock current user for MatchModal - TODO: Get from auth store
   const currentUser = {
     id: 'current_user',
     email: 'current@example.com',
@@ -94,6 +115,26 @@ export const DiscoveryScreen: React.FC = () => {
     logEvent(Events.SCREEN_VIEWED, { screenName: 'Discovery' });
   }, []);
 
+  // Handle errors with user feedback
+  useEffect(() => {
+    if (error) {
+      Alert.alert(
+        t('discovery.error.title'),
+        error,
+        [
+          {
+            text: t('common.retry'),
+            onPress: refreshProfiles,
+          },
+          {
+            text: t('common.cancel'),
+            style: 'cancel',
+          },
+        ]
+      );
+    }
+  }, [error, refreshProfiles]);
+
   // Card transition animation
   const animateCardTransition = (direction: 'up' | 'down') => {
     const toValue = direction === 'up' ? -SCREEN_HEIGHT : SCREEN_HEIGHT;
@@ -115,75 +156,48 @@ export const DiscoveryScreen: React.FC = () => {
   // Handle Challenge action
   const handleChallenge = () => {
     if (!currentProfile) return;
-
-    logEvent(Events.PROFILE_SWIPED_RIGHT, { 
-      profileId: currentProfile.id,
-      profileName: currentProfile.name,
-      action: 'challenge'
-    });
-
-    // Simulate mutual challenge (50% chance for demo)
-    const isMutualChallenge = Math.random() > 0.5;
     
-    if (isMutualChallenge) {
-      setMatchedProfile(currentProfile);
-      setShowMatchModal(true);
-      logEvent(Events.MATCH_CREATED, { 
-        profileId: currentProfile.id,
-        profileName: currentProfile.name 
-      });
-    }
-
-    // Move to next profile
+    logEvent(Events.CHALLENGE_BUTTON_PRESSED, {
+      targetUserId: currentProfile.id,
+      targetUserGender: currentProfile.gender || 'unknown',
+      targetUserSports: currentProfile.preferred_sports?.join(',') || '',
+    });
+    
+    // Animate card transition
     animateCardTransition('up');
-    setTimeout(() => {
-      setCurrentProfileIndex(prev => (prev + 1) % profiles.length);
-    }, 150);
+    
+    // Use service layer to handle swipe
+    handleSwipe('challenge');
   };
 
   // Handle Nope action
   const handleNope = () => {
     if (!currentProfile) return;
-
-    logEvent(Events.PROFILE_SWIPED_LEFT, { 
-      profileId: currentProfile.id,
-      profileName: currentProfile.name,
-      action: 'nope'
+    
+    logEvent(Events.NOPE_BUTTON_PRESSED, {
+      targetUserId: currentProfile.id,
     });
-
-    // Add to skipped profiles
-    setSkippedProfiles(prev => [currentProfile, ...prev]);
-
-    // Move to next profile
+    
+    // Animate card transition
     animateCardTransition('up');
-    setTimeout(() => {
-      setCurrentProfileIndex(prev => (prev + 1) % profiles.length);
-    }, 150);
+    
+    // Use service layer to handle swipe
+    handleSwipe('nope');
   };
 
   // Handle Revert action
-  const handleRevert = () => {
-    if (skippedProfiles.length === 0) return;
-
-    const lastSkippedProfile = skippedProfiles[0];
+  const handleRevertAction = () => {
+    if (!canRevert) return;
     
-    logEvent(Events.PROFILE_VIEWED, { 
-      profileId: lastSkippedProfile.id,
-      profileName: lastSkippedProfile.name,
-      action: 'revert'
+    logEvent('revert_button_pressed', {
+      canRevert,
     });
-
-    // Remove from skipped profiles
-    setSkippedProfiles(prev => prev.slice(1));
     
-    // Find the profile in the main list and go back to it
-    const profileIndex = profiles.findIndex(p => p.id === lastSkippedProfile.id);
-    if (profileIndex !== -1) {
-      animateCardTransition('down');
-      setTimeout(() => {
-        setCurrentProfileIndex(profileIndex);
-      }, 150);
-    }
+    // Animate card transition
+    animateCardTransition('down');
+    
+    // Use service layer to handle revert
+    handleRevert();
   };
 
   // Handle Filter button
@@ -199,42 +213,43 @@ export const DiscoveryScreen: React.FC = () => {
 
   // Handle Notification button
   const handleNotificationPress = () => {
-    logEvent(Events.NOTIFICATION_PRESSED, { 
-      screenName: 'Discovery',
-      unreadCount 
+    logEvent(Events.NOTIFICATION_PRESSED, {
+      unreadCount: notificationCount,
     });
-    // Navigate to notifications screen in Profile stack
-    (navigation as any).navigate('Profile', { screen: 'Notifications' });
+    
+    // TODO: Navigate to notifications/matches screen
+    console.log('Navigate to notifications');
   };
 
   // Handle Match Modal actions
   const handleSendMessage = () => {
     if (!matchedProfile) return;
     
-    logEvent(Events.MESSAGE_SENT, { 
-      profileId: matchedProfile.id,
-      profileName: matchedProfile.name,
-      source: 'match_modal'
+    logEvent(Events.CHAT_BUTTON_PRESSED, {
+      matchedUserId: matchedProfile.id,
     });
     
-    setShowMatchModal(false);
-    // TODO: Navigate to chat screen
+    handleMatchModalClose();
+    // TODO: Navigate to chat with matched user
+    console.log('Navigate to chat with:', matchedProfile.full_name);
   };
 
   const handleKeepSwiping = () => {
-    setShowMatchModal(false);
+    handleMatchModalClose();
   };
 
   const handleCloseModal = () => {
-    setShowMatchModal(false);
+    handleMatchModalClose();
   };
 
   const handleContinueDiscovery = () => {
-    logEvent(Events.MODAL_CLOSED, { modalType: 'match' });
-    setShowMatchModal(false);
+    handleMatchModalClose();
   };
 
-
+  // Handle match modal open with analytics
+  const handleMatchModalOpenWithAnalytics = () => {
+    handleMatchModalOpen();
+  };
 
   if (!currentProfile) {
     return (
@@ -250,38 +265,63 @@ export const DiscoveryScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Enhanced SwipeCard - Full Screen */}
-      <Animated.View 
-        style={[
-          styles.swipeCardContainer,
-          {
-            transform: [{ translateY: cardAnimatedValue }],
-          }
-        ]}
-      >
-        <SwipeCard
-          profile={{
-            id: currentProfile.id,
-            name: currentProfile.name,
-            age: currentProfile.age,
-            images: currentProfile.images,
-            location: `${currentProfile.distance} ${t('discover.distance')}`,
-            bio: currentProfile.bio,
-            sports: currentProfile.sports.map((sportName, index) => ({
-              id: `sport_${index}`,
-              name: sportName,
-              icon: getSportIcon(sportName),
-            })),
-          }}
-          onSwipeLeft={handleNope}
-          onSwipeRight={handleChallenge}
-          onPressImage={(imageIndex) => {
-            logEvent(Events.PROFILE_VIEWED, { profileId: currentProfile.id, imageIndex });
-          }}
-          fullScreen={true}
-          style={styles.swipeCard}
-        />
-      </Animated.View>
+      {/* Loading State */}
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <Loader size="large" />
+          <Typography variant="body" style={styles.loadingText}>
+            {t('discovery.loading')}
+          </Typography>
+        </View>
+      )}
+
+      {/* Main Content */}
+      {!isLoading && currentProfile ? (
+        <Animated.View 
+          style={[
+            styles.swipeCardContainer,
+            {
+              transform: [{ translateY: cardAnimatedValue }],
+            },
+          ]}
+        >
+          <SwipeCard
+            profile={{
+              id: currentProfile.id,
+              name: currentProfile.full_name || 'Unknown',
+              age: currentProfile.date_of_birth ? 
+                new Date().getFullYear() - new Date(currentProfile.date_of_birth).getFullYear() : 
+                25, // Default age if not available
+              bio: '', // TODO: Add bio field to ProfileRow
+              images: currentProfile.avatar_urls || [], // Changed from photos to images
+              sports: currentProfile.preferred_sports?.map((sport, index) => ({
+                id: `sport_${index}`,
+                name: sport,
+                icon: getSportIcon(sport),
+              })) || [],
+              location: '', // TODO: Add location field to ProfileRow
+            }}
+            onSwipeLeft={handleNope}
+            onSwipeRight={handleChallenge}
+            style={styles.swipeCard}
+          />
+        </Animated.View>
+      ) : !isLoading && !hasProfiles ? (
+        <View style={styles.emptyState}>
+          <Typography 
+            variant="h2" 
+            style={styles.emptyTitle}
+          >
+            {t('discovery.noMoreProfiles')}
+          </Typography>
+          <Typography 
+            variant="body" 
+            style={styles.emptySubtitle}
+          >
+            {t('discovery.tryAdjustingFilters')}
+          </Typography>
+        </View>
+      ) : null}
 
       {/* Match Modal */}
       <MatchModal
@@ -289,20 +329,22 @@ export const DiscoveryScreen: React.FC = () => {
         currentUser={currentUser}
         matchedUser={matchedProfile ? {
           id: matchedProfile.id,
-          email: `${matchedProfile.name.toLowerCase().replace(' ', '.')}@example.com`,
-          firstName: matchedProfile.name.split(' ')[0] || matchedProfile.name,
-          lastName: matchedProfile.name.split(' ')[1] || '',
-          age: matchedProfile.age,
-          gender: 'male' as const,
-          bio: matchedProfile.bio || '',
-          photos: matchedProfile.images,
+          email: '', // TODO: Add email field to ProfileRow
+          firstName: matchedProfile.full_name?.split(' ')[0] || 'Unknown',
+          lastName: matchedProfile.full_name?.split(' ').slice(1).join(' ') || '',
+          age: matchedProfile.date_of_birth ? 
+            new Date().getFullYear() - new Date(matchedProfile.date_of_birth).getFullYear() : 
+            25,
+          gender: matchedProfile.gender === 'man' ? 'male' : 'female',
+          bio: '', // TODO: Add bio field to ProfileRow
+          photos: matchedProfile.avatar_urls || [],
           location: {
-            latitude: 0,
+            latitude: 0, // TODO: Add location fields to ProfileRow
             longitude: 0,
             city: 'City',
             country: 'Country'
           },
-          sports: matchedProfile.sports?.map(sport => ({
+          sports: matchedProfile.preferred_sports?.map(sport => ({
             name: sport,
             skillLevel: 'intermediate' as const,
             yearsPlaying: 2
@@ -311,7 +353,7 @@ export const DiscoveryScreen: React.FC = () => {
             ageRange: [18, 35] as [number, number],
             maxDistance: 25,
             genderPreference: 'both' as const,
-            sportsInterests: matchedProfile.sports || []
+            sportsInterests: matchedProfile.preferred_sports || []
           }
         } : currentUser}
         onSendMessage={handleSendMessage}
@@ -334,7 +376,7 @@ export const DiscoveryScreen: React.FC = () => {
       />
       
       <NotificationButton
-        badgeCount={unreadCount}
+        badgeCount={notificationCount}
         onPress={handleNotificationPress}
         style={styles.topRightButton}
       />
@@ -347,16 +389,18 @@ export const DiscoveryScreen: React.FC = () => {
           style={styles.actionButton}
         />
         <RevertButton
-          onPress={handleRevert}
-          disabled={skippedProfiles.length === 0}
+          onPress={handleRevertAction}
+          disabled={!canRevert || isRevertLoading}
           size="lg"
           style={styles.actionButton}
         />
         <ChallengeButton
           onPress={handleChallenge}
+          disabled={isSwipeLoading || !currentProfile}
           size="lg"
           style={styles.actionButton}
         />
+
       </View>
     </SafeAreaView>
   );
@@ -439,5 +483,19 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     textAlign: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  emptySubtitle: {
+    textAlign: 'center',
+    color: theme.colors.text.secondary,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    color: theme.colors.text.secondary,
   },
 });

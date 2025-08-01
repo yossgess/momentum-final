@@ -72,71 +72,6 @@ export async function getDiscoveryProfiles(
     console.log('Fetching discovery profiles for user:', user.id);
     console.log('Applied filters:', filters);
 
-    // First, let's test direct access to profiles table to verify data exists
-    console.log('Testing direct access to profiles table...');
-    try {
-      const { data: directProfiles, error: directError } = await supabase
-        .from('profiles')
-        .select('*')
-        .limit(5);
-      
-      console.log('Direct profiles query result:');
-      console.log('- Direct data:', directProfiles);
-      console.log('- Direct error:', directError);
-      console.log('- Direct data length:', directProfiles?.length);
-      
-      if (directError) {
-        console.error('Direct profiles access failed:', directError);
-      }
-
-      // Check specifically for mock profiles
-      console.log('Checking for mock profiles...');
-      const { data: mockProfiles, error: mockError } = await supabase
-        .from('profiles')
-        .select('*')
-        .ilike('full_name', 'Test %');
-      
-      console.log('Mock profiles query result:');
-      console.log('- Mock data:', mockProfiles);
-      console.log('- Mock error:', mockError);
-      console.log('- Mock data length:', mockProfiles?.length);
-
-      // Check all profiles to see actual names
-      console.log('Checking ALL profiles to see actual names...');
-      const { data: allProfiles, error: allError } = await supabase
-        .from('profiles')
-        .select('id, full_name, gender, interested_in, created_at')
-        .order('created_at', { ascending: false });
-      
-      console.log('All profiles query result:');
-      console.log('- All profiles data:', allProfiles);
-      console.log('- All profiles error:', allError);
-      console.log('- All profiles length:', allProfiles?.length);
-
-      // Check if RLS is blocking access by trying different approaches
-      console.log('Testing RLS policies...');
-      const { data: rlsTest, error: rlsError } = await supabase
-        .from('profiles')
-        .select('*')
-        .neq('id', user.id); // Exclude current user
-      
-      console.log('RLS test (profiles != current user):');
-      console.log('- RLS test data:', rlsTest);
-      console.log('- RLS test error:', rlsError);
-      console.log('- RLS test length:', rlsTest?.length);
-
-      // Check all profiles count
-      const { count, error: countError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      
-      console.log('Total profiles count:', count);
-      console.log('Count error:', countError);
-      
-    } catch (directTestError) {
-      console.error('Direct profiles test failed:', directTestError);
-    }
-
     logEvent('search_started', {
       gender: filters.gender,
       ageRange: `${filters.ageRange[0]}-${filters.ageRange[1]}`,
@@ -157,49 +92,71 @@ export async function getDiscoveryProfiles(
       max_distance_km: filters.distanceKm || 25, // Default 25km if not specified
     });
     
-    // TEMPORARY: Use direct table query since RPC is returning empty
-    console.log('TEMPORARY: Using direct table query instead of RPC...');
-    const { data: directProfiles, error: directError } = await supabase
-      .from('profiles')
-      .select('*')
-      .neq('id', user.id) // Exclude current user
-      .limit(10);
+    // Call Supabase RPC function for server-side filtering
+    console.log('Calling RPC function get_discovery_profiles...');
+    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles', {
+      user_id: user.id,
+      gender_filter: genderFilter,
+      interested_in_filter: interestedInFilter,
+      min_age: filters.ageRange[0],
+      max_age: filters.ageRange[1],
+      sports_filter: filters.sports && filters.sports.length > 0 ? filters.sports : null,
+      max_distance_km: filters.distanceKm || 25, // Default 25km if not specified
+    });
 
-    console.log('Direct query for discovery:');
-    console.log('- Direct profiles:', directProfiles);
-    console.log('- Direct error:', directError);
-    console.log('- Direct length:', directProfiles?.length);
+    console.log('RPC function response:');
+    console.log('- Data:', profiles);
+    console.log('- Error:', error);
+    console.log('- Data type:', typeof profiles);
+    console.log('- Data is array:', Array.isArray(profiles));
+    console.log('- Data length:', profiles?.length);
 
-    // Use direct profiles instead of RPC result temporarily
-    const profilesToUse = directProfiles || [];
-
-    if (directError) {
-      console.error('Direct query failed:', directError);
-      console.error('Error details:', directError.message || 'Unknown error');
+    if (error) {
+      console.error('RPC function failed:', error);
+      console.error('Error details:', error.message || 'Unknown error');
+      console.error('Error code:', error.code);
+      console.error('Error hint:', error.hint);
+      console.error('Error details object:', error.details);
       
+      // Check if it's a function not found error or any other RPC error
+      if (error.message?.includes('function') || error.code === '42883' || error.message?.includes('undefined')) {
+        console.warn('RPC function issue detected, returning empty array');
+        logEvent('rpc_discovery_fetch', {
+          results_count: 0,
+          success: false,
+          source: 'rpc_function_missing',
+          error_code: error.code,
+          error_message: error.message
+        });
+        return [];
+      }
+      
+      // For any other error, also return empty array
+      console.warn('RPC error occurred, returning empty array');
       logEvent('rpc_discovery_fetch', {
         results_count: 0,
         success: false,
-        source: 'direct_query_error',
-        error_message: directError.message
+        source: 'rpc_error',
+        error_code: error.code,
+        error_message: error.message
       });
       return [];
     }
 
-    if (!profilesToUse || !Array.isArray(profilesToUse)) {
-      console.log('No profiles returned from direct query, returning empty array');
+    if (!profiles || !Array.isArray(profiles)) {
+      console.log('No profiles returned from RPC, returning empty array');
       logEvent('rpc_discovery_fetch', {
         results_count: 0,
         success: true,
-        source: 'direct_query_no_results'
+        source: 'rpc_no_results'
       });
       return [];
     }
 
-    console.log('Direct query returned profiles:', profilesToUse.length);
+    console.log('RPC returned profiles:', profiles.length);
 
-    // Map direct query results to ProfileWithDistance type with null safety
-    const profilesWithDistance: ProfileWithDistance[] = profilesToUse.map((profile: any) => ({
+    // Map RPC results to ProfileWithDistance type with null safety
+    const profilesWithDistance: ProfileWithDistance[] = profiles.map((profile: any) => ({
       id: profile?.id || '',
       full_name: profile?.full_name || '',
       date_of_birth: profile?.date_of_birth || '',
@@ -217,7 +174,7 @@ export async function getDiscoveryProfiles(
     logEvent('rpc_discovery_fetch', {
       results_count: profilesWithDistance.length,
       success: true,
-      source: 'direct_query_temporary'
+      source: 'rpc'
     });
 
     return profilesWithDistance;

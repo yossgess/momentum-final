@@ -251,17 +251,11 @@ export const DiscoveryScreen: React.FC = () => {
     handleMatchModalOpen();
   };
 
-  if (!currentProfile) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.emptyState}>
-          <Typography variant="h2" color="primary" style={styles.emptyTitle}>
-            {t('common.loading')}
-          </Typography>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // Handle empty state edit filters action
+  const handleEditFilters = () => {
+    logEvent(Events.BUTTON_PRESSED, { buttonName: 'EditFilters', source: 'EmptyState' });
+    setShowFilterModal(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -276,7 +270,7 @@ export const DiscoveryScreen: React.FC = () => {
       )}
 
       {/* Main Content */}
-      {!isLoading && currentProfile ? (
+      {!isLoading && currentProfile && (
         <Animated.View 
           style={[
             styles.swipeCardContainer,
@@ -307,16 +301,19 @@ export const DiscoveryScreen: React.FC = () => {
             style={styles.swipeCard}
           />
         </Animated.View>
-      ) : !isLoading && !hasProfiles ? (
+      )}
+
+      {/* Empty State - Show when not loading and no current profile */}
+      {!isLoading && !currentProfile && (
         <EmptyState
           icon="people-outline"
           title={t('discovery.noMoreProfiles')}
           description={t('discovery.tryAdjustingFilters')}
-          actionLabel={t('discovery.refreshProfiles')}
-          onAction={refreshProfiles}
+          actionLabel={t('discovery.editFilters')}
+          onAction={handleEditFilters}
           style={styles.emptyState}
         />
-      ) : null}
+      )}
 
       {/* Match Modal */}
       <MatchModal
@@ -324,26 +321,26 @@ export const DiscoveryScreen: React.FC = () => {
         currentUser={currentUser}
         matchedUser={matchedProfile ? {
           id: matchedProfile.id,
-          email: '', // TODO: Add email field to ProfileRow
+          email: '',
           firstName: matchedProfile.full_name?.split(' ')[0] || 'Unknown',
           lastName: matchedProfile.full_name?.split(' ').slice(1).join(' ') || '',
           age: matchedProfile.date_of_birth ? 
             new Date().getFullYear() - new Date(matchedProfile.date_of_birth).getFullYear() : 
             25,
-          gender: matchedProfile.gender === 'man' ? 'male' : 'female',
-          bio: '', // TODO: Add bio field to ProfileRow
+          gender: matchedProfile.gender === 'man' ? 'male' : matchedProfile.gender === 'woman' ? 'female' : 'other',
+          bio: '', // TODO: Add bio field
           photos: matchedProfile.avatar_urls || [],
           location: {
-            latitude: 0, // TODO: Add location fields to ProfileRow
-            longitude: 0,
-            city: 'City',
-            country: 'Country'
+            latitude: matchedProfile.lat || 0,
+            longitude: matchedProfile.lng || 0,
+            city: 'Unknown',
+            country: 'Unknown'
           },
-          sports: matchedProfile.preferred_sports?.map(sport => ({
+          sports: (matchedProfile.preferred_sports || []).map(sport => ({
             name: sport,
             skillLevel: 'intermediate' as const,
             yearsPlaying: 2
-          })) || [],
+          })),
           preferences: {
             ageRange: [18, 35] as [number, number],
             maxDistance: 25,
@@ -362,7 +359,7 @@ export const DiscoveryScreen: React.FC = () => {
         onClose={handleFilterModalClose}
       />
 
-      {/* Top Corner Buttons Overlay - Positioned last for proper layering */}
+      {/* Top Corner Buttons Overlay - Always visible */}
       <FilterButton
         onPress={handleFilterPress}
         active={activeFilters > 0}
@@ -376,27 +373,28 @@ export const DiscoveryScreen: React.FC = () => {
         style={styles.topRightButton}
       />
 
-      {/* Bottom Action Buttons Overlay - Stationary when SwipeCard moves */}
-      <View style={styles.bottomActionButtons}>
-        <NopeButton
-          onPress={handleNope}
-          size="lg"
-          style={styles.actionButton}
-        />
-        <RevertButton
-          onPress={handleRevertAction}
-          disabled={!canRevert || isRevertLoading}
-          size="lg"
-          style={styles.actionButton}
-        />
-        <ChallengeButton
-          onPress={handleChallenge}
-          disabled={isSwipeLoading || !currentProfile}
-          size="lg"
-          style={styles.actionButton}
-        />
-
-      </View>
+      {/* Bottom Action Buttons Overlay - Only show when there's a current profile */}
+      {!isLoading && currentProfile && (
+        <View style={styles.bottomActionButtons}>
+          <NopeButton
+            onPress={handleNope}
+            size="lg"
+            style={styles.actionButton}
+          />
+          <RevertButton
+            onPress={handleRevertAction}
+            disabled={!canRevert || isRevertLoading}
+            size="lg"
+            style={styles.actionButton}
+          />
+          <ChallengeButton
+            onPress={handleChallenge}
+            disabled={isSwipeLoading || !currentProfile}
+            size="lg"
+            style={styles.actionButton}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

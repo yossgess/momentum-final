@@ -192,6 +192,10 @@ export const translations: Translations = {
     en: 'Loading profiles...',
     fr: 'Chargement des profils...',
   },
+  'discovery.editFilters': {
+    en: 'Edit Filters',
+    fr: 'Modifier les filtres',
+  },
 
   // Sports categories - short labels to prevent wrapping
   'sports.categories.team': {

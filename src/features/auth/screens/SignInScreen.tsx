@@ -3,6 +3,10 @@ import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
+
+// Complete auth session for OAuth redirects
+WebBrowser.maybeCompleteAuthSession();
 
 // Components
 import { Typography } from '../../../components/atoms/Typography';
@@ -15,6 +19,7 @@ import { theme } from '../../../theme';
 import { t } from '../../../shared/utils/i18n';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { AuthStackParamList } from '../../../shared/types/navigation';
+import { supabase } from '../../../config/supabase';
 
 // Mock data for testing
 const MOCK_EMAIL = "sofia@momentum.com";
@@ -88,11 +93,44 @@ export const SignInScreen: React.FC = () => {
   const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
     try {
       setIsLoading(true);
-      const { useAuthStore } = await import('../../../shared/stores/authStore');
-      await useAuthStore.getState().signInWithOAuth(provider);
-      logEvent(Events.LOGIN_SUCCESS, { provider });
+      
+      // Log analytics event for OAuth attempt
+      logEvent(Events.LOGIN_ATTEMPTED, { provider });
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: 'exp://127.0.0.1:8081', // This should match Expo Go dev URL
+        },
+      });
+
+      if (error) {
+        console.error('OAuth sign-in error:', error.message);
+        logEvent(Events.LOGIN_FAILED, { provider, error: error.message });
+        Alert.alert('Error', `Failed to sign in with ${provider}. Please try again.`);
+        return;
+      }
+
+      if (data?.url) {
+        // Open the OAuth URL in the system browser
+        const result = await WebBrowser.openAuthSessionAsync(
+          data.url, 
+          'exp://127.0.0.1:8081'
+        );
+        
+        // Log the result for debugging
+        console.log('OAuth browser result:', result);
+        
+        // The auth state change will be handled by the auth store listener
+        // Log success analytics event
+        logEvent(Events.LOGIN_SUCCESS, { provider });
+      }
     } catch (error) {
-      logEvent(Events.LOGIN_FAILED, { provider, error: String(error) });
+      console.error('OAuth sign-in error:', error);
+      logEvent(Events.LOGIN_FAILED, { 
+        provider, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
       Alert.alert('Error', `Failed to sign in with ${provider}. Please try again.`);
     } finally {
       setIsLoading(false);

@@ -45,7 +45,8 @@
     "rn-range-slider": "^2.2.2",
     "zod": "^4.0.14",
     "zustand": "^5.0.6",
-    "expo-crypto": "~14.1.5"
+    "expo-crypto": "~14.1.5",
+    "expo-web-browser": "~14.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

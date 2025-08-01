@@ -31,7 +31,7 @@ import { t } from '../../../shared/utils/i18n';
 import { useDiscoverFiltersStore } from '../components/useDiscoverFiltersStore';
 import { getSportIcon } from '../../../constants/sportIcons';
 import { useDiscovery } from '../../../shared/hooks/useDiscovery';
-import { DiscoveryFilters } from '../../../shared/services/discoveryService';
+import { DiscoveryFilters, ProfileWithDistance } from '../../../shared/services/discoveryService';
 import { ProfileRow } from '../../../shared/types/database';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -53,8 +53,8 @@ export const DiscoveryScreen: React.FC = () => {
     minAge: ageRange[0],
     maxAge: ageRange[1],
     sports: sports.length > 0 ? sports : undefined,
-    // Note: distance filtering will be added to service layer later
-  }), [gender, ageRange, sports]);
+    distanceKm: distance, // Map distance from filter store
+  }), [gender, ageRange, sports, distance]);
   
   // Discovery hook with integrated service layer
   const {
@@ -300,6 +300,7 @@ export const DiscoveryScreen: React.FC = () => {
                 icon: getSportIcon(sport),
               })) || [],
               location: '', // TODO: Add location field to ProfileRow
+              distanceInKm: (currentProfile as ProfileWithDistance).distanceInKm, // Pass distance info
             }}
             onSwipeLeft={handleNope}
             onSwipeRight={handleChallenge}

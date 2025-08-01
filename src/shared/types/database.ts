@@ -22,6 +22,8 @@ export interface ProfileRow {
     periods: string[];
   } | null;
   avatar_urls: string[] | null;
+  lat: number | null;
+  lng: number | null;
   created_at: string;
 }
 

@@ -50,7 +50,10 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
         <View style={styles.locationRow}>
           <Ionicons name="location-outline" size={16} color={theme.colors.text.primary} />
           <Typography variant="body" color="primary" style={styles.locationText}>
-            {profile.location}
+            {profile.distanceInKm ? 
+              `${profile.distanceInKm.toFixed(1)} km away` : 
+              profile.location || 'Location unknown'
+            }
           </Typography>
         </View>
 

@@ -1,14 +1,41 @@
 import { supabase } from '../../config/supabase';
 import { ProfileRow } from '../types/database';
 import { logEvent, Events } from '../utils/analytics';
+import { useAuthStore } from '../stores/authStore';
+import { DiscoverFilters } from '../../features/discovery/components/useDiscoverFiltersStore';
 
-// Discovery filters interface
-export interface DiscoveryFilters {
+/**
+ * Calculate distance between two points using Haversine formula
+ * @param lat1 Latitude of first point
+ * @param lng1 Longitude of first point
+ * @param lat2 Latitude of second point
+ * @param lng2 Longitude of second point
+ * @returns Distance in kilometers
+ */
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Map DiscoverFilters to RPC parameters
+interface DiscoveryFilters {
   gender?: 'man' | 'woman';
   interestedIn?: 'men' | 'women' | 'any';
-  minAge?: number;
-  maxAge?: number;
+  ageRange: [number, number];
   sports?: string[];
+  distanceKm?: number; // Maximum distance in kilometers
+}
+
+// Extended ProfileRow with distance information
+export interface ProfileWithDistance extends ProfileRow {
+  distanceInKm?: number;
 }
 
 // Match type with profile information
@@ -27,150 +54,93 @@ export interface MatchNotification {
 }
 
 /**
- * Get filtered discovery profiles for the current user
- * Excludes already swiped users and existing matches
- * TODO: Replace with Supabase RPC function for better performance
+ * Get discovery profiles using Supabase RPC function
+ * Server-side filtering for better performance and security
+ * Excludes current user, already swiped users, and existing matches
+ * Applies filters for gender, age, interested_in, sports, and distance
  */
-export const getDiscoveryProfiles = async (filters: DiscoveryFilters): Promise<ProfileRow[]> => {
+export async function getDiscoveryProfiles(
+  filters: DiscoverFilters
+): Promise<ProfileWithDistance[]> {
   try {
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      throw new Error('User not authenticated');
+    const { user } = useAuthStore.getState();
+    if (!user) {
+      throw new Error('No authenticated user');
     }
 
-    logEvent(Events.SEARCH_PERFORMED, {
-      filters: JSON.stringify(filters),
-      userId: user.id,
+    logEvent('search_started', {
+      gender: filters.gender,
+      ageRange: `${filters.ageRange[0]}-${filters.ageRange[1]}`,
+      sportsCount: filters.sports?.length || 0,
+      distanceKm: filters.distance,
     });
 
-    // TODO: This should be replaced with a Supabase RPC function for better performance
-    // For now, we'll fetch all profiles and filter client-side
+    // Map DiscoverFilters to RPC parameters
+    const genderFilter = filters.gender === 'men' ? 'man' : filters.gender === 'women' ? 'woman' : null;
+    const interestedInFilter = filters.gender === 'men' ? 'men' : filters.gender === 'women' ? 'women' : 'any';
     
-    // Get all profiles except current user
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .neq('id', user.id)
-      .not('full_name', 'is', null); // Only include profiles with names
+    // Call Supabase RPC function for server-side filtering
+    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles', {
+      user_id: user.id,
+      gender_filter: genderFilter,
+      interested_in_filter: interestedInFilter,
+      min_age: filters.ageRange[0],
+      max_age: filters.ageRange[1],
+      sports_filter: filters.sports && filters.sports.length > 0 ? filters.sports : null,
+      max_distance_km: filters.distance || 25, // Default 25km if not specified
+    });
 
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError);
-      throw profilesError;
+    if (error) {
+      console.error('Failed to fetch discovery profiles via RPC', error);
+      throw error;
     }
 
     if (!profiles) {
+      logEvent('rpc_discovery_fetch', { 
+        results_count: 0, 
+        success: true 
+      });
       return [];
     }
 
-    // Get already swiped user IDs
-    const { data: swipes, error: swipesError } = await supabase
-      .from('swipes')
-      .select('swiped_id')
-      .eq('user_id', user.id);
+    // Map RPC results to ProfileWithDistance type
+    const profilesWithDistance: ProfileWithDistance[] = profiles.map((profile: any) => ({
+      id: profile.id,
+      full_name: profile.full_name,
+      date_of_birth: profile.date_of_birth,
+      gender: profile.gender,
+      interested_in: profile.interested_in,
+      preferred_sports: profile.preferred_sports,
+      availability: profile.availability,
+      avatar_urls: profile.avatar_urls,
+      lat: profile.lat,
+      lng: profile.lng,
+      created_at: profile.created_at,
+      distanceInKm: profile.distance_km,
+    }));
 
-    if (swipesError) {
-      console.error('Error fetching swipes:', swipesError);
-      throw swipesError;
-    }
-
-    const swipedUserIds = new Set(swipes?.map(swipe => swipe.swiped_id) || []);
-
-    // Get existing match user IDs
-    const { data: matches, error: matchesError } = await supabase
-      .from('matches')
-      .select('user_a, user_b')
-      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`);
-
-    if (matchesError) {
-      console.error('Error fetching matches:', matchesError);
-      throw matchesError;
-    }
-
-    const matchedUserIds = new Set(
-      matches?.map(match => 
-        match.user_a === user.id ? match.user_b : match.user_a
-      ) || []
-    );
-
-    // Filter profiles
-    let filteredProfiles = profiles.filter(profile => {
-      // Exclude already swiped users
-      if (swipedUserIds.has(profile.id)) return false;
-      
-      // Exclude existing matches
-      if (matchedUserIds.has(profile.id)) return false;
-
-      return true;
+    logEvent('rpc_discovery_fetch', {
+      results_count: profilesWithDistance.length,
+      success: true,
+      hasLocationData: profilesWithDistance.some((p) => p.distanceInKm !== null),
     });
 
-    // Apply client-side filters
-    // TODO: Move these filters to the database query for better performance
-    if (filters.gender) {
-      filteredProfiles = filteredProfiles.filter(profile => 
-        profile.gender === filters.gender
-      );
-    }
-
-    if (filters.interestedIn) {
-      // Filter based on what the current user is interested in
-      const currentUserProfile = await getCurrentUserProfile();
-      if (currentUserProfile?.gender) {
-        const userGender = currentUserProfile.gender;
-        filteredProfiles = filteredProfiles.filter(profile => {
-          if (!profile.interested_in) return true; // Include if no preference set
-          
-          if (filters.interestedIn === 'any') return true;
-          
-          // Check if the profile's interested_in matches current user's gender
-          if (filters.interestedIn === 'men' && userGender === 'man') return profile.interested_in === 'men' || profile.interested_in === 'any';
-          if (filters.interestedIn === 'women' && userGender === 'woman') return profile.interested_in === 'women' || profile.interested_in === 'any';
-          
-          return true;
-        });
-      }
-    }
-
-    // Age filtering
-    if (filters.minAge || filters.maxAge) {
-      const currentDate = new Date();
-      filteredProfiles = filteredProfiles.filter(profile => {
-        if (!profile.date_of_birth) return true; // Include if no DOB set
-        
-        const birthDate = new Date(profile.date_of_birth);
-        const age = currentDate.getFullYear() - birthDate.getFullYear();
-        
-        if (filters.minAge && age < filters.minAge) return false;
-        if (filters.maxAge && age > filters.maxAge) return false;
-        
-        return true;
-      });
-    }
-
-    // Sports filtering
-    if (filters.sports && filters.sports.length > 0) {
-      filteredProfiles = filteredProfiles.filter(profile => {
-        if (!profile.preferred_sports || profile.preferred_sports.length === 0) return false;
-        
-        // Check if any of the user's preferred sports match the filter
-        return filters.sports!.some(sport => 
-          profile.preferred_sports!.includes(sport)
-        );
-      });
-    }
-
-    logEvent(Events.SEARCH_PERFORMED, {
-      resultsCount: filteredProfiles.length,
-      filtersApplied: Object.keys(filters).length,
+    logEvent('search_results_loaded', {
+      count: profilesWithDistance.length,
+      hasLocationData: profilesWithDistance.some((p) => p.distanceInKm !== null),
     });
 
-    return filteredProfiles;
-
+    return profilesWithDistance;
   } catch (error) {
-    console.error('Error in getDiscoveryProfiles:', error);
+    console.error('Failed to get discovery profiles', error);
+    logEvent('rpc_discovery_fetch', {
+      results_count: 0,
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     throw error;
   }
-};
+}
 
 /**
  * Record a swipe action (challenge or nope)

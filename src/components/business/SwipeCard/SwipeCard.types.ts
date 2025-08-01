@@ -15,6 +15,7 @@ export interface Profile {
   sports?: Sport[];
   sharedSports?: Sport[];
   skillLevel?: string;
+  distanceInKm?: number; // Distance in kilometers
 }
 
 export interface SwipeCardProps {

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation } from '@tanstack/react-query';
+import * as Location from 'expo-location';
 
 import {
   Typography,
@@ -81,6 +82,39 @@ export const OnboardingForm: React.FC = () => {
       const { user } = useAuthStore.getState();
       if (!user) throw new Error('No authenticated user');
 
+      // Capture user location before submitting
+      let userLocation: { lat: number; lng: number } | null = null;
+      try {
+        // Request location permissions
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        
+        if (status === 'granted') {
+          logEvent('location_permission', { status: 'granted' });
+          
+          // Get current position
+          const location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+            timeInterval: 10000,
+          });
+          
+          userLocation = {
+            lat: location.coords.latitude,
+            lng: location.coords.longitude,
+          };
+          
+          logEvent('location_captured', {
+            lat: userLocation.lat,
+            lng: userLocation.lng,
+          });
+        } else {
+          logEvent('location_permission', { status: 'denied' });
+          console.warn('Location permission denied');
+        }
+      } catch (error) {
+        console.warn('Failed to get location:', error);
+        logEvent('location_capture_failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+      }
+
       const uploadedPhotoUrls: string[] = [];
       for (const photo of data.photos) {
         const fileName = `avatar_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
@@ -104,17 +138,21 @@ export const OnboardingForm: React.FC = () => {
       // Check if profile already exists
       const existingProfile = await profilesService.getProfile(user.id);
       
+      const profileData = {
+        full_name: updatedFormData.fullName,
+        date_of_birth: updatedFormData.dateOfBirth?.toISOString().split('T')[0] || null,
+        gender: updatedFormData.gender,
+        interested_in: updatedFormData.interestedIn,
+        preferred_sports: updatedFormData.preferredSports,
+        availability: updatedFormData.availability,
+        avatar_urls: updatedFormData.photos.map(photo => photo.uri),
+        lat: userLocation?.lat || null,
+        lng: userLocation?.lng || null,
+      };
+      
       if (existingProfile) {
-        // Update existing profile instead of creating a new one
-        await profilesService.updateProfile(user.id, {
-          full_name: updatedFormData.fullName,
-          date_of_birth: updatedFormData.dateOfBirth?.toISOString().split('T')[0] || null,
-          gender: updatedFormData.gender,
-          interested_in: updatedFormData.interestedIn,
-          preferred_sports: updatedFormData.preferredSports,
-          availability: updatedFormData.availability,
-          avatar_urls: updatedFormData.photos.map(photo => photo.uri),
-        });
+        // Update existing profile
+        await profilesService.updateProfile(user.id, profileData);
       } else {
         // Create new profile
         await profilesService.createProfile(user.id, updatedFormData);

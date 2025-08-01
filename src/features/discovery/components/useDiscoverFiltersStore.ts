@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { logEvent } from '../../../shared/utils/analytics';
 
 export interface DiscoverFilters {
-  distance: number;
+  distance: number; // Distance in kilometers
   ageRange: [number, number];
   gender: 'men' | 'women' | 'any';
   sports: string[];
@@ -22,7 +22,7 @@ interface DiscoverFiltersStore extends DiscoverFilters {
 }
 
 const defaultFilters: DiscoverFilters = {
-  distance: 25,
+  distance: 25, // Default 25km radius
   ageRange: [18, 35],
   gender: 'any',
   sports: [],

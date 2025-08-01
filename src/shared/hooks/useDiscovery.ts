@@ -7,7 +7,8 @@ import {
   getMatchNotifications,
   markMatchNotificationsAsSeen,
   revertLastSwipe,
-  DiscoveryFilters 
+  DiscoveryFilters,
+  ProfileWithDistance 
 } from '../services/discoveryService';
 import { logEvent, Events } from '../utils/analytics';
 

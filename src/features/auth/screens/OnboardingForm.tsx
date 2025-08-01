@@ -100,7 +100,25 @@ export const OnboardingForm: React.FC = () => {
       };
 
       const { profilesService } = await import('../../../shared/services/profilesService');
-      await profilesService.createProfile(user.id, updatedFormData);
+      
+      // Check if profile already exists
+      const existingProfile = await profilesService.getProfile(user.id);
+      
+      if (existingProfile) {
+        // Update existing profile instead of creating a new one
+        await profilesService.updateProfile(user.id, {
+          full_name: updatedFormData.fullName,
+          date_of_birth: updatedFormData.dateOfBirth?.toISOString().split('T')[0] || null,
+          gender: updatedFormData.gender,
+          interested_in: updatedFormData.interestedIn,
+          preferred_sports: updatedFormData.preferredSports,
+          availability: updatedFormData.availability,
+          avatar_urls: updatedFormData.photos.map(photo => photo.uri),
+        });
+      } else {
+        // Create new profile
+        await profilesService.createProfile(user.id, updatedFormData);
+      }
       
       return { success: true };
     },
@@ -261,6 +279,7 @@ export const OnboardingForm: React.FC = () => {
                   logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'dateOfBirth' });
                 }}
                 mode="date"
+                placeholder={t('onboarding.form.selectDateOfBirth')}
                 maximumDate={new Date()}
               />
               {formErrors.dateOfBirth && (

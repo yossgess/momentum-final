@@ -7,14 +7,40 @@ import { useOnboardingStore } from '../features/onboarding/store/onboardingStore
 import { AuthNavigator } from './AuthNavigator';
 import { TabNavigator } from './TabNavigator';
 import { OnboardingSlider } from '../features/auth/screens/OnboardingSlider';
+import { OnboardingForm } from '../features/auth/screens/OnboardingForm';
 import { RootStackParamList } from '../shared/types/navigation';
 import { logEvent, Events } from '../shared/utils/analytics';
+
+// Development mode flag - set to true to always show full onboarding flow for testing
+const DEV_MODE_RESET_ONBOARDING = true; // Change to false for production
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const AppNavigator: React.FC = () => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, hasCompletedProfile, user } = useAuthStore();
   const { hasSeenOnboarding } = useOnboardingStore();
+  
+  // For development: allow progression but reset persistence on app restart
+  const devHasSeenOnboarding = hasSeenOnboarding; // Always use current state to allow progression
+  const devIsAuthenticated = DEV_MODE_RESET_ONBOARDING ? false : isAuthenticated;
+  const devHasCompletedProfile = DEV_MODE_RESET_ONBOARDING ? false : hasCompletedProfile;
+
+  React.useEffect(() => {
+    // Initialize auth store and onboarding store on app start
+    const initializeStores = async () => {
+      await useAuthStore.getState().initialize();
+      await useOnboardingStore.getState().loadPersistedState();
+      
+      // In development mode, reset onboarding state on app start
+      if (DEV_MODE_RESET_ONBOARDING) {
+        // Reset onboarding state to force showing slides
+        useOnboardingStore.getState().resetOnboardingState();
+        // Note: Auth and profile states are already handled by the dev flags above
+      }
+    };
+    
+    initializeStores();
+  }, []);
 
   React.useEffect(() => {
     if (isAuthenticated && user) {
@@ -38,12 +64,18 @@ export const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer onStateChange={handleNavigationStateChange}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!hasSeenOnboarding ? (
+        {!devHasSeenOnboarding ? (
+          // Step 1: OnboardingSlider
           <Stack.Screen name="OnboardingSlider" component={OnboardingSlider} />
-        ) : isAuthenticated ? (
-          <Stack.Screen name="Main" component={TabNavigator} />
-        ) : (
+        ) : !devIsAuthenticated ? (
+          // Step 2: Authentication Screens
           <Stack.Screen name="Auth" component={AuthNavigator} />
+        ) : !devHasCompletedProfile ? (
+          // Step 3: OnboardingForm (profile setup)
+          <Stack.Screen name="OnboardingForm" component={OnboardingForm} />
+        ) : (
+          // Step 4: Main App (DiscoveryScreen)
+          <Stack.Screen name="Main" component={TabNavigator} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

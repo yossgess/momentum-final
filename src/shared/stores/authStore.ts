@@ -1,14 +1,19 @@
 import { create } from 'zustand';
 import { User, Session } from '@supabase/supabase-js';
-import { logEvent, Events } from '../utils/analytics';
-import { authService } from '../services/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../config/supabase';
+import { authService } from '../services/authService';
+import { logEvent, Events } from '../utils/analytics';
+
+// AsyncStorage keys for profile completion per user
+const PROFILE_COMPLETED_PREFIX = '@momentum/profile_completed_';
 
 export interface AuthState {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  hasCompletedProfile: boolean;
   userType: 'enthusiast' | 'coach' | null;
   
   setUser: (user: User | null) => void;
@@ -18,7 +23,8 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, userType: 'enthusiast' | 'coach') => Promise<void>;
   signInWithOAuth: (provider: 'google' | 'facebook') => Promise<void>;
-  completeOnboarding: () => void;
+  completeOnboarding: () => Promise<void>;
+  checkProfileCompletion: (userId: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   initialize: () => Promise<void>;
@@ -29,6 +35,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   isLoading: false,
   isAuthenticated: false, // Set to false so SignInScreen appears after onboarding
+  hasCompletedProfile: false, // Set to false so OnboardingForm appears after auth
   userType: null, // No user type initially
 
   setUser: (user) => {
@@ -52,12 +59,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   login: async (email: string, password: string) => {
-    const { setLoading } = get();
+    const { setLoading, checkProfileCompletion } = get();
     
     try {
       setLoading(true);
       const { user, session } = await authService.signIn(email, password);
       set({ user, session, isAuthenticated: true });
+      
+      // Check if user has completed profile
+      if (user) {
+        await checkProfileCompletion(user.id);
+      }
     } catch (error) {
       throw error;
     } finally {
@@ -92,9 +104,43 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  completeOnboarding: () => {
-    set({ isAuthenticated: true });
-    logEvent(Events.ONBOARDING_COMPLETED);
+  completeOnboarding: async () => {
+    const { user } = get();
+    if (user) {
+      try {
+        await AsyncStorage.setItem(`${PROFILE_COMPLETED_PREFIX}${user.id}`, 'true');
+        set({ hasCompletedProfile: true });
+        logEvent(Events.ONBOARDING_COMPLETED);
+      } catch (error) {
+        console.error('Failed to save profile completion status:', error);
+      }
+    }
+  },
+
+  checkProfileCompletion: async (userId: string) => {
+    try {
+      // Check if profile exists in database (more reliable than AsyncStorage)
+      const { profilesService } = await import('../services/profilesService');
+      const profile = await profilesService.getProfile(userId);
+      const hasCompletedProfile = !!profile;
+      
+      set({ hasCompletedProfile });
+      
+      // Also update AsyncStorage to keep it in sync
+      if (hasCompletedProfile) {
+        await AsyncStorage.setItem(`${PROFILE_COMPLETED_PREFIX}${userId}`, 'true');
+      }
+    } catch (error) {
+      console.error('Failed to check profile completion status:', error);
+      // Fallback to AsyncStorage if database check fails
+      try {
+        const hasCompleted = await AsyncStorage.getItem(`${PROFILE_COMPLETED_PREFIX}${userId}`);
+        set({ hasCompletedProfile: hasCompleted === 'true' });
+      } catch (storageError) {
+        console.error('Failed to check AsyncStorage fallback:', storageError);
+        set({ hasCompletedProfile: false });
+      }
+    }
   },
 
   logout: async () => {
@@ -103,7 +149,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authService.signOut();
       logEvent(Events.LOGOUT, { userId: user?.id });
-      set({ user: null, session: null, isAuthenticated: false, userType: null });
+      set({ user: null, session: null, isAuthenticated: false, hasCompletedProfile: false, userType: null });
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
@@ -112,34 +158,62 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshSession: async () => {
     try {
+      console.log('Attempting to refresh session...');
       const { data, error } = await supabase.auth.refreshSession();
       if (error) throw error;
       
+      console.log('Session refresh successful:', data);
       set({ session: data.session, user: data.user });
     } catch (error) {
-      console.error('Session refresh error:', error);
+      console.error('Session refresh error [auth.refreshSession]:', error);
+      console.error('Session refresh error details:', JSON.stringify(error, null, 2));
       throw error;
     }
   },
 
   initialize: async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        set({ session, user: session.user, isAuthenticated: true });
+    const initAuth = async () => {
+      console.log('Initializing auth store...');
+
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        console.log('Got session from getSession:', session);
+        if (session) {
+          set({ session, user: session.user, isAuthenticated: true });
+          // Check if user has completed profile
+          await get().checkProfileCompletion(session.user.id);
+        }
+      } catch (err) {
+        console.error('Error while getting session [auth.getSession]:', err);
+        console.error('Session error details:', JSON.stringify(err, null, 2));
       }
 
-      supabase.auth.onAuthStateChange((event, session) => {
-        set({ session, user: session?.user || null, isAuthenticated: !!session });
-        
-        if (event === 'SIGNED_IN') {
-          logEvent(Events.LOGIN_SUCCESS, { userId: session?.user?.id });
-        } else if (event === 'SIGNED_OUT') {
-          logEvent(Events.LOGOUT);
+      // Attach listener after initial session
+      console.log('Setting up auth state change listener...');
+      const { data: listener } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          console.log('Auth state change:', event, session);
+          set({ session, user: session?.user || null, isAuthenticated: !!session });
+          
+          if (event === 'SIGNED_IN') {
+            logEvent(Events.LOGIN_SUCCESS, { userId: session?.user?.id });
+          } else if (event === 'SIGNED_OUT') {
+            logEvent(Events.LOGOUT);
+          }
         }
-      });
-    } catch (error) {
-      console.error('Auth initialization error:', error);
-    }
+      );
+
+      return () => {
+        listener.subscription.unsubscribe();
+      };
+    };
+
+    initAuth();
   },
 }));

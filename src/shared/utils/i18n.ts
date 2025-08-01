@@ -329,6 +329,10 @@ export const translations: Translations = {
     en: 'Date of Birth',
     fr: 'Date de naissance',
   },
+  'onboarding.form.selectDateOfBirth': {
+    en: 'Select your date of birth',
+    fr: 'Sélectionnez votre date de naissance',
+  },
   'onboarding.form.gender': {
     en: 'Gender',
     fr: 'Genre',

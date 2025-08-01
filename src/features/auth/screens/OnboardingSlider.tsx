@@ -16,7 +16,7 @@ import { theme } from '../../../theme';
 import { t } from '../../../shared/utils/i18n';
 import { onboardingSlides } from '../data/onboardingSlides';
 import { logEvent, Events } from '../../../shared/utils/analytics';
-import { useOnboardingStore } from '../../../stores/onboardingStore';
+import { useOnboardingStore } from '../../onboarding/store/onboardingStore';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -24,7 +24,7 @@ export const OnboardingSlider: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const pagerRef = useRef<PagerView>(null);
   const navigation = useNavigation();
-  const { setHasSeenOnboarding } = useOnboardingStore();
+  const { markOnboardingAsSeen } = useOnboardingStore();
 
   useEffect(() => {
     // Log onboarding started
@@ -32,10 +32,9 @@ export const OnboardingSlider: React.FC = () => {
       totalSlides: onboardingSlides.length,
     });
 
-    // Preload all images for faster navigation
-    onboardingSlides.forEach((slide) => {
-      ExpoImage.prefetch(slide.image);
-    });
+    // Note: Skipping image prefetch for local assets as they're already bundled
+    // ExpoImage.prefetch is only needed for remote URLs, not local require() assets
+    console.log('Onboarding slides loaded with local assets - no prefetch needed');
   }, []);
 
   const handleNext = () => {
@@ -57,7 +56,7 @@ export const OnboardingSlider: React.FC = () => {
     });
     
     // Mark onboarding as seen
-    setHasSeenOnboarding(true);
+    markOnboardingAsSeen();
     
     // Navigation will happen automatically due to conditional rendering
     // When hasSeenOnboarding becomes true, AppNavigator will show Auth flow

@@ -1,5 +1,10 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PhotoData } from '../../../components/atoms/PhotoSelector/PhotoSelector.types';
+
+// AsyncStorage keys
+const ONBOARDING_SEEN_KEY = '@momentum/hasSeenOnboarding';
+const PROFILE_COMPLETED_KEY = '@momentum/hasCompletedProfile';
 
 export interface OnboardingFormData {
   fullName: string;
@@ -31,8 +36,10 @@ export interface OnboardingState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   resetForm: () => void;
+  resetOnboardingState: () => void;
   prefillFromSocialAuth: (name?: string, dateOfBirth?: Date) => void;
-  markOnboardingAsSeen: () => void;
+  markOnboardingAsSeen: () => Promise<void>;
+  loadPersistedState: () => Promise<void>;
 }
 
 const initialFormData: OnboardingFormData = {
@@ -98,6 +105,16 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
     });
   },
 
+  resetOnboardingState: () => {
+    set({
+      formData: initialFormData,
+      currentStep: 0,
+      isLoading: false,
+      error: null,
+      hasSeenOnboarding: false, // Reset this flag for development mode
+    });
+  },
+
   prefillFromSocialAuth: (name, dateOfBirth) => {
     set((state) => ({
       formData: {
@@ -108,7 +125,24 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
     }));
   },
 
-  markOnboardingAsSeen: () => {
-    set({ hasSeenOnboarding: true });
+  markOnboardingAsSeen: async () => {
+    try {
+      await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
+      set({ hasSeenOnboarding: true });
+    } catch (error) {
+      console.error('Failed to save onboarding seen status:', error);
+    }
+  },
+
+  // Load persisted onboarding state
+  loadPersistedState: async () => {
+    try {
+      const hasSeenOnboarding = await AsyncStorage.getItem(ONBOARDING_SEEN_KEY);
+      if (hasSeenOnboarding === 'true') {
+        set({ hasSeenOnboarding: true });
+      }
+    } catch (error) {
+      console.error('Failed to load onboarding state:', error);
+    }
   },
 }));

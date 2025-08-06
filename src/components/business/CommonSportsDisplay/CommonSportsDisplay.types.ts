@@ -7,7 +7,7 @@ export interface Sport {
 
 export interface CommonSportsDisplayProps {
   sharedSports: Sport[];
-  userSports: Sport[];
+  userSports?: Sport[]; // Keep for backward compatibility but not used
   title?: string;
   showTitle?: boolean;
   style?: any;

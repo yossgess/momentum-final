@@ -11,6 +11,8 @@ import {
   ProfileWithDistance 
 } from '../services/discoveryService';
 import { logEvent, Events } from '../utils/analytics';
+import { getSportByName } from '../../constants/sports';
+import { Sport } from '../types/sports';
 
 export const useDiscovery = (filters: DiscoveryFilters) => {
   const queryClient = useQueryClient();
@@ -52,17 +54,36 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
     gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in v5)
   });
 
+  // Transform sports data helper function
+  const transformSportsToObjects = React.useCallback((sportNames: string[]): Sport[] => {
+    if (!sportNames || sportNames.length === 0) {
+      return [];
+    }
+    
+    return sportNames
+      .map(name => getSportByName(name))
+      .filter((sport): sport is Sport => sport !== undefined);
+  }, []);
+
   // Handle successful data fetch
   React.useEffect(() => {
     if (fetchedProfiles) {
-      setProfiles(fetchedProfiles);
+      // Transform profiles to include Sport objects for components
+      const transformedProfiles = fetchedProfiles.map(profile => ({
+        ...profile,
+        sports: transformSportsToObjects(profile.userSports || []),
+        sharedSports: transformSportsToObjects(profile.commonSports || []),
+      }));
+      
+      setProfiles(transformedProfiles);
       setError(null);
       logEvent('search_results_loaded', {
-        profileCount: fetchedProfiles.length,
+        profileCount: transformedProfiles.length,
         filters: JSON.stringify(filters),
+        avgCommonSports: transformedProfiles.reduce((sum, p) => sum + (p.sharedSports?.length || 0), 0) / transformedProfiles.length,
       });
     }
-  }, [fetchedProfiles, filters, setProfiles, setError]);
+  }, [fetchedProfiles, filters, setProfiles, setError, transformSportsToObjects]);
 
   // Handle query errors
   React.useEffect(() => {

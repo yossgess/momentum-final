@@ -3,6 +3,8 @@ import { ProfileRow } from '../types/database';
 import { logEvent, Events } from '../utils/analytics';
 import { useAuthStore } from '../stores/authStore';
 import { DiscoverFilters } from '../../features/discovery/components/useDiscoverFiltersStore';
+import { getSportByName } from '../../constants/sports';
+import { Sport } from '../types/sports';
 
 /**
  * Calculate distance between two points using Haversine formula
@@ -24,6 +26,21 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
+/**
+ * Transform sport names array to Sport objects
+ * @param sportNames Array of sport names from database
+ * @returns Array of Sport objects with icons and metadata
+ */
+function transformSportsToObjects(sportNames: string[]): Sport[] {
+  if (!sportNames || sportNames.length === 0) {
+    return [];
+  }
+  
+  return sportNames
+    .map(name => getSportByName(name))
+    .filter((sport): sport is Sport => sport !== undefined);
+}
+
 // Aligned with both filter store and RPC function parameters
 export interface DiscoveryFilters {
   interestedIn: 'men' | 'women' | 'any'; // What user is interested in (maps to interested_in_filter)
@@ -32,9 +49,11 @@ export interface DiscoveryFilters {
   distanceKm: number; // Maximum distance in km (maps to max_distance_km)
 }
 
-// Extended ProfileRow with distance information
+// Extended ProfileRow with distance information and sports data
 export interface ProfileWithDistance extends ProfileRow {
   distanceInKm?: number;
+  userSports?: string[];
+  commonSports?: string[];
 }
 
 // Match type with profile information
@@ -122,10 +141,12 @@ export async function getDiscoveryProfiles(): Promise<ProfileWithDistance[]> {
       throw new Error('Invalid data format from discovery RPC');
     }
 
-    // Convert profiles to ProfileWithDistance format
+    // Convert profiles to ProfileWithDistance format with sports data
     const profilesWithDistance: ProfileWithDistance[] = profiles.map((profile: any) => ({
       ...profile,
       distanceInKm: profile.distance_km || undefined, // Map server distance field
+      userSports: profile.user_sports || [], // User's sports from filter_preferences
+      commonSports: profile.common_sports || [], // Common sports with current user
     }));
 
     console.log(` Server-side filtering successful: ${profilesWithDistance.length} profiles`);

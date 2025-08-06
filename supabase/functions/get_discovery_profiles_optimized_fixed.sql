@@ -15,7 +15,9 @@ RETURNS TABLE (
   lat DOUBLE PRECISION,
   lng DOUBLE PRECISION,
   created_at TIMESTAMP,
-  distance_km DOUBLE PRECISION
+  distance_km DOUBLE PRECISION,
+  user_sports TEXT[],
+  common_sports TEXT[]
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -32,6 +34,9 @@ DECLARE
   filter_max_age INTEGER;
   filter_sports TEXT[];
   filter_max_distance_km INTEGER;
+  
+  -- Current user's sports for common sports calculation
+  current_user_sports TEXT[];
 BEGIN
   -- Get current user's profile data for mutual compatibility and location
   SELECT p.lat, p.lng, p.gender
@@ -66,6 +71,9 @@ BEGIN
     filter_max_distance_km
   FROM filter_preferences fp
   WHERE fp.user_id = get_discovery_profiles_optimized.user_id;
+  
+  -- Store current user's sports for common sports calculation
+  current_user_sports := COALESCE(filter_sports, ARRAY[]::TEXT[]);
 
   -- Apply sensible defaults if no preferences found
   IF filter_interested_in IS NULL THEN
@@ -111,7 +119,20 @@ BEGIN
           )
         )
       ELSE NULL
-    END AS distance_km
+    END AS distance_km,
+    
+    -- User's sports from filter_preferences
+    COALESCE(fp_candidate.sports, ARRAY[]::TEXT[]) AS user_sports,
+    
+    -- Calculate common sports between current user and candidate
+    COALESCE(
+      ARRAY(
+        SELECT unnest(current_user_sports)
+        INTERSECT
+        SELECT unnest(COALESCE(fp_candidate.sports, ARRAY[]::TEXT[]))
+      ),
+      ARRAY[]::TEXT[]
+    ) AS common_sports
   FROM profiles p
   LEFT JOIN filter_preferences fp_candidate ON fp_candidate.user_id = p.id
   WHERE 

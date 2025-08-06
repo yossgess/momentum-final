@@ -293,7 +293,8 @@ export const DiscoveryScreen: React.FC = () => {
                 25, // Default age if not available
               bio: '', // TODO: Add bio field to ProfileRow
               images: currentProfile.avatar_urls || [], // Changed from photos to images
-              sports: [], // Sports data now comes from filter_preferences table
+              sports: (currentProfile as any).sports || [], // Dynamic sports from useDiscovery hook
+              sharedSports: (currentProfile as any).sharedSports || [], // Dynamic common sports from useDiscovery hook
               location: '', // TODO: Add location field to ProfileRow
               distanceInKm: (currentProfile as ProfileWithDistance).distanceInKm, // Pass distance info
             }}

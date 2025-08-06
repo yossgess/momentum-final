@@ -43,6 +43,14 @@ export const translations: Translations = {
     en: 'Done',
     fr: 'Terminé',
   },
+  'common.ok': {
+    en: 'OK',
+    fr: 'OK',
+  },
+  'common.tryAgain': {
+    en: 'Try Again',
+    fr: 'Réessayer',
+  },
   'common.selectDate': {
     en: 'Select Date',
     fr: 'Sélectionner la date',
@@ -203,6 +211,52 @@ export const translations: Translations = {
   'discovery.editFilters': {
     en: 'Edit Filters',
     fr: 'Modifier les filtres',
+  },
+
+  // Location functionality
+  'discovery.location.title': {
+    en: 'Location Required',
+    fr: 'Localisation Requise',
+  },
+  'discovery.location.description': {
+    en: 'To discover people near you and show accurate distances, we need access to your location.',
+    fr: 'Pour découvrir des personnes près de vous et afficher des distances précises, nous avons besoin d\'accéder à votre localisation.',
+  },
+  'discovery.location.reason1': {
+    en: 'Find people nearby',
+    fr: 'Trouver des personnes à proximité',
+  },
+  'discovery.location.reason2': {
+    en: 'Show accurate distances',
+    fr: 'Afficher des distances précises',
+  },
+  'discovery.location.reason3': {
+    en: 'Your privacy is protected',
+    fr: 'Votre vie privée est protégée',
+  },
+  'discovery.location.enableButton': {
+    en: 'Enable Location',
+    fr: 'Activer la Localisation',
+  },
+  'discovery.location.privacyNote': {
+    en: 'Your exact location is never shared with other users. Only approximate distances are shown.',
+    fr: 'Votre position exacte n\'est jamais partagée avec d\'autres utilisateurs. Seules les distances approximatives sont affichées.',
+  },
+  'discovery.location.success.title': {
+    en: 'Location Enabled',
+    fr: 'Localisation Activée',
+  },
+  'discovery.location.success.message': {
+    en: 'Great! You can now discover people near you.',
+    fr: 'Parfait ! Vous pouvez maintenant découvrir des personnes près de vous.',
+  },
+  'discovery.location.error.title': {
+    en: 'Location Error',
+    fr: 'Erreur de Localisation',
+  },
+  'discovery.location.error.message': {
+    en: 'We couldn\'t access your location. Please check your permissions and try again.',
+    fr: 'Nous n\'avons pas pu accéder à votre localisation. Veuillez vérifier vos autorisations et réessayer.',
   },
 
   // Sports categories - short labels to prevent wrapping

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,47 +14,85 @@ import { SportFilterChipsGroup } from '../../../components/business/SportFilterC
 export interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
+  onFiltersApplied?: () => void;
 }
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   visible,
   onClose,
+  onFiltersApplied,
 }) => {
   const {
     distanceKm,
     ageRange,
-    gender,
+    interestedIn,
     sports,
     setDistance,
     setAgeRange,
-    setGender,
+    setInterestedIn,
     setSports,
     resetFilters,
     applyFilters,
+    loadFilterPreferences,
   } = useDiscoverFiltersStore();
 
-  const handleDistanceChange = useCallback((newDistance: number) => {
-    setDistance(newDistance);
+  const handleDistanceChange = useCallback(async (newDistance: number) => {
+    try {
+      await setDistance(newDistance);
+    } catch (error) {
+      console.error('Failed to save distance preference:', error);
+    }
   }, [setDistance]);
 
-  const handleAgeRangeChange = useCallback((newRange: [number, number]) => {
-    setAgeRange(newRange);
+  const handleAgeRangeChange = useCallback(async (newRange: [number, number]) => {
+    try {
+      await setAgeRange(newRange);
+    } catch (error) {
+      console.error('Failed to save age range preference:', error);
+    }
   }, [setAgeRange]);
 
-  const handleGenderChange = useCallback((newGender: 'men' | 'women' | 'any') => {
-    setGender(newGender);
-  }, [setGender]);
+  const handleInterestedInChange = useCallback(async (newInterestedIn: 'men' | 'women' | 'any') => {
+    try {
+      await setInterestedIn(newInterestedIn);
+    } catch (error) {
+      console.error('Failed to save interested in preference:', error);
+    }
+  }, [setInterestedIn]);
+
+  const handleSportsChange = useCallback(async (newSports: string[]) => {
+    try {
+      await setSports(newSports);
+    } catch (error) {
+      console.error('Failed to save sports preference:', error);
+    }
+  }, [setSports]);
 
   const handleReset = useCallback(() => {
     resetFilters();
     logEvent('FilterModal_ResetFilters_Clicked');
   }, [resetFilters]);
 
-  const handleApply = useCallback(() => {
-    applyFilters();
-    logEvent('FilterModal_ApplyFilters_Clicked');
-    onClose();
-  }, [applyFilters, onClose]);
+  const handleApply = useCallback(async () => {
+    try {
+      await applyFilters();
+      onClose();
+      logEvent('FilterModal_ApplyFilters_Clicked');
+      
+      // Refresh profiles after applying filters
+      onFiltersApplied?.();
+    } catch (error) {
+      console.error('Failed to apply filters:', error);
+    }
+  }, [applyFilters, onClose, onFiltersApplied]);
+
+  useEffect(() => {
+    if (visible) {
+      loadFilterPreferences().catch(error => {
+        console.error('Failed to load filter preferences:', error);
+      });
+    }
+  }, [visible, loadFilterPreferences]);
 
   const renderGenderSelector = () => (
     <View style={styles.sectionContainer}>
@@ -73,14 +111,14 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             key={option}
             style={[
               styles.genderButton,
-              gender === option && styles.genderButtonActive
+              interestedIn === option && styles.genderButtonActive
             ]}
-            onPress={() => handleGenderChange(option)}
+            onPress={() => handleInterestedInChange(option)}
           >
             <Typography
               variant="button"
-              color={gender === option ? 'primary' : 'secondary'}
-              weight={gender === option ? 'bold' : 'normal'}
+              color={interestedIn === option ? 'primary' : 'secondary'}
+              weight={interestedIn === option ? 'bold' : 'normal'}
             >
               {t(`filters.${option}`)}
             </Typography>
@@ -104,7 +142,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
       <View style={styles.sportsContainer}>
         <SportFilterChipsGroup
           selectedFilters={sports}
-          onChange={setSports}
+          onChange={handleSportsChange}
           showClearAll={true}
           showSelectAll={false}
         />

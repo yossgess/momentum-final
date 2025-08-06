@@ -24,6 +24,7 @@ import { NopeButton } from '../../../components/business/NopeButton';
 import { RevertButton } from '../../../components/business/RevertButton';
 import { MatchModal } from '../../../components/business/MatchModal';
 import { FilterModal } from '../components/FilterModal';
+import { LocationEmptyState } from '../components/LocationEmptyState';
 
 // Utils & Types
 import { theme } from '../../../theme';
@@ -45,16 +46,15 @@ export const DiscoveryScreen: React.FC = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   
   // Filter store
-  const { distanceKm, ageRange, gender, sports, isApplied } = useDiscoverFiltersStore();
+  const { distanceKm, ageRange, interestedIn, sports, isApplied } = useDiscoverFiltersStore();
   
-  // Map filter store to service layer format
+  // Direct mapping - interfaces are now aligned
   const discoveryFilters: DiscoveryFilters = useMemo(() => ({
-    gender: gender === 'men' ? 'man' : gender === 'women' ? 'woman' : undefined,
-    interestedIn: gender === 'men' ? 'men' : gender === 'women' ? 'women' : 'any',
-    ageRange: ageRange,
-    sports: sports.length > 0 ? sports : undefined,
+    interestedIn,
+    ageRange,
+    sports,
     distanceKm: distanceKm, // Now using consistent field name
-  }), [gender, ageRange, sports, distanceKm]);
+  }), [interestedIn, ageRange, sports, distanceKm]);
   
   // Discovery hook with integrated service layer
   const {
@@ -79,7 +79,7 @@ export const DiscoveryScreen: React.FC = () => {
   const activeFilters = (
     (distanceKm !== 25 ? 1 : 0) +
     (ageRange[0] !== 18 || ageRange[1] !== 35 ? 1 : 0) +
-    (gender !== 'any' ? 1 : 0) +
+    (interestedIn !== 'any' ? 1 : 0) +
     (sports.length > 0 ? 1 : 0)
   );
 
@@ -160,7 +160,7 @@ export const DiscoveryScreen: React.FC = () => {
     logEvent(Events.CHALLENGE_BUTTON_PRESSED, {
       targetUserId: currentProfile.id,
       targetUserGender: currentProfile.gender || 'unknown',
-      targetUserSports: currentProfile.preferred_sports?.join(',') || '',
+      targetUserSports: '', // Sports data now comes from filter_preferences table
     });
     
     // Animate card transition
@@ -293,11 +293,7 @@ export const DiscoveryScreen: React.FC = () => {
                 25, // Default age if not available
               bio: '', // TODO: Add bio field to ProfileRow
               images: currentProfile.avatar_urls || [], // Changed from photos to images
-              sports: currentProfile.preferred_sports?.map((sport, index) => ({
-                id: `sport_${index}`,
-                name: sport,
-                icon: getSportIcon(sport),
-              })) || [],
+              sports: [], // Sports data now comes from filter_preferences table
               location: '', // TODO: Add location field to ProfileRow
               distanceInKm: (currentProfile as ProfileWithDistance).distanceInKm, // Pass distance info
             }}
@@ -308,8 +304,13 @@ export const DiscoveryScreen: React.FC = () => {
         </Animated.View>
       )}
 
-      {/* Empty State - Show when not loading and no current profile */}
-      {!isLoading && !currentProfile && (
+      {/* Location Required State - Show when location is missing */}
+      {!isLoading && error === 'LOCATION_REQUIRED' && (
+        <LocationEmptyState onLocationUpdated={refreshProfiles} />
+      )}
+
+      {/* Empty State - Show when not loading, no current profile, and no location error */}
+      {!isLoading && !currentProfile && error !== 'LOCATION_REQUIRED' && (
         <EmptyState
           icon="people-outline"
           title={t('discovery.noMoreProfiles')}
@@ -341,16 +342,12 @@ export const DiscoveryScreen: React.FC = () => {
             city: 'Unknown',
             country: 'Unknown'
           },
-          sports: (matchedProfile.preferred_sports || []).map(sport => ({
-            name: sport,
-            skillLevel: 'intermediate' as const,
-            yearsPlaying: 2
-          })),
+          sports: [], // Sports data now comes from filter_preferences table
           preferences: {
             ageRange: [18, 35] as [number, number],
             maxDistance: 25,
             genderPreference: 'both' as const,
-            sportsInterests: matchedProfile.preferred_sports || []
+            sportsInterests: [] // Sports interests now come from filter_preferences table
           }
         } : currentUser}
         onSendMessage={handleSendMessage}
@@ -362,6 +359,7 @@ export const DiscoveryScreen: React.FC = () => {
       <FilterModal
         visible={showFilterModal}
         onClose={handleFilterModalClose}
+        onFiltersApplied={refreshProfiles}
       />
 
       {/* Top Corner Buttons Overlay - Always visible */}

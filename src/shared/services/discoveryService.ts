@@ -24,13 +24,12 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
-// Map DiscoverFilters to RPC parameters
+// Aligned with both filter store and RPC function parameters
 export interface DiscoveryFilters {
-  gender?: 'man' | 'woman';
-  interestedIn?: 'men' | 'women' | 'any';
-  ageRange: [number, number];
-  sports?: string[];
-  distanceKm?: number; // Maximum distance in kilometers
+  interestedIn: 'men' | 'women' | 'any'; // What user is interested in (maps to interested_in_filter)
+  ageRange: [number, number]; // Age range [min, max] (maps to min_age, max_age)
+  sports: string[]; // Preferred sports (maps to sports_filter)
+  distanceKm: number; // Maximum distance in km (maps to max_distance_km)
 }
 
 // Extended ProfileRow with distance information
@@ -59,84 +58,68 @@ export interface MatchNotification {
  * Excludes current user, already swiped users, and existing matches
  * Applies filters for gender, age, interested_in, sports, and distance
  */
-export async function getDiscoveryProfiles(
-  filters: DiscoveryFilters
-): Promise<ProfileWithDistance[]> {
+export async function getDiscoveryProfiles(): Promise<ProfileWithDistance[]> {
+  const { user } = useAuthStore.getState();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
   try {
-    const { user } = useAuthStore.getState();
-    if (!user) {
-      console.error('No authenticated user found');
-      return [];
+    // First check if user has location data - required for discovery
+    const { data: userProfile, error: locationError } = await supabase
+      .from('profiles')
+      .select('lat, lng')
+      .eq('id', user.id)
+      .single();
+
+    if (locationError) {
+      console.error('Failed to check user location:', locationError);
+      throw new Error('Failed to verify user location');
     }
 
-    console.log('Fetching discovery profiles for user:', user.id);
-    console.log('Applied filters:', filters);
+    if (!userProfile?.lat || !userProfile?.lng) {
+      console.log('User location not found - blocking discovery');
+      logEvent('discovery_blocked_no_location', {
+        userId: user.id,
+        hasLat: !!userProfile?.lat,
+        hasLng: !!userProfile?.lng
+      });
+      throw new Error('LOCATION_REQUIRED');
+    }
+
+    console.log('Fetching discovery profiles using saved filter preferences for user:', user.id);
 
     logEvent('search_started', {
-      gender: filters.gender,
-      ageRange: `${filters.ageRange[0]}-${filters.ageRange[1]}`,
-      sportsCount: filters.sports?.length || 0,
-      distanceKm: filters.distanceKm,
-      method: 'server_side_attempt',
+      method: 'filter_preferences_table',
+      userId: user.id
     });
 
-    const genderFilter = filters.gender || null;
-    const interestedInFilter = filters.interestedIn || 'any';
-    
-    // Call Supabase RPC function for server-side filtering
-    console.log('Calling RPC function get_discovery_profiles...');
-    
-    // Back to production RPC function - minimal debug confirmed basic functionality works
-    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles', {
-      user_id: user.id,
-      gender_filter: genderFilter,
-      interested_in_filter: interestedInFilter,
-      min_age: filters.ageRange[0],
-      max_age: filters.ageRange[1],
-      sports_filter: filters.sports && filters.sports.length > 0 ? filters.sports : null,
-      max_distance_km: filters.distanceKm || 25,
+    // Always use the optimized RPC function that gets preferences from filter_preferences table
+    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles_optimized', {
+      user_id: user.id
     });
-
-    console.log(' PRODUCTION RPC Response:');
-    console.log('- Error:', error);
-    console.log('- Profiles count:', profiles?.length);
-    if (profiles && profiles.length > 0) {
-      console.log('- First 3 profiles:', profiles.slice(0, 3).map((p: any) => ({
-        name: p.full_name,
-        distance: p.distance_km?.toFixed(2) + 'km',
-        gender: p.gender,
-        interested_in: p.interested_in
-      })));
-    } else {
-      console.log(' Production RPC returned 0 profiles - checking which filter is too restrictive');
-      console.log('- Applied filters:', {
-        gender_filter: genderFilter,
-        interested_in_filter: interestedInFilter,
-        min_age: filters.ageRange[0],
-        max_age: filters.ageRange[1],
-        sports_filter: filters.sports,
-        max_distance_km: filters.distanceKm || 25
-      });
-    }
 
     if (error) {
-      console.warn('RPC function failed, using client-side fallback:', error.message);
-      logEvent('search_fallback_triggered', { 
+      console.error('RPC function failed:', error.message);
+      logEvent('search_error', { 
         reason: 'rpc_error', 
-        error: error.message 
+        error: error.message,
+        method: 'filter_preferences_table'
       });
       
-      return await getDiscoveryProfilesClientSide(filters);
+      throw new Error(`Discovery RPC failed: ${error.message}`);
     }
 
     if (!profiles || !Array.isArray(profiles)) {
-      console.warn('RPC returned invalid data format, using client-side fallback');
-      logEvent('search_fallback_triggered', { 
+      console.error('RPC returned invalid data format:', typeof profiles);
+      logEvent('search_error', { 
         reason: 'invalid_data_format',
-        dataType: typeof profiles 
+        dataType: typeof profiles,
+        method: 'filter_preferences_table'
       });
       
-      return await getDiscoveryProfilesClientSide(filters);
+      throw new Error('Invalid data format from discovery RPC');
     }
 
     // Convert profiles to ProfileWithDistance format
@@ -157,133 +140,11 @@ export async function getDiscoveryProfiles(
 
   } catch (error) {
     console.error('Unexpected error in getDiscoveryProfiles:', error);
-    logEvent('search_fallback_triggered', { 
+    logEvent('search_error', { 
       reason: 'unexpected_error',
       error: error instanceof Error ? error.message : String(error)
     });
     
-    // Fallback to client-side filtering on any error
-    console.log(' Falling back to client-side filtering due to error...');
-    return await getDiscoveryProfilesClientSide(filters);
-  }
-}
-
-/**
- * Client-side fallback for discovery profiles with location filtering
- * Used when server-side RPC is not available or fails
- */
-async function getDiscoveryProfilesClientSide(
-  filters: DiscoveryFilters
-): Promise<ProfileWithDistance[]> {
-  try {
-    console.log('Starting client-side profile filtering...');
-    
-    // Get current user's profile for location-based filtering
-    const currentUserProfile = await getCurrentUserProfile();
-    if (!currentUserProfile) {
-      console.error('Could not get current user profile for location filtering');
-      return [];
-    }
-
-    // Get all profiles except current user
-    const { data: allProfiles, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .neq('id', currentUserProfile.id);
-
-    if (error) {
-      console.error('Error fetching profiles for client-side filtering:', error);
-      throw error;
-    }
-
-    if (!allProfiles) {
-      console.log('No profiles found');
-      return [];
-    }
-
-    console.log(`Filtering ${allProfiles.length} profiles client-side...`);
-
-    // Apply client-side filters
-    let filteredProfiles = allProfiles.filter((profile: ProfileRow) => {
-      // Gender filter
-      if (filters.gender && profile.gender !== filters.gender) {
-        return false;
-      }
-
-      // Interested in filter
-      if (filters.interestedIn && filters.interestedIn !== 'any') {
-        if (filters.interestedIn === 'men' && profile.gender !== 'man') return false;
-        if (filters.interestedIn === 'women' && profile.gender !== 'woman') return false;
-      }
-
-      // Age filter
-      if (profile.date_of_birth) {
-        const age = new Date().getFullYear() - new Date(profile.date_of_birth).getFullYear();
-        if (age < filters.ageRange[0] || age > filters.ageRange[1]) {
-          return false;
-        }
-      }
-
-      // Sports filter
-      if (filters.sports && filters.sports.length > 0) {
-        const profileSports = profile.preferred_sports || [];
-        const hasMatchingSport = filters.sports.some(sport => 
-          profileSports.includes(sport)
-        );
-        if (!hasMatchingSport) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    // Apply distance filter if both users have location data
-    const profilesWithDistance: ProfileWithDistance[] = filteredProfiles.map((profile: ProfileRow) => {
-      let distanceInKm: number | undefined;
-
-      if (currentUserProfile.lat && currentUserProfile.lng && 
-          profile.lat && profile.lng) {
-        distanceInKm = haversineDistance(
-          currentUserProfile.lat,
-          currentUserProfile.lng,
-          profile.lat,
-          profile.lng
-        );
-      }
-
-      return {
-        ...profile,
-        distanceInKm,
-      };
-    });
-
-    // Filter by distance if specified
-    if (filters.distanceKm) {
-      filteredProfiles = profilesWithDistance.filter(profile => {
-        if (profile.distanceInKm === undefined) {
-          // Include profiles without location data (they might be new users)
-          return true;
-        }
-        return profile.distanceInKm <= filters.distanceKm!;
-      });
-    } else {
-      filteredProfiles = profilesWithDistance;
-    }
-
-    console.log(`Client-side filtering complete: ${filteredProfiles.length} profiles remaining`);
-    
-    logEvent('search_results_loaded', {
-      profileCount: filteredProfiles.length,
-      method: 'client_side',
-      hasLocationData: filteredProfiles.some(p => p.distanceInKm !== undefined),
-    });
-
-    return filteredProfiles;
-
-  } catch (error) {
-    console.error('Error in client-side profile filtering:', error);
-    console.error('Error details:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }

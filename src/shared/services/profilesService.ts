@@ -10,10 +10,12 @@ export class ProfilesService {
       full_name: onboardingData.fullName,
       date_of_birth: onboardingData.dateOfBirth?.toISOString().split('T')[0] || null,
       gender: onboardingData.gender,
-      interested_in: onboardingData.interestedIn,
-      preferred_sports: onboardingData.preferredSports,
+      // interested_in is now stored in filter_preferences table
+      // preferred_sports is now stored in filter_preferences table as 'sports'
       availability: onboardingData.availability,
       avatar_urls: onboardingData.photos.map(photo => photo.uri),
+      lat: null, // Location will be set later via locationService
+      lng: null, // Location will be set later via locationService
     };
 
     const { data, error } = await supabase
@@ -65,17 +67,13 @@ export class ProfilesService {
       bio: '',
       photos: profileRow.avatar_urls || [],
       location: { latitude: 0, longitude: 0, city: '', country: '' },
-      sports: (profileRow.preferred_sports || []).map(sport => ({
-        name: sport,
-        skillLevel: 'beginner' as const,
-        yearsPlaying: 0,
-      })),
+      sports: [], // Sports now come from filter_preferences table
       preferences: {
         ageRange: [18, 65],
         maxDistance: 50,
-        genderPreference: profileRow.interested_in === 'men' ? 'male' :
-                        profileRow.interested_in === 'women' ? 'female' : 'both',
-        sportsInterests: profileRow.preferred_sports || [],
+        // genderPreference now comes from filter_preferences table, defaulting to 'both'
+        genderPreference: 'both' as const,
+        sportsInterests: [], // Sports interests now come from filter_preferences table
       },
     };
   }
@@ -84,7 +82,7 @@ export class ProfilesService {
     return {
       full_name: `${userProfile.firstName} ${userProfile.lastName}`.trim(),
       avatar_urls: userProfile.photos,
-      preferred_sports: userProfile.preferences.sportsInterests,
+      // preferred_sports is now stored in filter_preferences table as 'sports'
     };
   }
 }

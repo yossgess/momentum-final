@@ -25,6 +25,7 @@ import { PhotoData } from '../../../components/atoms/PhotoSelector/PhotoSelector
 
 import { useOnboardingStore } from '../../onboarding/store/onboardingStore';
 import { useAuthStore } from '../../../shared/stores/authStore';
+import { filterPreferencesService } from '../../../shared/services/filterPreferencesService';
 import { t } from '../../../shared/utils/i18n';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { theme } from '../../../theme';
@@ -142,8 +143,8 @@ export const OnboardingForm: React.FC = () => {
         full_name: updatedFormData.fullName,
         date_of_birth: updatedFormData.dateOfBirth?.toISOString().split('T')[0] || null,
         gender: updatedFormData.gender,
-        interested_in: updatedFormData.interestedIn,
-        preferred_sports: updatedFormData.preferredSports,
+        // interested_in is now stored in filter_preferences table
+        // preferred_sports is now stored in filter_preferences table as 'sports'
         availability: updatedFormData.availability,
         avatar_urls: updatedFormData.photos.map(photo => photo.uri),
         lat: userLocation?.lat || null,
@@ -160,7 +161,39 @@ export const OnboardingForm: React.FC = () => {
       
       return { success: true };
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      const { user } = useAuthStore.getState();
+      
+      // Save filter preferences (interested_in + sports + defaults) to filter_preferences table
+      if (user && formData.interestedIn) {
+        try {
+          const defaultPreferences = {
+            interestedIn: formData.interestedIn,
+            ageRange: [18, 35] as [number, number], // Default age range
+            sports: formData.preferredSports,
+            distanceKm: 25, // Default distance
+          };
+          
+          await filterPreferencesService.saveFilterPreferences(user.id, defaultPreferences);
+          
+          logEvent('onboarding_filter_preferences_saved', {
+            interestedIn: formData.interestedIn,
+            sportsCount: formData.preferredSports.length,
+            defaultAgeMin: 18,
+            defaultAgeMax: 35,
+            defaultDistance: 25
+          });
+          
+          console.log('Onboarding filter preferences saved:', {
+            interested_in: formData.interestedIn,
+            sports: formData.preferredSports,
+            defaults: { age_min: 18, age_max: 35, distance_km: 25 }
+          });
+        } catch (error) {
+          console.error('Failed to save onboarding filter preferences:', error);
+        }
+      }
+      
       completeOnboarding();
     },
     onError: (error: any) => {

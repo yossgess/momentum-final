@@ -22,8 +22,8 @@ import { AuthStackParamList } from '../../../shared/types/navigation';
 import { supabase } from '../../../config/supabase';
 
 // Mock data for testing
-const MOCK_EMAIL = "sofia@momentum.com";
-const MOCK_PASSWORD = "test1234";
+const MOCK_EMAIL = "test.sofia@momentum.app";
+const MOCK_PASSWORD = "testpass123";
 
 type SignInScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'SignIn'>;
 

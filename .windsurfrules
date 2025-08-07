@@ -1,0 +1,153 @@
+# 🌊 KINEVO WindSurfRules
+> Persistent rules for AI-assisted development in the Momentum / KINEVO React Native mobile app.
+
+🧠 CONTEXT
+This is a sports partner discovery app built using React Native (Expo), Zustand, React Query, and Supabase. The app is bilingual (EN/FR), location-aware, and follows atomic design with modular architecture.
+
+---
+
+## 1. 🧱 Architecture & Folder Discipline
+
+- ✅ Use Atomic Design in `src/components` (Atoms, Molecules, Organisms, Business)
+- ✅ Use domain-driven structure in `src/features/<feature>/`
+- ✅ Use services from `src/shared/services/` for all backend/API logic
+- ✅ Keep state inside `src/shared/stores/` with Zustand and proper typing
+- ✅ Navigation is handled from `src/navigation/` using React Navigation v7
+- ❌ DO NOT place business logic inside UI files
+
+---
+
+## 2. 🔤 Internationalization Rules (Bilingual Support)
+
+- ✅ All user-facing text must use `t('translation.key')`
+- ✅ Add new keys to `src/shared/utils/i18n.ts`
+- ✅ Always provide both English and French
+- ❌ Never hardcode text in components
+
+---
+
+## 3. 🎨 Theming & Styling
+
+- ✅ Use theme tokens: `theme.colors`, `theme.spacing`, `theme.typography`
+- ✅ No inline styles unless dynamic or conditional
+- ✅ Maintain visual hierarchy and consistent spacing
+- ✅ Use `theme-aware` props inside all reusable components
+- ❌ Never use hardcoded colors, spacing, or fonts
+
+---
+
+## 4. 🧪 TypeScript First
+
+- ✅ Enforce strict types using interfaces from `src/shared/types/`
+- ✅ Use `Database['public']['Tables']['table']['Row']` for Supabase types
+- ✅ Every store, service, and hook must be typed
+- ❌ No `any`, `unknown`, or `implicit` types in production code
+
+---
+
+## 5. 📦 Component Standards
+
+- ✅ Use existing reusable components before creating new ones
+- ✅ Place UI-only logic in `src/components`
+- ✅ Place feature-specific logic in `src/features/<module>/components`
+- ✅ Test new components inside isolated PreviewScreens first
+- ✅ Every component must support:
+  - Bilingual labels (`t(...)`)
+  - Analytics logging via `logEvent(...)`
+  - TestID for testing
+  - Theme integration
+
+---
+
+## 6. 🔐 Supabase Integration Rules
+
+- ✅ Always use `supabaseClient` from `src/config/supabase.ts`
+- ✅ Use row-level security (RLS) in DB policies
+- ✅ Never expose auth-sensitive logic in frontend code
+- ✅ Use RPC functions for complex filtering (e.g. discovery logic)
+- ❌ Do not query or mutate data directly inside components
+
+---
+
+## 7. 📊 Analytics Tracking
+
+- ✅ Every interaction must use `logEvent(...)`
+- ✅ Use `Events` enum for standard events
+- ✅ Include context in `properties`: { targetUserId, distance, sport }
+- ✅ Track modal openings, screen views, filters, swipes, matches
+- ✅ Onboarding must track every user decision or error
+
+---
+
+## 8. 🧭 Navigation & Routing
+
+- ✅ Use deep linking structure: `kinevo://discovery`, `kinevo://chat/:id`
+- ✅ Navigation param types must be declared in `src/navigation/types.ts`
+- ✅ Bottom navigation bar must show badge for new matches or messages
+- ✅ Animate screen transitions when navigating modally
+
+---
+
+## 9. 💾 Data Caching & State Strategy
+
+- ✅ Use Zustand for UI state and lightweight user state
+- ✅ Use React Query for all server state (queries, mutations, subscriptions)
+- ✅ Use infinite scroll / batching when loading large datasets
+- ✅ Invalidate queries on user interaction that changes backend state
+
+---
+
+## 10. ⚠️ UX & Error Handling
+
+- ✅ All async logic must use try/catch
+- ✅ Show loading indicators while fetching
+- ✅ Show fallback UI when error or empty
+- ✅ Use `Alert.alert()` or modals for user confirmations
+- ✅ Gracefully degrade when permissions (like location) are denied
+
+---
+
+## 11. 🌍 Location-Aware Discovery Rules
+
+- ✅ Use `expo-location` to request and store user lat/lng
+- ✅ Onboarding captures location once with user consent
+- ✅ Discovery results must be filtered by proximity (Haversine)
+- ✅ Profiles missing location must be excluded from distance filtering
+- ✅ Use client-side fallback if RPC fails
+
+---
+
+## 12. 🛠️ General Coding Etiquette
+
+- ✅ Use `console.error()` in dev for catching failures (remove in prod)
+- ✅ Organize imports by type: react, 3rd-party, local
+- ✅ All function names must be camelCase
+- ✅ All file names must be kebab-case or PascalCase (if React component)
+- ✅ Leave a TODO or FIXME when logic is incomplete
+
+---
+
+## 13. 🧠 AI & Agent Collaboration
+
+- ✅ Always refer to `PROJECT_OVERVIEW.md` before implementing features
+- ✅ Before editing files, check for duplicates and existing reusable logic
+- ✅ When introducing new DB logic, update Supabase and types accordingly
+- ✅ Update the roadmap section when major milestones are completed
+- ✅ Update translations and analytics if relevant
+
+---
+
+## 🧭 Key Focus Areas (Keep in Mind)
+
+- 🚀 Smooth UX for DiscoveryScreen
+- 🔐 Secure and polished Auth onboarding
+- 📍 Realistic, performant location matching
+- 📊 Consistent, detailed analytics logging
+- 🌐 Complete bilingual coverage
+- 💡 Reusability across modules
+
+---
+
+📝 Last Updated: August 2025  
+👨‍💻 Maintainer: @yosri-dev  
+📄 Linked Reference: `PROJECT_OVERVIEW.md`

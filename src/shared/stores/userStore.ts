@@ -104,9 +104,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       if (updates.photos) {
         profileUpdates.avatar_urls = updates.photos;
       }
-      if (updates.preferences?.sportsInterests) {
-        profileUpdates.preferred_sports = updates.preferences.sportsInterests;
-      }
+      // Note: Sports preferences are now stored in filter_preferences table, not profiles
       
       if (Object.keys(profileUpdates).length > 0) {
         await profilesService.updateProfile(profile.id, profileUpdates);

@@ -184,14 +184,14 @@ const styles = StyleSheet.create({
   slideContainer: {
     flex: 1,
     backgroundColor: 'transparent',
-    paddingTop: theme.spacing.xl,
+    paddingTop: theme.spacing['4xl'], // Increased top padding to push content down
   },
   illustrationContainer: {
-    flex: 1.5,
+    flex: 1.8, // Increased flex to give more space and push content down
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.xl,
+    paddingTop: theme.spacing['2xl'], // Increased top padding for illustration
   },
   illustration: {
     width: screenWidth * 0.7,

@@ -10,6 +10,7 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { logEvent, Events } from './src/shared/utils/analytics';
 import { useAuthStore } from './src/shared/stores/authStore';
 import { supabase } from './src/config/supabase';
+import { pushNotificationService } from './src/shared/services/pushNotificationService';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -29,6 +30,16 @@ export default function App() {
 
     useAuthStore.getState().initialize();
 
+    // Initialize push notifications
+    const initializePushNotifications = async () => {
+      try {
+        const success = await pushNotificationService.initialize();
+        console.log('Push notifications initialized:', success);
+      } catch (error) {
+        console.error('Error initializing push notifications:', error);
+      }
+    };
+
     // Test Supabase connection with detailed error logging
     const testSupabase = async () => {
       try {
@@ -43,6 +54,7 @@ export default function App() {
       }
     };
 
+    initializePushNotifications();
     testSupabase();
   }, []);
 

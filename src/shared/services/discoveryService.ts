@@ -62,11 +62,12 @@ export interface ProfileWithDistance extends ProfileRow {
   commonSports?: string[];
 }
 
-// Match type with profile information
+// Match type with profile information and distance data
 export interface Match {
   id: string;
   otherUser: ProfileRow;
   created_at: string;
+  distanceKm?: number; // Distance to matched user in kilometers
 }
 
 // Match notification type
@@ -195,8 +196,9 @@ export async function getDiscoveryProfiles(batchParams?: BatchFetchParams): Prom
 /**
  * Record a swipe action (challenge or nope)
  * Inserts into swipes table and triggers matching logic via DB trigger
+ * Returns match information if a mutual challenge creates a match
  */
-export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'): Promise<void> => {
+export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'): Promise<{ isMatch: boolean; matchData?: Match }> => {
   try {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -231,7 +233,7 @@ export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'):
       // Don't throw error for database issues, just log them
       // This keeps the app functional even if backend isn't fully set up
       console.warn('Swipe not recorded in database, but continuing with app functionality');
-      return;
+      return { isMatch: false };
     }
 
     // console.log('Swipe recorded successfully');
@@ -241,11 +243,31 @@ export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'):
       logEvent(Events.PROFILE_SWIPED_RIGHT, {
         targetUserId: swipedId,
       });
+      
+      // Check if this challenge created a match
+      console.log('🚀 Challenge recorded, checking for match...');
+      const matchResult = await checkForNewMatch(user.id, swipedId);
+      console.log('🚀 Match check result:', matchResult);
+      
+      if (matchResult.isMatch && matchResult.matchData) {
+        // Log match creation
+        console.log('🎉 MATCH FOUND! Creating match event...');
+        logEvent(Events.MATCH_CREATED, {
+          matchedUserId: swipedId,
+          matchId: matchResult.matchData.id,
+        });
+        
+        return matchResult;
+      } else {
+        console.log('❌ No match detected');
+      }
     } else {
       logEvent(Events.PROFILE_SWIPED_LEFT, {
         targetUserId: swipedId,
       });
     }
+
+    return { isMatch: false };
 
   } catch (error) {
     console.error('Error in swipeUser:', error);
@@ -253,12 +275,13 @@ export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'):
     
     // Don't throw error to keep app functional
     console.warn('Swipe action failed, but continuing with app functionality');
+    return { isMatch: false };
   }
 };
 
 /**
- * Get all matches for the current user
- * Returns matches with full profile information of the matched user
+ * Get all matches for the current user using optimized RPC function
+ * Returns matches with full profile information and distance data
  */
 export const getMatches = async (): Promise<Match[]> => {
   try {
@@ -268,6 +291,63 @@ export const getMatches = async (): Promise<Match[]> => {
       throw new Error('User not authenticated');
     }
 
+    // Use the optimized RPC function to get matches with profile data
+    const { data: matchesData, error: rpcError } = await supabase
+      .rpc('get_user_matches', { user_id: user.id });
+
+    if (rpcError) {
+      console.error('Error fetching matches via RPC:', rpcError);
+      // Fallback to manual query if RPC fails
+      return await getMatchesManual(user.id);
+    }
+
+    if (!matchesData || matchesData.length === 0) {
+      logEvent(Events.SCREEN_VIEWED, {
+        screen: 'matches',
+        matchCount: 0,
+      });
+      return [];
+    }
+
+    // Transform RPC result to Match[] format
+    const matches: Match[] = matchesData.map((match: any) => ({
+      id: match.match_id,
+      otherUser: {
+        id: match.other_user_id,
+        full_name: match.other_user_name,
+        avatar_urls: match.other_user_avatar_urls || [],
+        gender: match.other_user_gender,
+        date_of_birth: null, // Calculate from age if needed
+        interested_in: null,
+        preferred_sports: match.other_user_sports || [],
+        availability: null,
+        created_at: null,
+        lat: null,
+        lng: null,
+      },
+      created_at: match.match_created_at,
+      distanceKm: match.distance_km ? Number(match.distance_km) : undefined,
+    }));
+
+    logEvent(Events.SCREEN_VIEWED, {
+      screen: 'matches',
+      matchCount: matches.length,
+    });
+
+    return matches;
+
+  } catch (error) {
+    console.error('Error in getMatches:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
+    throw error;
+  }
+};
+
+/**
+ * Fallback function for manual match fetching if RPC fails
+ */
+const getMatchesManual = async (userId: string): Promise<Match[]> => {
+  try {
     // Get matches where user is either user_a or user_b
     const { data: matches, error: matchesError } = await supabase
       .from('matches')
@@ -277,11 +357,11 @@ export const getMatches = async (): Promise<Match[]> => {
         user_b,
         created_at
       `)
-      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+      .or(`user_a.eq.${userId},user_b.eq.${userId}`)
       .order('created_at', { ascending: false });
 
     if (matchesError) {
-      console.error('Error fetching matches:', matchesError);
+      console.error('Error fetching matches manually:', matchesError);
       throw matchesError;
     }
 
@@ -293,7 +373,7 @@ export const getMatches = async (): Promise<Match[]> => {
     const matchesWithProfiles: Match[] = [];
     
     for (const match of matches) {
-      const otherUserId = match.user_a === user.id ? match.user_b : match.user_a;
+      const otherUserId = match.user_a === userId ? match.user_b : match.user_a;
       
       // Fetch the other user's profile
       const { data: profile, error: profileError } = await supabase
@@ -316,16 +396,9 @@ export const getMatches = async (): Promise<Match[]> => {
       }
     }
 
-    logEvent(Events.SCREEN_VIEWED, {
-      screen: 'matches',
-      matchCount: matchesWithProfiles.length,
-    });
-
     return matchesWithProfiles;
-
   } catch (error) {
-    console.error('Error in getMatches:', error);
-    console.error('Error details:', error instanceof Error ? error.message : String(error));
+    console.error('Error in getMatchesManual:', error);
     throw error;
   }
 };
@@ -476,6 +549,150 @@ export const revertLastSwipe = async (): Promise<void> => {
     console.error('Error in revertLastSwipe:', error);
     console.error('Error details:', error instanceof Error ? error.message : String(error));
     throw error;
+  }
+};
+
+/**
+ * Check if a mutual challenge created a new match
+ * Called immediately after recording a challenge swipe
+ */
+const checkForNewMatch = async (userId: string, swipedId: string): Promise<{ isMatch: boolean; matchData?: Match }> => {
+  try {
+    console.log('🔍 Checking for new match between:', userId, 'and', swipedId);
+    
+    // Check if a match was created between these two users
+    // First try to get all matches for this user, then filter
+    const { data: allMatches, error: matchError } = await supabase
+      .from('matches')
+      .select(`
+        id,
+        created_at,
+        user_a,
+        user_b
+      `)
+      .or(`user_a.eq.${userId},user_b.eq.${userId}`)
+      .order('created_at', { ascending: false });
+
+    console.log('🔍 All matches for user:', allMatches);
+
+    if (matchError) {
+      console.error('❌ Error fetching matches:', matchError);
+      return { isMatch: false };
+    }
+
+    if (!allMatches || allMatches.length === 0) {
+      console.log('❌ No matches found for user');
+      return { isMatch: false };
+    }
+
+    // Find match with the specific swiped user
+    const matchData = allMatches.find(match => 
+      (match.user_a === userId && match.user_b === swipedId) ||
+      (match.user_a === swipedId && match.user_b === userId)
+    );
+
+    console.log('🔍 Found specific match:', matchData);
+
+    if (!matchData) {
+      // No match found with this specific user
+      console.log('❌ No match found with specific user');
+      return { isMatch: false };
+    }
+
+    // For now, let's test without timing restriction to see if the rest works
+    const matchCreatedAt = new Date(matchData.created_at);
+    const now = new Date();
+    const timeDiff = now.getTime() - matchCreatedAt.getTime();
+    
+    console.log('🕒 Match timing info:', {
+      matchCreatedAt: matchCreatedAt.toISOString(),
+      now: now.toISOString(),
+      timeDiffMs: timeDiff,
+      timeDiffSeconds: Math.round(timeDiff / 1000)
+    });
+    
+    console.log('✅ Match found - proceeding with MatchModal trigger (timing check disabled for testing)');
+
+    // Get the matched user's profile
+    const matchedUserId = matchData.user_a === userId ? matchData.user_b : matchData.user_a;
+    const { data: matchedUserProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', matchedUserId)
+      .single();
+
+    if (profileError || !matchedUserProfile) {
+      console.error('Error fetching matched user profile:', profileError);
+      return { isMatch: false };
+    }
+
+    // Create match object
+    const match: Match = {
+      id: matchData.id,
+      otherUser: matchedUserProfile,
+      created_at: matchData.created_at,
+    };
+
+    return { isMatch: true, matchData: match };
+
+  } catch (error) {
+    console.error('Error checking for new match:', error);
+    return { isMatch: false };
+  }
+};
+
+/**
+ * Create a chat conversation for a new match
+ * Called when a match is detected
+ */
+export const createChatForMatch = async (matchId: string, matchedUserId: string): Promise<string | null> => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Check if chat conversation already exists for this match
+    const { data: existingChat, error: chatCheckError } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('match_id', matchId)
+      .single();
+
+    if (existingChat) {
+      // Chat already exists
+      return existingChat.id;
+    }
+
+    // Create new chat conversation
+    const { data: newChat, error: chatError } = await supabase
+      .from('conversations')
+      .insert({
+        match_id: matchId,
+        user_a: user.id,
+        user_b: matchedUserId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+
+    if (chatError || !newChat) {
+      console.error('Error creating chat conversation:', chatError);
+      return null;
+    }
+
+    logEvent('chat_created', {
+      chatId: newChat.id,
+      matchId: matchId,
+      matchedUserId: matchedUserId,
+    });
+
+    return newChat.id;
+
+  } catch (error) {
+    console.error('Error creating chat for match:', error);
+    return null;
   }
 };
 

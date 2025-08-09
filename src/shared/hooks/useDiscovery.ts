@@ -11,6 +11,9 @@ import {
   ProfileWithDistance,
   BatchFetchParams 
 } from '../services/discoveryService';
+import { pushNotificationService } from '../services/pushNotificationService';
+import { useNotificationsStore } from '../../features/notifications/store/notifications.store';
+import { Notification } from '../../features/notifications/constants/notificationTypes';
 import { logEvent, Events } from '../utils/analytics';
 import { getSportByName } from '../../constants/sports';
 import { Sport } from '../types/sports';
@@ -154,9 +157,10 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
 
   // Swipe mutation
   const swipeMutation = useMutation({
-    mutationFn: ({ swipedId, action }: { swipedId: string; action: 'challenge' | 'nope' }) =>
-      swipeUser(swipedId, action),
-    onSuccess: async (_, { swipedId, action }) => {
+    mutationFn: async ({ swipedId, action }: { swipedId: string; action: 'challenge' | 'nope' }) => {
+      return await swipeUser(swipedId, action);
+    },
+    onSuccess: async (result, { swipedId, action }) => {
       // Move current profile to skipped profiles for potential revert
       const currentProfile = getCurrentProfile();
       if (currentProfile) {
@@ -168,21 +172,51 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
       // Advance to next profile
       advance();
 
-      // Check for new match notifications after challenge
-      if (action === 'challenge') {
+      // Handle match if one was created
+      if (result.isMatch && result.matchData && currentProfile) {
+        // Show match modal immediately
+        showMatch(currentProfile);
+        
+        console.log('🎉 MATCH FOUND! Creating match event...');
+        logEvent('match_created', {
+          matchId: result.matchData.id,
+          matchedUserId: swipedId,
+        });
+
+        // Send push notification for the match
+        const matchedUserName = result.matchData.otherUser.full_name || 'Someone';
+        await pushNotificationService.sendMatchNotification(matchedUserName, result.matchData.id);
+
+        // Add notification to the notification store (deferred to avoid useInsertionEffect warning)
+        const matchData = result.matchData; // Capture match data for closure
+        setTimeout(() => {
+          const { addNotification } = useNotificationsStore.getState();
+          const matchNotification: Notification<'match'> = {
+            id: `match_${matchData.id}_${Date.now()}`,
+            type: 'match',
+            timestamp: Date.now(),
+            isRead: false,
+            data: {
+              user: matchedUserName,
+              userId: swipedId,
+              userPhoto: matchData.otherUser.avatar_urls?.[0],
+            }
+          };
+          addNotification(matchNotification);
+        }, 0);
+
+        // TODO: Chat creation will be implemented later
+        // const chatId = await createChatForMatch(result.matchData.id, swipedId);
+        
+        logEvent('match_created', {
+          matchId: result.matchData.id,
+          matchedUserId: swipedId,
+          chatId: 'chat_module_not_implemented_yet',
+          notificationSent: true,
+        });
+        
+        // Refresh notifications to update badge
         await refetchNotifications();
-        
-        // Check if this created a match
-        const updatedNotifications = await getMatchNotifications();
-        const newMatch = updatedNotifications.find(n => n.matched_user_id === swipedId);
-        
-        if (newMatch && currentProfile) {
-          // Show match modal
-          showMatch(currentProfile);
-          logEvent(Events.MATCH_CREATED, {
-            matchedUserId: swipedId,
-          });
-        }
       }
 
       // Auto-fetch more profiles if we're running low after swipe
@@ -268,6 +302,10 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
   // Combined error state
   const error = storeError || (queryError instanceof Error ? queryError.message : null);
 
+  // Get unread notification count from notification store
+  const { getUnreadCount } = useNotificationsStore();
+  const notificationCount = getUnreadCount();
+
   return {
     // Data
     profiles: profilesQueue,
@@ -275,7 +313,7 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
     currentIndex,
     hasProfiles: hasProfiles(),
     notifications,
-    notificationCount: Array.isArray(notifications) ? notifications.length : 0,
+    notificationCount,
     remainingProfilesCount: getRemainingProfilesCount(),
 
     // Modal state
@@ -300,5 +338,8 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
     // Mutations
     isSwipeLoading: swipeMutation.isPending,
     isRevertLoading: revertMutation.isPending,
+    
+    // Match result for debugging
+    lastSwipeResult: swipeMutation.data,
   };
 };

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { Notification, NotificationType } from '../constants/notificationTypes';
-import { mockNotifications, generateMockNotification } from '../data/mockNotifications';
 
 export interface NotificationsState {
   notifications: Notification[];
@@ -35,16 +34,13 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
       set({ isLoading: true });
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // In a real app, this would be an API call
-      // For now, we use mock data with fresh timestamps
-      const freshNotifications = mockNotifications.map((notification, index) => ({
-        ...notification,
-        timestamp: Date.now() - (index * 1000 * 60 * 60 * 2) - (Math.random() * 1000 * 60 * 30),
-      }));
-
-      const sortedNotifications = freshNotifications.sort((a, b) => b.timestamp - a.timestamp);
+      // In production, this would fetch from Supabase
+      // For now, we only keep notifications that were added programmatically (real matches)
+      const { notifications } = get();
+      const sortedNotifications = notifications.sort((a, b) => b.timestamp - a.timestamp);
+      
       set({ 
         notifications: sortedNotifications,
         lastFetch: Date.now(),
@@ -52,8 +48,8 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
 
       logEvent(Events.SCREEN_VIEWED, {
         screenName: 'notifications',
-        notificationCount: freshNotifications.length,
-        unreadCount: freshNotifications.filter(n => !n.isRead).length,
+        notificationCount: sortedNotifications.length,
+        unreadCount: sortedNotifications.filter((n: Notification) => !n.isRead).length,
       });
 
     } catch (error) {
@@ -145,12 +141,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   },
 
   simulateNewNotification: (type?: NotificationType) => {
-    const { addNotification } = get();
-    const newNotification = generateMockNotification(type);
-    addNotification(newNotification);
-
-    logEvent('notification_simulated', {
-      notificationType: newNotification.type,
-    });
+    // Mock notification simulation disabled - only real notifications are shown
+    console.log('Mock notification simulation disabled');
   },
 }));

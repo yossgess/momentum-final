@@ -56,8 +56,9 @@ const getNotificationTitle = (notification: Notification): string => {
 const getNotificationSubtitle = (notification: Notification): string => {
   switch (notification.type) {
     case 'match':
-      const matchData = notification.data as any;
-      return t('notifications.matchSubtitle', `You matched with ${matchData.user}!`);
+      const matchNotification = notification as Notification<'match'>;
+      const userName = matchNotification.data.user || 'Someone';
+      return `You have a new challenge with ${userName}!`;
     
     case 'message':
       const messageData = notification.data as any;

@@ -236,10 +236,6 @@ export const translations: Translations = {
     en: 'About',
     fr: 'À propos',
   },
-  'profile.sports': {
-    en: 'Sports',
-    fr: 'Sports',
-  },
   'profile.availability': {
     en: 'Availability',
     fr: 'Disponibilité',
@@ -289,6 +285,16 @@ export const translations: Translations = {
   'discovery.location.error.message': {
     en: 'We couldn\'t access your location. Please check your permissions and try again.',
     fr: 'Nous n\'avons pas pu accéder à votre localisation. Veuillez vérifier vos autorisations et réessayer.',
+  },
+
+  // Arena tab
+  'arena.title': {
+    en: 'Arena',
+    fr: 'Arène',
+  },
+  'arena.comingSoon': {
+    en: 'Coming Soon',
+    fr: 'Bientôt Disponible',
   },
 
   // Sports categories - short labels to prevent wrapping
@@ -957,6 +963,130 @@ export const translations: Translations = {
   'photo.addYourFirstPhoto': {
     en: 'Add your first photo to get started',
     fr: 'Ajoutez votre première photo pour commencer',
+  },
+
+  // Match translations
+  'matches.title': {
+    en: 'Your Matches',
+    fr: 'Vos Matchs',
+  },
+  'matches.noMatchesYet': {
+    en: 'No matches yet',
+    fr: 'Aucun match pour le moment',
+  },
+  'matches.youHaveMatches': {
+    en: 'You have {{count}} matches',
+    fr: 'Vous avez {{count}} matchs',
+  },
+  'matches.newMatches': {
+    en: '{{count}} new matches!',
+    fr: '{{count}} nouveaux matchs !',
+  },
+  'matches.loadingMatches': {
+    en: 'Loading matches...',
+    fr: 'Chargement des matchs...',
+  },
+  'matches.errorLoadingMatches': {
+    en: 'Failed to load matches. Please try again.',
+    fr: 'Échec du chargement des matchs. Veuillez réessayer.',
+  },
+  'matches.noMatches': {
+    en: 'No Matches Yet',
+    fr: 'Aucun Match Pour Le Moment',
+  },
+  'matches.noMatchesDesc': {
+    en: 'Start swiping in Discovery to find your perfect sports partner!',
+    fr: 'Commencez à swiper dans Découverte pour trouver votre partenaire sportif idéal !',
+  },
+  'matches.yourMatches': {
+    en: 'Your Matches',
+    fr: 'Vos Matchs',
+  },
+  'matches.unknownUser': {
+    en: 'Unknown User',
+    fr: 'Utilisateur Inconnu',
+  },
+  'matches.commonSports': {
+    en: 'Common sports',
+    fr: 'Sports en commun',
+  },
+  'matches.matchedOn': {
+    en: 'Matched on',
+    fr: 'Match le',
+  },
+  'matches.startChat': {
+    en: 'Start Chat',
+    fr: 'Commencer la Discussion',
+  },
+  'matches.startChatWith': {
+    en: 'Start a conversation with {{name}}?',
+    fr: 'Commencer une conversation avec {{name}} ?',
+  },
+  'matches.sendMessage': {
+    en: 'Send Message',
+    fr: 'Envoyer un Message',
+  },
+  'matches.developmentTools': {
+    en: 'Development Tools',
+    fr: 'Outils de Développement',
+  },
+  'matches.createTestMatches': {
+    en: 'Create Test Matches',
+    fr: 'Créer des Matchs de Test',
+  },
+  'matches.cleanupTestData': {
+    en: 'Cleanup Test Data',
+    fr: 'Nettoyer les Données de Test',
+  },
+  'matches.creating': {
+    en: 'Creating...',
+    fr: 'Création...',
+  },
+  'matches.cleaning': {
+    en: 'Cleaning...',
+    fr: 'Nettoyage...',
+  },
+  'matches.testMatchesCreated': {
+    en: 'Test Matches Created',
+    fr: 'Matchs de Test Créés',
+  },
+  'matches.testMatchesCreatedDesc': {
+    en: 'Test matches have been created successfully. Pull to refresh to see them.',
+    fr: 'Les matchs de test ont été créés avec succès. Tirez pour actualiser pour les voir.',
+  },
+  'matches.testDataCleaned': {
+    en: 'Test Data Cleaned',
+    fr: 'Données de Test Nettoyées',
+  },
+  'matches.testDataCleanedDesc': {
+    en: 'All test data has been removed successfully.',
+    fr: 'Toutes les données de test ont été supprimées avec succès.',
+  },
+  'matches.errorCreatingTestMatches': {
+    en: 'Failed to create test matches. Please try again.',
+    fr: 'Échec de la création des matchs de test. Veuillez réessayer.',
+  },
+  'matches.errorCleaningTestData': {
+    en: 'Failed to clean test data. Please try again.',
+    fr: 'Échec du nettoyage des données de test. Veuillez réessayer.',
+  },
+
+  // Common gender and distance translations
+  'common.man': {
+    en: 'Man',
+    fr: 'Homme',
+  },
+  'common.woman': {
+    en: 'Woman',
+    fr: 'Femme',
+  },
+  'common.away': {
+    en: 'away',
+    fr: 'de distance',
+  },
+  'common.error': {
+    en: 'Error',
+    fr: 'Erreur',
   },
 };
 

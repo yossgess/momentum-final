@@ -84,6 +84,7 @@ export const Events = {
   PROFILE_SWIPED_LEFT: 'profile_swiped_left',
   PROFILE_SUPER_LIKED: 'profile_super_liked',
   MATCH_CREATED: 'match_created',
+  MATCH_SELECTED: 'match_selected',
   MATCH_MODAL_VIEWED: 'match_modal_viewed',
   
   EVENT_VIEWED: 'event_viewed',

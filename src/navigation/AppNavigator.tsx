@@ -12,7 +12,7 @@ import { RootStackParamList } from '../shared/types/navigation';
 import { logEvent, Events } from '../shared/utils/analytics';
 
 // Development mode flag - set to true to always show full onboarding flow for testing
-const DEV_MODE_RESET_ONBOARDING = true; // Change to false for production
+const DEV_MODE_FORCE_ONBOARDING = true; // Change to false for production
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -27,7 +27,7 @@ export const AppNavigator: React.FC = () => {
       await useOnboardingStore.getState().loadPersistedState();
       
       // In development mode, reset onboarding state on app start
-      if (DEV_MODE_RESET_ONBOARDING) {
+      if (DEV_MODE_FORCE_ONBOARDING) {
         // Reset onboarding state to force showing slides
         useOnboardingStore.getState().resetOnboardingState();
       }
@@ -57,6 +57,11 @@ export const AppNavigator: React.FC = () => {
 
   // Determine which screen to show based on user state
   const getScreenToShow = () => {
+    // In development mode, force onboarding slides to show for testing (even if authenticated)
+    if (DEV_MODE_FORCE_ONBOARDING && !hasSeenOnboarding) {
+      return 'OnboardingSlider';
+    }
+    
     // For authenticated users, handle their flow first
     if (isAuthenticated && user) {
       // New users (no profile) -> Show OnboardingForm
@@ -71,12 +76,8 @@ export const AppNavigator: React.FC = () => {
     
     // For non-authenticated users, check if they need onboarding slides
     if (!isAuthenticated) {
-      // In development mode, always show onboarding slides for testing
-      if (DEV_MODE_RESET_ONBOARDING && !hasSeenOnboarding) {
-        return 'OnboardingSlider';
-      }
       // In production, only show slides to truly new users who haven't seen them
-      else if (!hasSeenOnboarding) {
+      if (!hasSeenOnboarding) {
         return 'OnboardingSlider';
       }
       // Existing users (who have seen slides before) -> Go directly to Auth

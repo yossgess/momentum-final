@@ -108,19 +108,18 @@ export const OnboardingSlider: React.FC = () => {
   const renderSlide = (slide: typeof onboardingSlides[0], index: number) => {
     return (
       <View key={index} style={styles.slideContainer}>
-        <View style={styles.imageContainer}>
+        <View style={styles.illustrationContainer}>
           <ExpoImage
             source={slide.image}
             style={styles.illustration}
-            resizeMode="cover"
+            resizeMode="contain"
           />
-          <View style={styles.darkOverlay} />
         </View>
         
-        <View style={styles.contentContainer}>
+        <View style={styles.textContainer}>
           <Typography
             variant="h1"
-            color="primary"
+            color="text"
             align="center"
             style={styles.title}
           >
@@ -129,7 +128,7 @@ export const OnboardingSlider: React.FC = () => {
           
           <Typography
             variant="body"
-            color="primary"
+            color="text"
             align="center"
             style={styles.subtitle}
           >
@@ -176,7 +175,7 @@ export const OnboardingSlider: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: theme.colors.surface.primary,
   },
   pagerView: {
     flex: 1,
@@ -184,34 +183,29 @@ const styles = StyleSheet.create({
   },
   slideContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
     backgroundColor: 'transparent',
+    paddingTop: theme.spacing.xl,
   },
-  imageContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  illustrationContainer: {
+    flex: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: theme.spacing.xl,
+    paddingTop: theme.spacing.xl,
   },
   illustration: {
-    width: screenWidth,
-    height: screenHeight,
-    position: 'absolute',
+    width: screenWidth * 0.7,
+    height: screenHeight * 0.35,
+    maxWidth: 280,
+    maxHeight: 280,
   },
-  contentContainer: {
-    position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    transform: [{ translateY: -50 }],
-    zIndex: 2,
-    backgroundColor: 'transparent',
-    paddingHorizontal: theme.spacing.xl,
-    justifyContent: 'center',
+  textContainer: {
+    flex: 1.5,
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingHorizontal: theme.spacing.xl,
+    paddingTop: theme.spacing.sm,
+    paddingBottom: theme.spacing['5xl'], // Extra bottom padding to avoid button overlap
   },
   title: {
     marginBottom: theme.spacing.lg,
@@ -220,15 +214,6 @@ const styles = StyleSheet.create({
   subtitle: {
     paddingHorizontal: theme.spacing.md,
     lineHeight: 24,
-  },
-  darkOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    zIndex: 1,
   },
   topOverlay: {
     position: 'absolute',
@@ -261,5 +246,4 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginHorizontal: theme.spacing.xs,
   },
-
 });

@@ -1,6 +1,6 @@
-const Buddy = require("../../../../assets/illustrations/buddy.png");
-const Challenge = require("../../../../assets/illustrations/challenge.jpg");
-const Events = require("../../../../assets/illustrations/events.jpg");
+const Buddy = require("../../../../assets/illustrations/buddy1.png");
+const Challenge = require("../../../../assets/illustrations/challenge1.png");
+const Events = require("../../../../assets/illustrations/events1.png");
 
 export interface OnboardingSlide {
   image: any;
@@ -10,7 +10,7 @@ export interface OnboardingSlide {
 
 export const onboardingSlides: OnboardingSlide[] = [
   {
-    image: Buddy,
+    image: Challenge,
     titleKey: "onboarding.title1",
     subtitleKey: "onboarding.subtitle1",
   },
@@ -20,7 +20,7 @@ export const onboardingSlides: OnboardingSlide[] = [
     subtitleKey: "onboarding.subtitle2",
   },
   {
-    image: Challenge,
+    image: Buddy,
     titleKey: "onboarding.title3",
     subtitleKey: "onboarding.subtitle3",
   },

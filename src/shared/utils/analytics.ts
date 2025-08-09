@@ -18,12 +18,12 @@ class AnalyticsService {
 
   setUserProperties(properties: UserProperties) {
     this.userProperties = { ...this.userProperties, ...properties };
-    console.log('Analytics: User properties updated', this.userProperties);
+    // console.log('Analytics: User properties updated', this.userProperties);
   }
 
   setUserId(userId: string) {
     this.userProperties.userId = userId;
-    console.log('Analytics: User ID set', userId);
+    // console.log('Analytics: User ID set', userId);
   }
 
   logEvent(eventName: string, properties?: EventProperties) {
@@ -36,7 +36,11 @@ class AnalyticsService {
       properties: properties || {},
     };
 
-    console.log('Analytics Event:', eventData);
+    // Only log analytics events in development for debugging
+    if (__DEV__) {
+      const timestamp = Date.now();
+      console.log(`📊 [${timestamp}] ${eventName}`, properties || {});
+    }
 
   }
 
@@ -50,7 +54,7 @@ class AnalyticsService {
 
   reset() {
     this.userProperties = {};
-    console.log('Analytics: User properties reset');
+    // console.log('Analytics: User properties reset');
   }
 }
 
@@ -145,4 +149,7 @@ export const Events = {
   ONBOARDING_FORM_FIELD_UPDATED: 'onboarding_form_field_updated',
   ONBOARDING_STEP_COMPLETED: 'onboarding_step_completed',
   ONBOARDING_FORM_SUBMITTED: 'onboarding_form_submitted',
+  
+  // Discovery batch fetching
+  PROFILES_BATCH_FETCHED: 'profiles_batch_fetched',
 } as const;

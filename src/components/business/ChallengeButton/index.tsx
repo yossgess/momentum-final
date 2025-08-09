@@ -1,6 +1,5 @@
 import React from 'react';
-import { Pressable, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Pressable, Text, Image } from 'react-native';
 import { ChallengeButtonProps } from './ChallengeButton.types';
 import { styles } from './ChallengeButton.styles';
 import { theme } from '../../../theme';
@@ -29,10 +28,15 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({
       onPress={handlePress}
       disabled={disabled}
     >
-      <Ionicons
-        name="flag"
-        size={size === 'sm' ? 20 : size === 'lg' ? 32 : 24}
-        color={disabled ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF'}
+      <Image
+        source={require('../../../../assets/concurrence.png')}
+        style={{
+          width: size === 'sm' ? 20 : size === 'lg' ? 32 : 24,
+          height: size === 'sm' ? 20 : size === 'lg' ? 32 : 24,
+          opacity: disabled ? 0.5 : 1,
+          tintColor: disabled ? theme.colors.text.tertiary : theme.colors.primary.main,
+        }}
+        resizeMode="contain"
       />
     </Pressable>
   );

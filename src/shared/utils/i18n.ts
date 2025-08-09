@@ -212,6 +212,38 @@ export const translations: Translations = {
     en: 'Edit Filters',
     fr: 'Modifier les filtres',
   },
+  'discovery.loadingMoreProfiles': {
+    en: 'Loading more profiles...',
+    fr: 'Chargement de plus de profils...',
+  },
+  'discovery.profileDetails': {
+    en: 'Profile Details',
+    fr: 'Détails du profil',
+  },
+  'discovery.locationUnknown': {
+    en: 'Location unknown',
+    fr: 'Localisation inconnue',
+  },
+  'discovery.profileBioPlaceholder': {
+    en: 'Hi, I\'m {{name}}! I love sports and I\'m looking for new partners to play with.',
+    fr: 'Salut, je suis {{name}} ! J\'adore le sport et je cherche de nouveaux partenaires pour jouer.',
+  },
+  'discovery.profileBioDefault': {
+    en: 'Sports enthusiast looking for new partners to play with!',
+    fr: 'Passionné de sport à la recherche de nouveaux partenaires de jeu !',
+  },
+  'profile.about': {
+    en: 'About',
+    fr: 'À propos',
+  },
+  'profile.sports': {
+    en: 'Sports',
+    fr: 'Sports',
+  },
+  'profile.availability': {
+    en: 'Availability',
+    fr: 'Disponibilité',
+  },
 
   // Location functionality
   'discovery.location.title': {

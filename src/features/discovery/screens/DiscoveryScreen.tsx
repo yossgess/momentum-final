@@ -23,6 +23,7 @@ import { ChallengeButton } from '../../../components/business/ChallengeButton';
 import { NopeButton } from '../../../components/business/NopeButton';
 import { RevertButton } from '../../../components/business/RevertButton';
 import { MatchModal } from '../../../components/business/MatchModal';
+import { ProfileModal } from '../../../components/business/ProfileModal';
 import { FilterModal } from '../components/FilterModal';
 import { LocationEmptyState } from '../components/LocationEmptyState';
 
@@ -44,6 +45,7 @@ export const DiscoveryScreen: React.FC = () => {
   
   // Local state
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   
   // Filter store
   const { distanceKm, ageRange, interestedIn, sports, isApplied } = useDiscoverFiltersStore();
@@ -61,9 +63,11 @@ export const DiscoveryScreen: React.FC = () => {
     currentProfile,
     hasProfiles,
     notificationCount,
+    remainingProfilesCount,
     showMatchModal,
     matchedProfile,
     isLoading,
+    isLoadingBatch,
     error,
     handleSwipe,
     handleRevert,
@@ -211,6 +215,38 @@ export const DiscoveryScreen: React.FC = () => {
     setShowFilterModal(false);
   };
 
+  // Handle Profile Modal
+  const handleProfilePress = () => {
+    if (!currentProfile) return;
+    
+    console.log('🔍 ProfileModal: Opening profile modal for:', currentProfile.id);
+    logEvent('profile_card_pressed', {
+      profileId: currentProfile.id,
+      source: 'discovery_screen'
+    });
+    setShowProfileModal(true);
+  };
+
+  const handleProfileModalClose = () => {
+    logEvent(Events.MODAL_CLOSED, { modalType: 'profile_details' });
+    setShowProfileModal(false);
+  };
+
+  const handleProfileModalChallenge = () => {
+    setShowProfileModal(false);
+    handleChallenge();
+  };
+
+  const handleProfileModalNope = () => {
+    setShowProfileModal(false);
+    handleNope();
+  };
+
+  const handleProfileModalRevert = () => {
+    setShowProfileModal(false);
+    handleRevertAction();
+  };
+
   // Handle Notification button
   const handleNotificationPress = () => {
     logEvent(Events.NOTIFICATION_PRESSED, {
@@ -264,18 +300,10 @@ export const DiscoveryScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Loading State */}
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <Loader size="large" />
-          <Typography variant="body" style={styles.loadingText}>
-            {t('discovery.loading')}
-          </Typography>
-        </View>
-      )}
 
-      {/* Main Content */}
-      {!isLoading && currentProfile && (
+
+      {/* Main Content - Show instantly when profile is available from queue */}
+      {currentProfile && (
         <Animated.View 
           style={[
             styles.swipeCardContainer,
@@ -300,18 +328,19 @@ export const DiscoveryScreen: React.FC = () => {
             }}
             onSwipeLeft={handleNope}
             onSwipeRight={handleChallenge}
+            onPress={handleProfilePress}
             style={styles.swipeCard}
           />
         </Animated.View>
       )}
 
       {/* Location Required State - Show when location is missing */}
-      {!isLoading && error === 'LOCATION_REQUIRED' && (
+      {error === 'LOCATION_REQUIRED' && !currentProfile && (
         <LocationEmptyState onLocationUpdated={refreshProfiles} />
       )}
 
-      {/* Empty State - Show when not loading, no current profile, and no location error */}
-      {!isLoading && !currentProfile && error !== 'LOCATION_REQUIRED' && (
+      {/* Empty State - Show when no current profile and no location error */}
+      {!currentProfile && error !== 'LOCATION_REQUIRED' && (
         <EmptyState
           icon="people-outline"
           title={t('discovery.noMoreProfiles')}
@@ -363,11 +392,22 @@ export const DiscoveryScreen: React.FC = () => {
         onFiltersApplied={refreshProfiles}
       />
 
+      {/* Profile Modal */}
+      <ProfileModal
+        visible={showProfileModal}
+        profile={currentProfile}
+        onClose={handleProfileModalClose}
+        onChallenge={handleProfileModalChallenge}
+        onNope={handleProfileModalNope}
+        onRevert={handleProfileModalRevert}
+        canRevert={canRevert}
+        isLoading={isSwipeLoading || isRevertLoading}
+      />
+
       {/* Top Corner Buttons Overlay - Always visible */}
       <FilterButton
         onPress={handleFilterPress}
         active={activeFilters > 0}
-        badgeCount={activeFilters}
         style={styles.topLeftButton}
       />
       
@@ -377,8 +417,10 @@ export const DiscoveryScreen: React.FC = () => {
         style={styles.topRightButton}
       />
 
+
+
       {/* Bottom Action Buttons Overlay - Only show when there's a current profile */}
-      {!isLoading && currentProfile && (
+      {currentProfile && (
         <View style={styles.bottomActionButtons}>
           <NopeButton
             onPress={handleNope}

@@ -12,18 +12,13 @@ import { RootStackParamList } from '../shared/types/navigation';
 import { logEvent, Events } from '../shared/utils/analytics';
 
 // Development mode flag - set to true to always show full onboarding flow for testing
-const DEV_MODE_RESET_ONBOARDING = false; // Change to false for production
+const DEV_MODE_RESET_ONBOARDING = true; // Change to false for production
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const AppNavigator: React.FC = () => {
   const { isAuthenticated, hasCompletedProfile, user } = useAuthStore();
   const { hasSeenOnboarding } = useOnboardingStore();
-  
-  // For development: allow progression but reset persistence on app restart
-  const devHasSeenOnboarding = hasSeenOnboarding; // Always use current state to allow progression
-  const devIsAuthenticated = DEV_MODE_RESET_ONBOARDING ? false : isAuthenticated;
-  const devHasCompletedProfile = DEV_MODE_RESET_ONBOARDING ? false : hasCompletedProfile;
 
   React.useEffect(() => {
     // Initialize auth store and onboarding store on app start
@@ -35,7 +30,6 @@ export const AppNavigator: React.FC = () => {
       if (DEV_MODE_RESET_ONBOARDING) {
         // Reset onboarding state to force showing slides
         useOnboardingStore.getState().resetOnboardingState();
-        // Note: Auth and profile states are already handled by the dev flags above
       }
     };
     
@@ -61,20 +55,55 @@ export const AppNavigator: React.FC = () => {
     });
   };
 
+  // Determine which screen to show based on user state
+  const getScreenToShow = () => {
+    // For authenticated users, handle their flow first
+    if (isAuthenticated && user) {
+      // New users (no profile) -> Show OnboardingForm
+      if (!hasCompletedProfile) {
+        return 'OnboardingForm';
+      }
+      // Existing users (with profile) -> Show Main App
+      else {
+        return 'Main';
+      }
+    }
+    
+    // For non-authenticated users, check if they need onboarding slides
+    if (!isAuthenticated) {
+      // In development mode, always show onboarding slides for testing
+      if (DEV_MODE_RESET_ONBOARDING && !hasSeenOnboarding) {
+        return 'OnboardingSlider';
+      }
+      // In production, only show slides to truly new users who haven't seen them
+      else if (!hasSeenOnboarding) {
+        return 'OnboardingSlider';
+      }
+      // Existing users (who have seen slides before) -> Go directly to Auth
+      else {
+        return 'Auth';
+      }
+    }
+    
+    // Fallback to auth if something is unclear
+    return 'Auth';
+  };
+
+  const currentScreen = getScreenToShow();
+
   return (
     <NavigationContainer onStateChange={handleNavigationStateChange}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!devHasSeenOnboarding ? (
-          // Step 1: OnboardingSlider
+        {currentScreen === 'OnboardingSlider' && (
           <Stack.Screen name="OnboardingSlider" component={OnboardingSlider} />
-        ) : !devIsAuthenticated ? (
-          // Step 2: Authentication Screens
+        )}
+        {currentScreen === 'Auth' && (
           <Stack.Screen name="Auth" component={AuthNavigator} />
-        ) : !devHasCompletedProfile ? (
-          // Step 3: OnboardingForm (profile setup)
+        )}
+        {currentScreen === 'OnboardingForm' && (
           <Stack.Screen name="OnboardingForm" component={OnboardingForm} />
-        ) : (
-          // Step 4: Main App (DiscoveryScreen)
+        )}
+        {currentScreen === 'Main' && (
           <Stack.Screen name="Main" component={TabNavigator} />
         )}
       </Stack.Navigator>

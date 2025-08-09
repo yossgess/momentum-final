@@ -4,7 +4,9 @@ import { theme } from '../../../theme';
 export const styles = StyleSheet.create({
   container: {
     borderRadius: 50,
-    backgroundColor: theme.colors.primary.main,
+    backgroundColor: theme.colors.surface.primary,
+    borderWidth: 2,
+    borderColor: theme.colors.primary.main,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -26,7 +28,7 @@ export const styles = StyleSheet.create({
     height: 72,
   },
   disabled: {
-    backgroundColor: theme.colors.surface.secondary,
+    borderColor: theme.colors.border.secondary,
     opacity: 0.5,
   },
 });

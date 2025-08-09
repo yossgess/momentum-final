@@ -49,6 +49,12 @@ export interface DiscoveryFilters {
   distanceKm: number; // Maximum distance in km (maps to max_distance_km)
 }
 
+// Batch fetching parameters
+export interface BatchFetchParams {
+  limit?: number; // Number of profiles per batch (default 10)
+  offset?: number; // Skip profiles already fetched (default 0)
+}
+
 // Extended ProfileRow with distance information and sports data
 export interface ProfileWithDistance extends ProfileRow {
   distanceInKm?: number;
@@ -72,12 +78,13 @@ export interface MatchNotification {
 }
 
 /**
- * Get discovery profiles using Supabase RPC function
+ * Get discovery profiles using Supabase RPC function with batch support
  * Server-side filtering for better performance and security
  * Excludes current user, already swiped users, and existing matches
  * Applies filters for gender, age, interested_in, sports, and distance
+ * @param batchParams Optional batch parameters for pagination
  */
-export async function getDiscoveryProfiles(): Promise<ProfileWithDistance[]> {
+export async function getDiscoveryProfiles(batchParams?: BatchFetchParams): Promise<ProfileWithDistance[]> {
   const { user } = useAuthStore.getState();
   
   if (!user) {
@@ -107,16 +114,31 @@ export async function getDiscoveryProfiles(): Promise<ProfileWithDistance[]> {
       throw new Error('LOCATION_REQUIRED');
     }
 
-    console.log('Fetching discovery profiles using saved filter preferences for user:', user.id);
+    // console.log('Fetching discovery profiles using saved filter preferences for user:', user.id);
 
     logEvent('search_started', {
       method: 'filter_preferences_table',
       userId: user.id
     });
 
-    // Always use the optimized RPC function that gets preferences from filter_preferences table
-    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles_optimized', {
-      user_id: user.id
+    // Use the batch-enabled RPC function with pagination support
+    const { limit = 10, offset = 0 } = batchParams || {};
+    
+    const startTime = Date.now();
+    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles_batch', {
+      user_id: user.id,
+      limit_count: limit,
+      offset_count: offset
+    });
+    const fetchTime = Date.now() - startTime;
+    
+    // Log batch fetch analytics
+    logEvent('profiles_batch_fetched', {
+      batchSize: limit,
+      offset: offset,
+      fetchTimeMs: fetchTime,
+      profilesReturned: profiles?.length || 0,
+      userId: user.id
     });
 
     if (error) {
@@ -149,7 +171,7 @@ export async function getDiscoveryProfiles(): Promise<ProfileWithDistance[]> {
       commonSports: profile.common_sports || [], // Common sports with current user
     }));
 
-    console.log(` Server-side filtering successful: ${profilesWithDistance.length} profiles`);
+    // console.log(` Server-side filtering successful: ${profilesWithDistance.length} profiles`);
     
     logEvent('search_results_loaded', {
       profileCount: profilesWithDistance.length,
@@ -183,7 +205,7 @@ export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'):
       throw new Error('User not authenticated');
     }
 
-    console.log('Recording swipe action:', { action, swipedId, userId: user.id });
+    // console.log('Recording swipe action:', { action, swipedId, userId: user.id });
 
     // Log the swipe action
     logEvent('swipe_action', {
@@ -212,7 +234,7 @@ export const swipeUser = async (swipedId: string, action: 'challenge' | 'nope'):
       return;
     }
 
-    console.log('Swipe recorded successfully');
+    // console.log('Swipe recorded successfully');
 
     // Log specific analytics events
     if (action === 'challenge') {

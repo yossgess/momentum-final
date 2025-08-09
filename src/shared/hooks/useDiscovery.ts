@@ -8,7 +8,8 @@ import {
   markMatchNotificationsAsSeen,
   revertLastSwipe,
   DiscoveryFilters,
-  ProfileWithDistance 
+  ProfileWithDistance,
+  BatchFetchParams 
 } from '../services/discoveryService';
 import { logEvent, Events } from '../utils/analytics';
 import { getSportByName } from '../../constants/sports';
@@ -19,39 +20,73 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
   
   // Zustand store
   const {
-    profiles,
+    profilesQueue,
     currentIndex,
     skippedProfiles,
+    totalFetched,
+    isLoadingBatch,
     showMatchModal,
     matchedProfile,
     isLoading: storeLoading,
     error: storeError,
     setProfiles,
+    addProfiles,
     advance,
     revert,
     showMatch,
     hideMatch,
     setLoading,
+    setLoadingBatch,
     setError,
     getCurrentProfile,
     hasProfiles,
     canRevert,
+    needsMoreProfiles,
+    getRemainingProfilesCount,
   } = useDiscoveryStore();
 
-  // Query for discovery profiles
+  // Initial batch fetch for discovery profiles - Load a larger batch upfront
   const {
-    data: fetchedProfiles,
+    data: initialProfiles,
     isLoading: queryLoading,
     error: queryError,
     refetch,
   } = useQuery({
-    queryKey: ['discovery-profiles'],
+    queryKey: ['discovery-profiles', 'initial'],
     queryFn: async () => {
-      const profiles = await getDiscoveryProfiles();
+      const profiles = await getDiscoveryProfiles({ limit: 20, offset: 0 }); // Load 20 profiles upfront
       return profiles;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in v5)
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Batch fetch mutation for loading more profiles
+  const fetchMoreMutation = useMutation({
+    mutationFn: async (batchParams: BatchFetchParams) => {
+      return await getDiscoveryProfiles(batchParams);
+    },
+    onMutate: () => {
+      setLoadingBatch(true);
+    },
+    onSuccess: (newProfiles) => {
+      addProfiles(newProfiles);
+      setLoadingBatch(false); // Always clear loading state
+      logEvent('profiles_batch_loaded', {
+        batchSize: newProfiles.length,
+        totalInQueue: profilesQueue.length + newProfiles.length,
+        remainingProfiles: getRemainingProfilesCount() + newProfiles.length,
+      });
+    },
+    onError: (error) => {
+      console.error('Error fetching more profiles:', error);
+      setLoadingBatch(false); // Always clear loading state
+      // Don't set error for batch fetches, just log it
+      logEvent('profiles_batch_error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        offset: totalFetched,
+      });
+    },
   });
 
   // Transform sports data helper function
@@ -65,11 +100,11 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
       .filter((sport): sport is Sport => sport !== undefined);
   }, []);
 
-  // Handle successful data fetch
+  // Handle initial profiles fetch
   React.useEffect(() => {
-    if (fetchedProfiles) {
+    if (initialProfiles) {
       // Transform profiles to include Sport objects for components
-      const transformedProfiles = fetchedProfiles.map(profile => ({
+      const transformedProfiles = initialProfiles.map(profile => ({
         ...profile,
         sports: transformSportsToObjects(profile.userSports || []),
         sharedSports: transformSportsToObjects(profile.commonSports || []),
@@ -81,9 +116,22 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
         profileCount: transformedProfiles.length,
         filters: JSON.stringify(filters),
         avgCommonSports: transformedProfiles.reduce((sum, p) => sum + (p.sharedSports?.length || 0), 0) / transformedProfiles.length,
+        isInitialBatch: true,
       });
     }
-  }, [fetchedProfiles, filters, setProfiles, setError, transformSportsToObjects]);
+  }, [initialProfiles, transformSportsToObjects]);
+
+  // Auto-fetch more profiles when running low (only when user has 5 or fewer profiles left)
+  React.useEffect(() => {
+    const remainingProfiles = profilesQueue.length - currentIndex;
+    if (remainingProfiles <= 5 && remainingProfiles > 0 && !isLoadingBatch && !fetchMoreMutation.isPending && totalFetched > 0) {
+      // Fetch next batch with offset - larger batch for better performance
+      fetchMoreMutation.mutate({
+        limit: 15,
+        offset: totalFetched,
+      });
+    }
+  }, [currentIndex, profilesQueue.length, isLoadingBatch, totalFetched]);
 
   // Handle query errors
   React.useEffect(() => {
@@ -137,10 +185,8 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
         }
       }
 
-      // Invalidate and refetch profiles if we're running low
-      if (!hasProfiles()) {
-        queryClient.invalidateQueries({ queryKey: ['discovery-profiles'] });
-      }
+      // Auto-fetch more profiles if we're running low after swipe
+      // The useEffect above will handle this automatically
     },
     onError: (error) => {
       console.error('Error swiping user:', error);
@@ -154,7 +200,7 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
     onSuccess: () => {
       revert();
       logEvent('swipe_reverted', {
-        profilesRemaining: profiles.length - currentIndex,
+        profilesRemaining: profilesQueue.length - currentIndex,
       });
     },
     onError: (error) => {
@@ -211,6 +257,8 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
   };
 
   const refreshProfiles = () => {
+    // Reset store and refetch initial batch
+    useDiscoveryStore.getState().reset();
     refetch();
   };
 
@@ -222,12 +270,13 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
 
   return {
     // Data
-    profiles,
+    profiles: profilesQueue,
     currentProfile: getCurrentProfile(),
     currentIndex,
     hasProfiles: hasProfiles(),
     notifications,
     notificationCount: Array.isArray(notifications) ? notifications.length : 0,
+    remainingProfilesCount: getRemainingProfilesCount(),
 
     // Modal state
     showMatchModal,
@@ -235,6 +284,7 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
 
     // Loading and error states
     isLoading,
+    isLoadingBatch,
     error,
 
     // Actions

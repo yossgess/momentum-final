@@ -98,7 +98,7 @@ export const useDiscoverFiltersStore = create<DiscoverFiltersStore>((set, get) =
   loadFilterPreferences: async () => {
     const { user } = useAuthStore.getState();
     if (!user) {
-      console.log('No authenticated user, skipping filter preferences load');
+      // console.log('No authenticated user, skipping filter preferences load');
       return;
     }
 
@@ -120,7 +120,7 @@ export const useDiscoverFiltersStore = create<DiscoverFiltersStore>((set, get) =
           distanceKm: preferences.distanceKm,
         });
         
-        console.log('Filter preferences loaded from database');
+        // console.log('Filter preferences loaded from database');
       }
     } catch (error) {
       console.error('Failed to load filter preferences:', error);
@@ -130,7 +130,7 @@ export const useDiscoverFiltersStore = create<DiscoverFiltersStore>((set, get) =
   saveFilterPreferences: async () => {
     const { user } = useAuthStore.getState();
     if (!user) {
-      console.log('No authenticated user, skipping filter preferences save');
+      // console.log('No authenticated user, skipping filter preferences save');
       return;
     }
 
@@ -153,7 +153,7 @@ export const useDiscoverFiltersStore = create<DiscoverFiltersStore>((set, get) =
         distanceKm: preferences.distanceKm,
       });
       
-      console.log('Filter preferences saved to database');
+      // console.log('Filter preferences saved to database');
     } catch (error) {
       console.error('Failed to save filter preferences:', error);
     }

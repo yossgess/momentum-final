@@ -1,5 +1,5 @@
-# 🌊 KINEVO WindSurfRules
-> Persistent rules for AI-assisted development in the Momentum / KINEVO React Native mobile app.
+# 🌊 Momentum WindSurfRules
+> Persistent rules for AI-assisted development in the Momentum / Momentum React Native mobile app.
 
 🧠 CONTEXT
 This is a sports partner discovery app built using React Native (Expo), Zustand, React Query, and Supabase. The app is bilingual (EN/FR), location-aware, and follows atomic design with modular architecture.
@@ -81,7 +81,7 @@ This is a sports partner discovery app built using React Native (Expo), Zustand,
 
 ## 8. 🧭 Navigation & Routing
 
-- ✅ Use deep linking structure: `kinevo://discovery`, `kinevo://chat/:id`
+- ✅ Use deep linking structure: `Momentum://discovery`, `://chat/:id`
 - ✅ Navigation param types must be declared in `src/navigation/types.ts`
 - ✅ Bottom navigation bar must show badge for new matches or messages
 - ✅ Animate screen transitions when navigating modally

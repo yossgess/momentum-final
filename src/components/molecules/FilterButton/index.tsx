@@ -10,12 +10,11 @@ import { logEvent, Events } from '../../../shared/utils/analytics';
 export const FilterButton: React.FC<FilterButtonProps> = ({
   onPress,
   active = false,
-  badgeCount = 0,
   label,
   style,
 }) => {
   const handlePress = () => {
-    logEvent(Events.FILTER_APPLIED, { active, badgeCount });
+    logEvent(Events.FILTER_APPLIED, { active });
     onPress();
   };
 
@@ -33,14 +32,6 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         size={28}
         color={theme.colors.text.primary}
       />
-      
-      {badgeCount > 0 && (
-        <View style={styles.badge}>
-          <Typography variant="caption" color="primary" style={styles.badgeText}>
-            {badgeCount > 9 ? '9+' : badgeCount}
-          </Typography>
-        </View>
-      )}
     </Pressable>
   );
 };

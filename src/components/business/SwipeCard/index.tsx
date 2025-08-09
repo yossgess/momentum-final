@@ -14,6 +14,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
   onSwipeLeft,
   onSwipeRight,
   onPressImage,
+  onPress,
   style,
   fullScreen = false,
 }) => {
@@ -22,17 +23,16 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
   const handleImagePress = (imageIndex: number) => {
     logEvent(Events.PROFILE_VIEWED, { profileId: profile.id, imageIndex });
     onPressImage?.(imageIndex);
+    // Also trigger the main onPress handler if provided (for ProfileModal)
+    onPress?.();
   };
 
   const handleIndexChange = (newIndex: number) => {
     setActiveIndex(newIndex);
   };
 
-  return (
-    <View style={[
-      fullScreen ? styles.fullScreenContainer : styles.container, 
-      style
-    ]}>
+  const CardContent = (
+    <>
       {/* Full-screen image carousel */}
       <ImageCarousel
         images={profile.images}
@@ -64,6 +64,29 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
           style={styles.sports}
         />
       </View>
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <Pressable 
+        style={[
+          fullScreen ? styles.fullScreenContainer : styles.container, 
+          style
+        ]}
+        onPress={onPress}
+      >
+        {CardContent}
+      </Pressable>
+    );
+  }
+
+  return (
+    <View style={[
+      fullScreen ? styles.fullScreenContainer : styles.container, 
+      style
+    ]}>
+      {CardContent}
     </View>
   );
 };

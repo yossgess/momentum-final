@@ -35,7 +35,7 @@ export class FilterPreferencesService {
       throw error;
     }
 
-    console.log('Filter preferences saved successfully for user:', userId);
+    // console.log('Filter preferences saved successfully for user:', userId);
   }
 
   /**
@@ -51,7 +51,7 @@ export class FilterPreferencesService {
     if (error) {
       if (error.code === 'PGRST116') {
         // No preferences found - this is normal for new users
-        console.log('No filter preferences found for user:', userId);
+        // console.log('No filter preferences found for user:', userId);
         return null;
       }
       console.error('Failed to load filter preferences:', error);
@@ -91,7 +91,7 @@ export class FilterPreferencesService {
     };
 
     await this.saveFilterPreferences(userId, defaultPreferences);
-    console.log('Default filter preferences set from onboarding for user:', userId);
+    // console.log('Default filter preferences set from onboarding for user:', userId);
   }
 }
 

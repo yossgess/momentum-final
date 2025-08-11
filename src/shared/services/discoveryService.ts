@@ -168,7 +168,7 @@ export async function getDiscoveryProfiles(batchParams?: BatchFetchParams): Prom
     // Convert profiles to ProfileWithDistance format with sports data
     const profilesWithDistance: ProfileWithDistance[] = profiles.map((profile: any) => ({
       ...profile,
-      distanceInKm: profile.distance_km || undefined, // Map server distance field
+      distanceInKm: profile.distance_km !== null ? profile.distance_km : undefined, // Map server distance field, preserve 0 values
       userSports: profile.user_sports || [], // User's sports from filter_preferences
       commonSports: profile.common_sports || [], // Common sports with current user
     }));

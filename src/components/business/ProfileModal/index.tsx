@@ -12,6 +12,7 @@ import { NopeButton } from '../NopeButton';
 import { RevertButton } from '../RevertButton';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { t } from '../../../shared/utils/i18n';
+import { formatDistance } from '../../../shared/utils/formatDistance';
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   visible,
@@ -140,7 +141,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 />
                 <Typography variant="body" style={styles.locationText}>
                   {profile.lat && profile.lng ? 
-                    `${((profile as any).distance_km || 0).toFixed(1)} km away` : 
+                    `${formatDistance((profile as any).distance_km)} away` : 
                     t('discovery.locationUnknown')
                   }
                 </Typography>

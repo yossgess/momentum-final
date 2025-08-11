@@ -6,9 +6,11 @@ import {
   Animated,
   Dimensions,
   Alert,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 // Components
 import { Typography } from '../../../components/atoms/Typography';
@@ -50,6 +52,7 @@ export const DiscoveryScreen: React.FC = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [hasLocation, setHasLocation] = useState<boolean | null>(null); // null = checking, true/false = result
+  const [showActionIcon, setShowActionIcon] = useState<'challenge' | 'nope' | null>(null);
   
   // Filter store
   const { distanceKm, ageRange, interestedIn, sports, isApplied } = useDiscoverFiltersStore();
@@ -93,6 +96,7 @@ export const DiscoveryScreen: React.FC = () => {
 
   // Animation refs
   const cardAnimatedValue = useRef(new Animated.Value(0)).current;
+  const iconAnimatedValue = useRef(new Animated.Value(0)).current;
 
   // Check user location on component mount
   React.useEffect(() => {
@@ -174,6 +178,34 @@ export const DiscoveryScreen: React.FC = () => {
     }
   }, [error, refreshProfiles]);
 
+  // Icon overlay animation
+  const animateActionIcon = (actionType: 'challenge' | 'nope') => {
+    setShowActionIcon(actionType);
+    
+    // Log animation event for analytics
+    logEvent(Events.PROFILE_VIEWED, {
+      profileId: currentProfile?.id || 'unknown',
+      action: `${actionType}_icon_animation`,
+      animationType: 'fade_scale',
+    });
+    
+    // Reset icon animation
+    iconAnimatedValue.setValue(0);
+    
+    // Animate icon appearance (fade in + scale)
+    Animated.timing(iconAnimatedValue, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      // After icon animation, wait briefly then hide icon and start card transition
+      setTimeout(() => {
+        setShowActionIcon(null);
+        iconAnimatedValue.setValue(0);
+      }, 150);
+    });
+  };
+
   // Card transition animation
   const animateCardTransition = (direction: 'up' | 'down') => {
     const toValue = direction === 'up' ? -SCREEN_HEIGHT : SCREEN_HEIGHT;
@@ -202,11 +234,15 @@ export const DiscoveryScreen: React.FC = () => {
       targetUserSports: '', // Sports data now comes from filter_preferences table
     });
     
-    // Animate card transition
-    animateCardTransition('up');
+    // Show action icon first, then animate card transition
+    animateActionIcon('challenge');
     
-    // Use service layer to handle swipe
-    handleSwipe('challenge');
+    // Delay card transition to sync with icon animation
+    setTimeout(() => {
+      animateCardTransition('up');
+      // Use service layer to handle swipe
+      handleSwipe('challenge');
+    }, 350); // 200ms icon animation + 150ms delay
   };
 
   // Handle Nope action
@@ -217,11 +253,15 @@ export const DiscoveryScreen: React.FC = () => {
       targetUserId: currentProfile.id,
     });
     
-    // Animate card transition
-    animateCardTransition('up');
+    // Show action icon first, then animate card transition
+    animateActionIcon('nope');
     
-    // Use service layer to handle swipe
-    handleSwipe('nope');
+    // Delay card transition to sync with icon animation
+    setTimeout(() => {
+      animateCardTransition('up');
+      // Use service layer to handle swipe
+      handleSwipe('nope');
+    }, 350); // 200ms icon animation + 150ms delay
   };
 
   // Handle Revert action
@@ -366,6 +406,40 @@ export const DiscoveryScreen: React.FC = () => {
             onPress={handleProfilePress}
             style={styles.swipeCard}
           />
+          
+          {/* Action Icon Overlay */}
+          {showActionIcon && (
+            <Animated.View 
+              style={[
+                styles.actionIconOverlay,
+                {
+                  opacity: iconAnimatedValue,
+                  transform: [
+                    {
+                      scale: iconAnimatedValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              {showActionIcon === 'challenge' ? (
+                <Image
+                  source={require('../../../../assets/concurrence.png')}
+                  style={styles.challengeIcon}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Ionicons
+                  name="close"
+                  size={80}
+                  color={theme.colors.status.error}
+                />
+              )}
+            </Animated.View>
+          )}
         </Animated.View>
       )}
 
@@ -590,5 +664,20 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: theme.spacing.md,
     color: theme.colors.text.secondary,
+  },
+  actionIconOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1001, // Above SwipeCard but below buttons
+  },
+  challengeIcon: {
+    width: 80,
+    height: 80,
+    tintColor: theme.colors.primary.main,
   },
 });

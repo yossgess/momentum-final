@@ -8,6 +8,7 @@ import { SwipeCardProps } from './SwipeCard.types';
 import { styles } from './SwipeCard.styles';
 import { theme } from '../../../theme';
 import { logEvent, Events } from '../../../shared/utils/analytics';
+import { formatDistance } from '../../../shared/utils/formatDistance';
 
 export const SwipeCard: React.FC<SwipeCardProps> = ({
   profile,
@@ -50,8 +51,8 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
         <View style={styles.locationRow}>
           <Ionicons name="location-outline" size={16} color={theme.colors.text.primary} />
           <Typography variant="body" color="primary" style={styles.locationText}>
-            {profile.distanceInKm ? 
-              `${profile.distanceInKm.toFixed(1)} km away` : 
+            {profile.distanceInKm !== undefined ? 
+              `${formatDistance(profile.distanceInKm)} away` : 
               profile.location || 'Location unknown'
             }
           </Typography>

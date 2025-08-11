@@ -18,8 +18,10 @@ async function testRPCFunction() {
     // Test with Sofia's user ID from mock data
     const testUserId = '550e8400-e29b-41d4-a716-446655440001';
     
-    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles_optimized', {
-      user_id: testUserId
+    const { data: profiles, error } = await supabase.rpc('get_discovery_profiles_batch', {
+      user_id: testUserId,
+      limit_count: 10,
+      offset_count: 0
     });
 
     if (error) {

@@ -50,16 +50,21 @@ export const OnboardingSlider: React.FC = () => {
     }
   };
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
     logEvent(Events.ONBOARDING_COMPLETED, {
       totalSlides: onboardingSlides.length,
     });
     
-    // Mark onboarding as seen
+    // Mark onboarding as seen using the navigation service
+    const { navigationService } = await import('../../../shared/services/navigationService');
+    await navigationService.markOnboardingSeen();
+    
+    // Mark onboarding as seen in the store as well (for backward compatibility)
     markOnboardingAsSeen();
     
-    // Navigation will happen automatically due to conditional rendering
-    // When hasSeenOnboarding becomes true, AppNavigator will show Auth flow
+    // The AppNavigator will automatically re-evaluate and show Auth screen
+    // when hasSeenOnboarding becomes true
+    console.log('[ONBOARDING] Onboarding completed, navigation should re-evaluate');
   };
 
   const handlePageSelected = (event: any) => {

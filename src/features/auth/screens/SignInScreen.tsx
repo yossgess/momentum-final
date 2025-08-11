@@ -146,11 +146,7 @@ export const SignInScreen: React.FC = () => {
   // Forgot password handler
   const handleForgotPassword = () => {
     logEvent(Events.BUTTON_PRESSED, { buttonName: 'ForgotPassword' });
-    Alert.alert(
-      'Forgot Password', 
-      'Password reset functionality will be implemented with Supabase integration.',
-      [{ text: 'OK' }]
-    );
+    navigation.navigate('PasswordReset');
   };
 
   return (

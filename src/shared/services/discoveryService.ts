@@ -106,13 +106,14 @@ export async function getDiscoveryProfiles(batchParams?: BatchFetchParams): Prom
     }
 
     if (!userProfile?.lat || !userProfile?.lng) {
-      console.log('User location not found - blocking discovery');
+      console.log('User location not found - returning empty results for graceful UX');
       logEvent('discovery_blocked_no_location', {
         userId: user.id,
         hasLat: !!userProfile?.lat,
         hasLng: !!userProfile?.lng
       });
-      throw new Error('LOCATION_REQUIRED');
+      // Return empty array instead of throwing error to allow graceful UX handling
+      return [];
     }
 
     // console.log('Fetching discovery profiles using saved filter preferences for user:', user.id);

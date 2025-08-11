@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography } from '../../../components/atoms/Typography';
 import { Button } from '../../../components/atoms/Button';
-import { Input } from '../../../components/atoms/Input';
+import { InputField } from '../../../components/atoms/InputField';
+import { PasswordStrengthIndicator } from '../../../components/atoms/PasswordStrengthIndicator';
 import { theme } from '../../../theme';
 import { t } from '../../../shared/utils/i18n';
 import { useAuthStore } from '../../../shared/stores/authStore';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { AuthStackParamList } from '../../../shared/types/navigation';
+import { AuthValidation } from '../../../shared/utils/authValidation';
 
 type SignupScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'Signup'>;
 
@@ -39,20 +42,22 @@ export const SignupScreen: React.FC = () => {
       confirmPassword?: string; 
     } = {};
     
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
+    // Email validation
+    const emailValidation = AuthValidation.validateEmail(email);
+    if (!emailValidation.isValid) {
+      newErrors.email = emailValidation.error;
     }
     
-    if (!password.trim()) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    // Password validation
+    const passwordValidation = AuthValidation.validatePassword(password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.feedback[0] || t('auth.errors.passwordTooWeak');
     }
     
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    // Password confirmation validation
+    const confirmValidation = AuthValidation.validatePasswordConfirmation(password, confirmPassword);
+    if (!confirmValidation.isValid) {
+      newErrors.confirmPassword = confirmValidation.error;
     }
     
     setErrors(newErrors);
@@ -64,10 +69,27 @@ export const SignupScreen: React.FC = () => {
 
     try {
       await signup(email, password, userType);
-      logEvent(Events.SIGNUP_SUCCESS, { email, userType });
+      
+      // Navigate to email confirmation screen after successful signup
+      navigation.navigate('EmailConfirmation', { email });
+      logEvent(Events.SIGNUP_SUCCESS, { email, userType, requiresConfirmation: true });
     } catch (error) {
-      logEvent(Events.SIGNUP_FAILED, { email, userType, error: String(error) });
-      Alert.alert('Signup Failed', 'Please try again.');
+      const errorMessage = AuthValidation.parseAuthError(error);
+      logEvent(Events.SIGNUP_FAILED, { email, userType, error: errorMessage });
+      
+      // Handle specific error cases
+      if (errorMessage.includes('already exists')) {
+        Alert.alert(
+          t('auth.errors.emailAlreadyExists'),
+          'Would you like to sign in instead?',
+          [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('auth.signIn'), onPress: () => navigation.navigate('SignIn') },
+          ]
+        );
+      } else {
+        Alert.alert('Signup Failed', errorMessage);
+      }
     }
   };
 
@@ -110,33 +132,47 @@ export const SignupScreen: React.FC = () => {
       <View style={styles.form}>
         {/* MVP: User type selector removed - defaulting to sports enthusiast */}
 
-        <Input
+        <InputField
           label={t('auth.email')}
           value={email}
           onChangeText={setEmail}
-          placeholder="Enter your email"
+          placeholder={t('auth.emailPlaceholder')}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-          error={errors.email}
+          errorText={errors.email}
         />
 
-        <Input
-          label={t('auth.password')}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Enter your password"
-          secureTextEntry
-          error={errors.password}
-        />
+        <View style={styles.passwordContainer}>
+          <InputField
+            label={t('auth.password')}
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              // Clear password error when user starts typing
+              if (errors.password) {
+                setErrors(prev => ({ ...prev, password: undefined }));
+              }
+            }}
+            placeholder={t('auth.passwordPlaceholder')}
+            variant="password"
+            errorText={errors.password}
+          />
+          
+          {/* Password Strength Indicator */}
+          <PasswordStrengthIndicator 
+            password={password} 
+            showFeedback={!!password && password.length > 0}
+          />
+        </View>
 
-        <Input
-          label="Confirm Password"
+        <InputField
+          label={t('auth.confirmPassword')}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
-          placeholder="Confirm your password"
-          secureTextEntry
-          error={errors.confirmPassword}
+          placeholder={t('auth.confirmPasswordPlaceholder')}
+          variant="password"
+          errorText={errors.confirmPassword}
         />
 
         <Button
@@ -206,6 +242,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center', // Center the form content vertically
     paddingVertical: theme.spacing.lg, // Added vertical padding to form
+  },
+  passwordContainer: {
+    marginVertical: theme.spacing.md,
   },
   signupButton: {
     marginTop: theme.spacing['3xl'], // Increased for better separation

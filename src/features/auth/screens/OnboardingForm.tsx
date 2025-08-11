@@ -84,12 +84,15 @@ export const OnboardingForm: React.FC = () => {
 
       // Capture user location before submitting
       let userLocation: { lat: number; lng: number } | null = null;
+      let locationPermissionRequested = false;
+      
       try {
         // Request location permissions
         const { status } = await Location.requestForegroundPermissionsAsync();
+        locationPermissionRequested = true;
         
         if (status === 'granted') {
-          logEvent('location_permission', { status: 'granted' });
+          logEvent('location_permission', { status: 'granted', context: 'onboarding' });
           
           // Get current position
           const location = await Location.getCurrentPositionAsync({
@@ -105,14 +108,18 @@ export const OnboardingForm: React.FC = () => {
           logEvent('location_captured', {
             lat: userLocation.lat,
             lng: userLocation.lng,
+            context: 'onboarding'
           });
         } else {
-          logEvent('location_permission', { status: 'denied' });
-          console.warn('Location permission denied');
+          logEvent('location_permission', { status: 'denied', context: 'onboarding' });
+          console.log('[ONBOARDING] Location permission denied during onboarding - user will not see EmptyLocationScreen');
         }
       } catch (error) {
         console.warn('Failed to get location:', error);
-        logEvent('location_capture_failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+        logEvent('location_capture_failed', { 
+          error: error instanceof Error ? error.message : 'Unknown error',
+          context: 'onboarding'
+        });
       }
 
       const uploadedPhotoUrls: string[] = [];
@@ -148,6 +155,7 @@ export const OnboardingForm: React.FC = () => {
         avatar_urls: updatedFormData.photos.map(photo => photo.uri),
         lat: userLocation?.lat || null,
         lng: userLocation?.lng || null,
+        location_permission_requested: locationPermissionRequested,
       };
       
       if (existingProfile) {

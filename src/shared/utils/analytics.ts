@@ -76,6 +76,15 @@ export const Events = {
   SIGNUP_FAILED: 'signup_failed',
   LOGOUT: 'logout',
   
+  // Email & Password Management
+  EMAIL_CONFIRMATION_RESENT: 'email_confirmation_resent',
+  EMAIL_CONFIRMATION_FAILED: 'email_confirmation_failed',
+  EMAIL_UPDATED: 'email_updated',
+  EMAIL_UPDATE_FAILED: 'email_update_failed',
+  PASSWORD_RESET_REQUESTED: 'password_reset_requested',
+  PASSWORD_RESET_COMPLETED: 'password_reset_completed',
+  PASSWORD_STRENGTH_CHECKED: 'password_strength_checked',
+  
   PROFILE_VIEWED: 'profile_viewed',
   PROFILE_EDITED: 'profile_edited',
   PROFILE_PHOTO_UPLOADED: 'profile_photo_uploaded',

@@ -18,6 +18,7 @@ export interface UserProfile {
     city: string;
     country: string;
   };
+  location_permission_requested?: boolean;
   sports: Array<{
     name: string;
     skillLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';

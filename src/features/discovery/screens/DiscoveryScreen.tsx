@@ -36,16 +36,20 @@ import { getSportIcon } from '../../../constants/sportIcons';
 import { useDiscovery } from '../../../shared/hooks/useDiscovery';
 import { DiscoveryFilters, ProfileWithDistance } from '../../../shared/services/discoveryService';
 import { ProfileRow } from '../../../shared/types/database';
+import { locationService } from '../../../shared/services/locationService';
+import { useAuthStore } from '../../../shared/stores/authStore';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const DiscoveryScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { user } = useAuthStore();
   
   // Local state
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [hasLocation, setHasLocation] = useState<boolean | null>(null); // null = checking, true/false = result
   
   // Filter store
   const { distanceKm, ageRange, interestedIn, sports, isApplied } = useDiscoverFiltersStore();
@@ -89,6 +93,37 @@ export const DiscoveryScreen: React.FC = () => {
 
   // Animation refs
   const cardAnimatedValue = useRef(new Animated.Value(0)).current;
+
+  // Check user location on component mount
+  React.useEffect(() => {
+    const checkLocation = async () => {
+      if (user?.id) {
+        const userHasLocation = await locationService.checkUserHasLocation(user.id);
+        
+        // If user doesn't have location, check if permission was already requested during onboarding
+        if (!userHasLocation) {
+          try {
+            const { useUserStore } = await import('../../../shared/stores/userStore');
+            const profile = useUserStore.getState().profile;
+            
+            // If location permission was already requested during onboarding and denied,
+            // don't show EmptyLocationScreen - proceed with discovery without location
+            if (profile?.location_permission_requested) {
+              console.log('[DISCOVERY] Location permission was already requested during onboarding - proceeding without location');
+              setHasLocation(true); // Allow discovery to proceed without location
+              return;
+            }
+          } catch (error) {
+            console.warn('[DISCOVERY] Failed to check onboarding location permission state:', error);
+          }
+        }
+        
+        setHasLocation(userHasLocation);
+      }
+    };
+
+    checkLocation();
+  }, [user?.id]);
 
   // Mock current user for MatchModal - TODO: Get from auth store
   const currentUser = {
@@ -335,12 +370,21 @@ export const DiscoveryScreen: React.FC = () => {
       )}
 
       {/* Location Required State - Show when location is missing */}
-      {error === 'LOCATION_REQUIRED' && !currentProfile && (
-        <LocationEmptyState onLocationUpdated={refreshProfiles} />
+      {hasLocation === false && (
+        <LocationEmptyState 
+          onLocationUpdated={() => {
+            setHasLocation(null); // Reset to checking state
+            // Re-check location after update
+            if (user?.id) {
+              locationService.checkUserHasLocation(user.id).then(setHasLocation);
+            }
+            refreshProfiles();
+          }} 
+        />
       )}
 
-      {/* Empty State - Show when no current profile and no location error */}
-      {!currentProfile && error !== 'LOCATION_REQUIRED' && (
+      {/* Empty State - Show when no current profile and location is available */}
+      {!currentProfile && hasLocation === true && (
         <EmptyState
           icon="people-outline"
           title={t('discovery.noMoreProfiles')}
@@ -349,6 +393,16 @@ export const DiscoveryScreen: React.FC = () => {
           onAction={handleEditFilters}
           style={styles.emptyState}
         />
+      )}
+
+      {/* Loading State - Show when checking location or loading profiles */}
+      {(hasLocation === null || (hasLocation === true && isLoading && !currentProfile)) && (
+        <View style={styles.loadingContainer}>
+          <Loader size="large" />
+          <Typography variant="body" style={styles.loadingText}>
+            {hasLocation === null ? t('discovery.checkingLocation') : t('discovery.loading')}
+          </Typography>
+        </View>
       )}
 
       {/* Match Modal */}

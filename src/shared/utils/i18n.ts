@@ -200,22 +200,6 @@ export const translations: Translations = {
     en: 'Try adjusting your filters to find more people',
     fr: 'Essayez d\'ajuster vos filtres pour trouver plus de personnes',
   },
-  'discovery.refreshProfiles': {
-    en: 'Refresh',
-    fr: 'Actualiser',
-  },
-  'discovery.loading': {
-    en: 'Loading profiles...',
-    fr: 'Chargement des profils...',
-  },
-  'discovery.editFilters': {
-    en: 'Edit Filters',
-    fr: 'Modifier les filtres',
-  },
-  'discovery.loadingMoreProfiles': {
-    en: 'Loading more profiles...',
-    fr: 'Chargement de plus de profils...',
-  },
   'discovery.profileDetails': {
     en: 'Profile Details',
     fr: 'Détails du profil',
@@ -819,6 +803,10 @@ export const translations: Translations = {
     en: 'Password',
     fr: 'Mot de passe',
   },
+  'auth.confirmPassword': {
+    en: 'Confirm Password',
+    fr: 'Confirmer le mot de passe',
+  },
   'auth.signIn': {
     en: 'Sign In',
     fr: 'Se connecter',
@@ -830,6 +818,10 @@ export const translations: Translations = {
   'auth.passwordPlaceholder': {
     en: 'Enter your password',
     fr: 'Entrez votre mot de passe',
+  },
+  'auth.confirmPasswordPlaceholder': {
+    en: 'Confirm your password',
+    fr: 'Confirmez votre mot de passe',
   },
   'auth.forgotPassword': {
     en: 'Forgot Password?',
@@ -847,6 +839,151 @@ export const translations: Translations = {
     en: 'Invalid email or password',
     fr: 'E-mail ou mot de passe invalide',
   },
+
+  // Auth Error Messages
+  'auth.errors.emailRequired': {
+    en: 'Email is required',
+    fr: 'L\'email est requis',
+  },
+  'auth.errors.emailInvalid': {
+    en: 'Please enter a valid email address',
+    fr: 'Veuillez entrer une adresse email valide',
+  },
+  'auth.errors.emailTypo': {
+    en: 'Did you mean {{suggested}}?',
+    fr: 'Vouliez-vous dire {{suggested}} ?',
+  },
+  'auth.errors.emailAlreadyExists': {
+    en: 'An account with this email already exists. Try signing in instead.',
+    fr: 'Un compte avec cet email existe déjà. Essayez de vous connecter à la place.',
+  },
+  'auth.errors.emailNotConfirmed': {
+    en: 'Please check your email and click the confirmation link to activate your account.',
+    fr: 'Veuillez vérifier votre email et cliquer sur le lien de confirmation pour activer votre compte.',
+  },
+  'auth.errors.passwordRequired': {
+    en: 'Password is required',
+    fr: 'Le mot de passe est requis',
+  },
+  'auth.errors.passwordTooShort': {
+    en: 'Password must be at least 8 characters long',
+    fr: 'Le mot de passe doit contenir au moins 8 caractères',
+  },
+  'auth.errors.passwordTooWeak': {
+    en: 'Password is too weak. Please choose a stronger password.',
+    fr: 'Le mot de passe est trop faible. Veuillez choisir un mot de passe plus fort.',
+  },
+  'auth.errors.passwordNeedsLowercase': {
+    en: 'Add at least one lowercase letter',
+    fr: 'Ajoutez au moins une lettre minuscule',
+  },
+  'auth.errors.passwordNeedsUppercase': {
+    en: 'Add at least one uppercase letter',
+    fr: 'Ajoutez au moins une lettre majuscule',
+  },
+  'auth.errors.passwordNeedsNumber': {
+    en: 'Add at least one number',
+    fr: 'Ajoutez au moins un chiffre',
+  },
+  'auth.errors.passwordNeedsSpecial': {
+    en: 'Add at least one special character (!@#$%^&*)',
+    fr: 'Ajoutez au moins un caractère spécial (!@#$%^&*)',
+  },
+  'auth.errors.passwordTooCommon': {
+    en: 'This password is too common. Please choose something more unique.',
+    fr: 'Ce mot de passe est trop commun. Veuillez choisir quelque chose de plus unique.',
+  },
+  'auth.errors.passwordNoSequential': {
+    en: 'Avoid sequential characters like "123" or "abc"',
+    fr: 'Évitez les caractères séquentiels comme "123" ou "abc"',
+  },
+  'auth.errors.confirmPasswordRequired': {
+    en: 'Please confirm your password',
+    fr: 'Veuillez confirmer votre mot de passe',
+  },
+  'auth.errors.passwordsDoNotMatch': {
+    en: 'Passwords do not match',
+    fr: 'Les mots de passe ne correspondent pas',
+  },
+  'auth.errors.invalidCredentials': {
+    en: 'Invalid email or password. Please check your credentials and try again.',
+    fr: 'Email ou mot de passe invalide. Veuillez vérifier vos identifiants et réessayer.',
+  },
+  'auth.errors.rateLimited': {
+    en: 'Too many attempts. Please wait a moment before trying again.',
+    fr: 'Trop de tentatives. Veuillez attendre un moment avant de réessayer.',
+  },
+  'auth.errors.networkError': {
+    en: 'Network error. Please check your connection and try again.',
+    fr: 'Erreur réseau. Veuillez vérifier votre connexion et réessayer.',
+  },
+  'auth.errors.unknown': {
+    en: 'An unexpected error occurred. Please try again.',
+    fr: 'Une erreur inattendue s\'est produite. Veuillez réessayer.',
+  },
+
+  // Password Strength
+  'auth.passwordStrength.weak': {
+    en: 'Weak',
+    fr: 'Faible',
+  },
+  'auth.passwordStrength.fair': {
+    en: 'Fair',
+    fr: 'Correct',
+  },
+  'auth.passwordStrength.good': {
+    en: 'Good',
+    fr: 'Bon',
+  },
+  'auth.passwordStrength.strong': {
+    en: 'Strong',
+    fr: 'Fort',
+  },
+
+  // Email Confirmation
+  'auth.emailConfirmation.title': {
+    en: 'Check Your Email',
+    fr: 'Vérifiez Votre Email',
+  },
+  'auth.emailConfirmation.message': {
+    en: 'We\'ve sent a confirmation link to {{email}}. Click the link to activate your account and start your sports journey!',
+    fr: 'Nous avons envoyé un lien de confirmation à {{email}}. Cliquez sur le lien pour activer votre compte et commencer votre parcours sportif !',
+  },
+  'auth.emailConfirmation.resend': {
+    en: 'Resend Email',
+    fr: 'Renvoyer l\'Email',
+  },
+  'auth.emailConfirmation.changeEmail': {
+    en: 'Change Email',
+    fr: 'Changer l\'Email',
+  },
+  'auth.emailConfirmation.resendSuccess': {
+    en: 'Confirmation email sent successfully!',
+    fr: 'Email de confirmation envoyé avec succès !',
+  },
+
+  // Password Reset
+  'auth.passwordReset.title': {
+    en: 'Reset Password',
+    fr: 'Réinitialiser le Mot de Passe',
+  },
+  'auth.passwordReset.message': {
+    en: 'Enter your email address and we\'ll send you a link to reset your password.',
+    fr: 'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
+  },
+  'auth.passwordReset.send': {
+    en: 'Send Reset Link',
+    fr: 'Envoyer le lien de réinitialisation',
+  },
+  'auth.passwordReset.success': {
+    en: 'Password reset email sent! Check your inbox and follow the instructions.',
+    fr: 'E-mail de réinitialisation envoyé ! Vérifiez votre boîte de réception et suivez les instructions.',
+  },
+  'auth.passwordReset.backToSignIn': {
+    en: 'Back to Sign In',
+    fr: 'Retour à la connexion',
+  },
+
 
   // Onboarding
   'onboarding.title1': {
@@ -1093,6 +1230,36 @@ export const translations: Translations = {
   'availability.displayMode': {
     en: 'Display Mode',
     fr: 'Mode Affichage',
+  },
+
+  // Discovery translations
+  'discovery.loading': {
+    en: 'Finding profiles...',
+    fr: 'Recherche de profils...',
+  },
+  'discovery.checkingLocation': {
+    en: 'Checking location...',
+    fr: 'Vérification de la localisation...',
+  },
+  'discovery.noMoreProfiles': {
+    en: 'No more profiles',
+    fr: 'Plus de profils',
+  },
+  'discovery.tryAdjustingFilters': {
+    en: 'Try adjusting your filters to discover more people',
+    fr: 'Essayez d\'ajuster vos filtres pour découvrir plus de personnes',
+  },
+  'discovery.editFilters': {
+    en: 'Edit Filters',
+    fr: 'Modifier les filtres',
+  },
+  'discovery.refreshProfiles': {
+    en: 'Refresh',
+    fr: 'Actualiser',
+  },
+  'discovery.loadingMoreProfiles': {
+    en: 'Loading more profiles...',
+    fr: 'Chargement de plus de profils...',
   },
 };
 

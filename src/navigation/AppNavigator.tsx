@@ -22,6 +22,7 @@ export const AppNavigator: React.FC = () => {
   const { hasSeenOnboarding } = useOnboardingStore();
   const [currentScreen, setCurrentScreen] = React.useState<NavigationScreen | null>(null);
   const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+  const [isProfileCheckComplete, setIsProfileCheckComplete] = React.useState<boolean>(false);
 
 
   React.useEffect(() => {
@@ -29,14 +30,33 @@ export const AppNavigator: React.FC = () => {
       try {
         console.log('[NAVIGATION] Initializing navigation system...');
         
-        // Initialize auth store first
+        // Initialize auth store first and wait for completion
         await useAuthStore.getState().initialize();
         
-        // Get user state for navigation decision
+        // Get fresh auth state after initialization
+        const authState = useAuthStore.getState();
+        console.log('[NAVIGATION] Auth state after initialization:', {
+          isAuthenticated: authState.isAuthenticated,
+          hasCompletedProfile: authState.hasCompletedProfile,
+          userId: authState.user?.id
+        });
+        
+        // If user is authenticated, explicitly wait for profile completion check
+        if (authState.isAuthenticated && authState.user) {
+          console.log('[NAVIGATION] User authenticated, checking profile completion...');
+          await authState.checkProfileCompletion(authState.user.id);
+          console.log('[NAVIGATION] Profile completion check finished');
+        }
+        
+        // Mark profile check as complete
+        setIsProfileCheckComplete(true);
+        
+        // Get final user state for navigation decision
+        const finalAuthState = useAuthStore.getState();
         const userState = await navigationService.getUserState({
-          isAuthenticated,
-          hasCompletedProfile,
-          user,
+          isAuthenticated: finalAuthState.isAuthenticated,
+          hasCompletedProfile: finalAuthState.hasCompletedProfile,
+          user: finalAuthState.user,
         });
 
         // Determine which screen to show based on consistent rules
@@ -48,12 +68,11 @@ export const AppNavigator: React.FC = () => {
         // Set the screen to show
         setCurrentScreen(decision.screen);
         
-
-        
       } catch (error) {
         console.error('[NAVIGATION] Initialization error:', error);
         // Fallback to auth screen on error
         setCurrentScreen('Auth');
+        setIsProfileCheckComplete(true);
       } finally {
         setIsInitialized(true);
       }
@@ -64,9 +83,16 @@ export const AppNavigator: React.FC = () => {
 
   // Re-evaluate navigation when auth state or onboarding state changes
   React.useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && isProfileCheckComplete) {
       const reevaluateNavigation = async () => {
         try {
+          console.log('[NAVIGATION] Re-evaluating navigation with state:', {
+            isAuthenticated,
+            hasCompletedProfile,
+            userId: user?.id,
+            hasSeenOnboarding
+          });
+          
           const userState = await navigationService.getUserState({
             isAuthenticated,
             hasCompletedProfile,
@@ -83,7 +109,7 @@ export const AppNavigator: React.FC = () => {
 
       reevaluateNavigation();
     }
-  }, [isAuthenticated, hasCompletedProfile, user, isInitialized, hasSeenOnboarding]);
+  }, [isAuthenticated, hasCompletedProfile, user, isInitialized, isProfileCheckComplete, hasSeenOnboarding]);
 
   // Load user profile when authenticated
   React.useEffect(() => {
@@ -100,8 +126,8 @@ export const AppNavigator: React.FC = () => {
     });
   };
 
-  // Show loading screen until initialization is complete
-  if (!isInitialized || !currentScreen) {
+  // Show loading screen until initialization and profile check are complete
+  if (!isInitialized || !isProfileCheckComplete || !currentScreen) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>

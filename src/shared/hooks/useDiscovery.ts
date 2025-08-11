@@ -20,6 +20,7 @@ import { Sport } from '../types/sports';
 
 export const useDiscovery = (filters: DiscoveryFilters) => {
   const queryClient = useQueryClient();
+  const [isHookInitialized, setIsHookInitialized] = React.useState(false);
   
   // Zustand store
   const {
@@ -103,9 +104,24 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
       .filter((sport): sport is Sport => sport !== undefined);
   }, []);
 
+  // Initialize hook with stable state
+  React.useEffect(() => {
+    const initializeHook = async () => {
+      console.log('[DISCOVERY_HOOK] Initializing useDiscovery hook...');
+      
+      // Small delay to ensure stable initialization
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      setIsHookInitialized(true);
+      console.log('[DISCOVERY_HOOK] Hook initialization complete');
+    };
+
+    initializeHook();
+  }, []);
+
   // Handle initial profiles fetch
   React.useEffect(() => {
-    if (initialProfiles) {
+    if (initialProfiles && isHookInitialized) {
       // Transform profiles to include Sport objects for components
       const transformedProfiles = initialProfiles.map(profile => ({
         ...profile,
@@ -122,7 +138,7 @@ export const useDiscovery = (filters: DiscoveryFilters) => {
         isInitialBatch: true,
       });
     }
-  }, [initialProfiles, transformSportsToObjects]);
+  }, [initialProfiles, isHookInitialized, transformSportsToObjects, setProfiles, setError, filters]);
 
   // Auto-fetch more profiles when running low (only when user has 5 or fewer profiles left)
   React.useEffect(() => {

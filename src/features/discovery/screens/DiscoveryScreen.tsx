@@ -53,6 +53,7 @@ export const DiscoveryScreen: React.FC = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [hasLocation, setHasLocation] = useState<boolean | null>(null); // null = checking, true/false = result
   const [showActionIcon, setShowActionIcon] = useState<'challenge' | 'nope' | null>(null);
+  const [isDiscoveryInitialized, setIsDiscoveryInitialized] = useState(false);
   
   // Filter store
   const { distanceKm, ageRange, interestedIn, sports, isApplied } = useDiscoverFiltersStore();
@@ -98,10 +99,25 @@ export const DiscoveryScreen: React.FC = () => {
   const cardAnimatedValue = useRef(new Animated.Value(0)).current;
   const iconAnimatedValue = useRef(new Animated.Value(0)).current;
 
+  // Initialize DiscoveryScreen with stable state
+  React.useEffect(() => {
+    const initializeDiscovery = async () => {
+      console.log('[DISCOVERY] Initializing DiscoveryScreen...');
+      
+      // Small delay to ensure navigation transition is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      setIsDiscoveryInitialized(true);
+      console.log('[DISCOVERY] DiscoveryScreen initialization complete');
+    };
+
+    initializeDiscovery();
+  }, []);
+
   // Check user location on component mount
   React.useEffect(() => {
     const checkLocation = async () => {
-      if (user?.id) {
+      if (user?.id && isDiscoveryInitialized) {
         const userHasLocation = await locationService.checkUserHasLocation(user.id);
         
         // If user doesn't have location, check if permission was already requested during onboarding
@@ -127,7 +143,7 @@ export const DiscoveryScreen: React.FC = () => {
     };
 
     checkLocation();
-  }, [user?.id]);
+  }, [user?.id, isDiscoveryInitialized]);
 
   // Mock current user for MatchModal - TODO: Get from auth store
   const currentUser = {
@@ -457,8 +473,18 @@ export const DiscoveryScreen: React.FC = () => {
         />
       )}
 
-      {/* Empty State - Show when no current profile and location is available */}
-      {!currentProfile && hasLocation === true && (
+      {/* Loading State - Show when loading profiles */}
+      {hasLocation === true && isLoading && !currentProfile && (
+        <View style={styles.loadingContainer}>
+          <Loader size="large" />
+          <Typography variant="body" style={styles.loadingText}>
+            {t('discovery.loading')}
+          </Typography>
+        </View>
+      )}
+
+      {/* Empty State - Show only when NOT loading and no profiles available */}
+      {hasLocation === true && !isLoading && !currentProfile && !hasProfiles && (
         <EmptyState
           icon="people-outline"
           title={t('discovery.noMoreProfiles')}
@@ -467,16 +493,6 @@ export const DiscoveryScreen: React.FC = () => {
           onAction={handleEditFilters}
           style={styles.emptyState}
         />
-      )}
-
-      {/* Loading State - Show when checking location or loading profiles */}
-      {(hasLocation === null || (hasLocation === true && isLoading && !currentProfile)) && (
-        <View style={styles.loadingContainer}>
-          <Loader size="large" />
-          <Typography variant="body" style={styles.loadingText}>
-            {hasLocation === null ? t('discovery.checkingLocation') : t('discovery.loading')}
-          </Typography>
-        </View>
       )}
 
       {/* Match Modal */}

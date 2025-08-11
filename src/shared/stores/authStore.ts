@@ -172,48 +172,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
-    const initAuth = async () => {
-      console.log('Initializing auth store...');
+    console.log('[AUTH] Initializing auth store...');
 
-      try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-        if (error) throw error;
+      if (error) throw error;
 
-        console.log('Got session from getSession:', session);
-        if (session) {
-          set({ session, user: session.user, isAuthenticated: true });
-          // Check if user has completed profile
-          await get().checkProfileCompletion(session.user.id);
-        }
-      } catch (err) {
-        console.error('Error while getting session [auth.getSession]:', err);
-        console.error('Session error details:', JSON.stringify(err, null, 2));
+      console.log('[AUTH] Got session from getSession:', !!session);
+      if (session) {
+        console.log('[AUTH] Setting authenticated user:', session.user.id);
+        set({ session, user: session.user, isAuthenticated: true });
+        
+        // CRITICAL: Wait for profile completion check to finish
+        console.log('[AUTH] Checking profile completion for user:', session.user.id);
+        await get().checkProfileCompletion(session.user.id);
+        console.log('[AUTH] Profile completion check finished');
+      } else {
+        console.log('[AUTH] No session found, user not authenticated');
+        set({ session: null, user: null, isAuthenticated: false, hasCompletedProfile: false });
       }
+    } catch (err) {
+      console.error('[AUTH] Error while getting session:', err);
+      console.error('[AUTH] Session error details:', JSON.stringify(err, null, 2));
+      // Set safe defaults on error
+      set({ session: null, user: null, isAuthenticated: false, hasCompletedProfile: false });
+    }
 
-      // Attach listener after initial session
-      console.log('Setting up auth state change listener...');
-      const { data: listener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          console.log('Auth state change:', event, session);
-          set({ session, user: session?.user || null, isAuthenticated: !!session });
-          
-          if (event === 'SIGNED_IN') {
-            logEvent(Events.LOGIN_SUCCESS, { userId: session?.user?.id });
-          } else if (event === 'SIGNED_OUT') {
-            logEvent(Events.LOGOUT);
-          }
+    // Attach listener after initial session
+    console.log('[AUTH] Setting up auth state change listener...');
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('[AUTH] Auth state change:', event, !!session);
+        set({ session, user: session?.user || null, isAuthenticated: !!session });
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          logEvent(Events.LOGIN_SUCCESS, { userId: session.user.id });
+          // Check profile completion for newly signed in users
+          await get().checkProfileCompletion(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          logEvent(Events.LOGOUT);
+          set({ hasCompletedProfile: false });
         }
-      );
+      }
+    );
 
-      return () => {
-        listener.subscription.unsubscribe();
-      };
-    };
-
-    initAuth();
+    // Store cleanup function for later use if needed
+    // For now, we don't return it to match the interface
+    console.log('[AUTH] Auth initialization complete');
   },
 }));

@@ -4,6 +4,8 @@ export type RootStackParamList = {
   OnboardingSlider: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   OnboardingForm: undefined;
+  WelcomeNew: { userName: string };
+  WelcomeBack: { userName: string };
   Main: NavigatorScreenParams<MainTabParamList>;
 };
 

@@ -9,6 +9,8 @@ import { navigationService, NavigationScreen } from '../shared/services/navigati
 import { logEvent, Events } from '../shared/utils/analytics';
 import { OnboardingSlider } from '../features/auth/screens/OnboardingSlider';
 import { OnboardingForm } from '../features/auth/screens/OnboardingForm';
+import { WelcomeNewScreen } from '../features/auth/screens/WelcomeNewScreen';
+import { WelcomeBackScreen } from '../features/auth/screens/WelcomeBackScreen';
 import { RootStackParamList } from '../shared/types/navigation';
 import { AuthNavigator } from './AuthNavigator';
 import { TabNavigator } from './TabNavigator';
@@ -123,6 +125,10 @@ export const AppNavigator: React.FC = () => {
             // Fallback screen to prevent empty navigator
             <Stack.Screen name="Auth" component={AuthNavigator} />
           )}
+          
+          {/* Welcome screens - available for navigation */}
+          <Stack.Screen name="WelcomeNew" component={WelcomeNewScreen} />
+          <Stack.Screen name="WelcomeBack" component={WelcomeBackScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       

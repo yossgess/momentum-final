@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useMutation } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 
@@ -31,6 +32,7 @@ import { t } from '../../../shared/utils/i18n';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { theme } from '../../../theme';
 import { categorizedSports, allSports } from '../../../constants/sports';
+import { RootStackParamList } from '../../../shared/types/navigation';
 
 const DAYS_OF_WEEK = [
   { key: 'monday', label: t('onboarding.form.monday') },
@@ -59,8 +61,10 @@ const INTEREST_OPTIONS = [
   { text: t('onboarding.form.any'), value: 'any' },
 ];
 
+type OnboardingFormNavigationProp = StackNavigationProp<RootStackParamList, 'OnboardingForm'>;
+
 export const OnboardingForm: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<OnboardingFormNavigationProp>();
   const { completeOnboarding } = useAuthStore();
   const {
     formData,
@@ -201,7 +205,11 @@ export const OnboardingForm: React.FC = () => {
         }
       }
       
+      // Complete onboarding and navigate to welcome screen
       completeOnboarding();
+      
+      // Navigate to welcome screen (name will be fetched from profile)
+      navigation.navigate('WelcomeNew', { userName: 'there' });
     },
     onError: (error: any) => {
       logEvent(Events.SIGNUP_FAILED, { error: error.message });

@@ -130,7 +130,7 @@ export const EmailConfirmationScreen: React.FC = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              error={emailError}
+              errorText={emailError}
             />
             
             <View style={styles.emailChangeButtons}>

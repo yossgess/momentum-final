@@ -109,25 +109,26 @@ export const SignupScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView 
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.header}>
-        <Typography variant="h2" color={theme.colors.text.primary} align="center">
-          {t('auth.signup')}
-        </Typography>
-        
-        <Typography 
-          variant="body" 
-          color={theme.colors.text.secondary} 
-          align="center"
-          style={styles.subtitle}
-        >
-          Join the Momentum community
-        </Typography>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Typography variant="h2" color={theme.colors.text.primary} align="center">
+            {t('auth.signup')}
+          </Typography>
+          
+          <Typography 
+            variant="body" 
+            color={theme.colors.text.secondary} 
+            align="center"
+            style={styles.subtitle}
+          >
+            Join the Momentum community
+          </Typography>
+        </View>
 
       <View style={styles.form}>
         {/* MVP: User type selector removed - defaulting to sports enthusiast */}
@@ -140,6 +141,7 @@ export const SignupScreen: React.FC = () => {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          leftIcon="mail"
           errorText={errors.email}
         />
 
@@ -156,6 +158,7 @@ export const SignupScreen: React.FC = () => {
             }}
             placeholder={t('auth.passwordPlaceholder')}
             variant="password"
+            leftIcon="lock-closed"
             errorText={errors.password}
           />
           
@@ -172,6 +175,7 @@ export const SignupScreen: React.FC = () => {
           onChangeText={setConfirmPassword}
           placeholder={t('auth.confirmPasswordPlaceholder')}
           variant="password"
+          leftIcon="lock-closed"
           errorText={errors.confirmPassword}
         />
 
@@ -219,7 +223,8 @@ export const SignupScreen: React.FC = () => {
           Already have an account? {t('auth.login')}
         </Button>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -227,8 +232,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.primary,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xl, // Added vertical padding for better distribution
+    paddingTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.lg,
   },
   header: {
     alignItems: 'center',

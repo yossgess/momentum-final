@@ -192,14 +192,6 @@ export const translations: Translations = {
     en: 'Error Loading Profiles',
     fr: 'Erreur de chargement des profils',
   },
-  'discovery.noMoreProfiles': {
-    en: 'No More Profiles',
-    fr: 'Plus de profils',
-  },
-  'discovery.tryAdjustingFilters': {
-    en: 'Try adjusting your filters to find more people',
-    fr: 'Essayez d\'ajuster vos filtres pour trouver plus de personnes',
-  },
   'discovery.profileDetails': {
     en: 'Profile Details',
     fr: 'Détails du profil',
@@ -1260,6 +1252,58 @@ export const translations: Translations = {
   'discovery.loadingMoreProfiles': {
     en: 'Loading more profiles...',
     fr: 'Chargement de plus de profils...',
+  },
+  
+  // Profile translations
+  'profile.signOut': {
+    en: 'Sign Out',
+    fr: 'Se déconnecter',
+  },
+  'profile.signOutConfirmation': {
+    en: 'Are you sure you want to sign out?',
+    fr: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+  },
+  'profile.signOutError': {
+    en: 'Failed to sign out. Please try again.',
+    fr: 'Échec de la déconnexion. Veuillez réessayer.',
+  },
+
+  // Welcome Screen translations
+  'welcome.newUser.title': {
+    en: 'Welcome to Momentum',
+    fr: 'Bienvenue sur Momentum',
+  },
+  'welcome.newUser.subtitle': {
+    en: 'Ready to find your perfect sports partner?',
+    fr: 'Prêt à trouver votre partenaire sportif parfait ?',
+  },
+  'welcome.newUser.description': {
+    en: 'Discover athletes near you, join exciting events, and challenge players on real courts.',
+    fr: 'Découvrez des athlètes près de vous, rejoignez des événements passionnants et défiez des joueurs sur de vrais terrains.',
+  },
+  'welcome.newUser.startExploring': {
+    en: 'Start Exploring',
+    fr: 'Commencer à Explorer',
+  },
+  'welcome.newUser.autoNavigate': {
+    en: 'You will be redirected automatically...',
+    fr: 'Vous serez redirigé automatiquement...',
+  },
+  'welcome.returningUser.title': {
+    en: 'Welcome back!',
+    fr: 'Bon retour',
+  },
+  'welcome.returningUser.subtitle': {
+    en: 'Ready to continue your sports journey?',
+    fr: 'Prêt à continuer votre parcours sportif ?',
+  },
+  'welcome.returningUser.continueButton': {
+    en: 'Continue',
+    fr: 'Continuer',
+  },
+  'welcome.returningUser.autoNavigate': {
+    en: 'You will be redirected automatically...',
+    fr: 'Vous serez redirigé automatiquement...',
   },
 };
 

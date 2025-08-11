@@ -18,14 +18,16 @@ import { Divider } from '../../../components/atoms/Divider';
 import { theme } from '../../../theme';
 import { t } from '../../../shared/utils/i18n';
 import { logEvent, Events } from '../../../shared/utils/analytics';
-import { AuthStackParamList } from '../../../shared/types/navigation';
+import { AuthStackParamList, RootStackParamList } from '../../../shared/types/navigation';
 import { supabase } from '../../../config/supabase';
 
 // Mock data for testing
 const MOCK_EMAIL = "test.sofia@momentum.app";
 const MOCK_PASSWORD = "testpass123";
 
-type SignInScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'SignIn'>;
+type SignInScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'SignIn'> & {
+  navigate: (screen: keyof RootStackParamList, params?: any) => void;
+};
 
 export const SignInScreen: React.FC = () => {
   const navigation = useNavigation<SignInScreenNavigationProp>();
@@ -75,6 +77,9 @@ export const SignInScreen: React.FC = () => {
       const { useAuthStore } = await import('../../../shared/stores/authStore');
       await useAuthStore.getState().login(email, password);
       logEvent(Events.LOGIN_SUCCESS, { email });
+      
+      // Navigate to welcome back screen (name will be fetched from profile)
+      (navigation as any).navigate('WelcomeBack', { userName: 'there' });
     } catch (error) {
       logEvent(Events.LOGIN_FAILED, { 
         email, 
@@ -179,28 +184,27 @@ export const SignInScreen: React.FC = () => {
         <View style={styles.form}>
           {/* Email Input */}
           <InputField
-            variant="default"
             label={t('auth.email')}
-            placeholder={t('auth.emailPlaceholder')}
             value={email}
             onChangeText={setEmail}
+            placeholder={t('auth.emailPlaceholder')}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            leftIcon="mail"
             errorText={errors.email}
-            leftIcon="mail-outline"
           />
 
           {/* Password Input */}
           <View style={styles.passwordContainer}>
             <InputField
-              variant="password"
               label={t('auth.password')}
-              placeholder={t('auth.passwordPlaceholder')}
               value={password}
               onChangeText={setPassword}
+              placeholder={t('auth.passwordPlaceholder')}
+              variant="password"
+              leftIcon="lock-closed"
               errorText={errors.password}
-              leftIcon="lock-closed-outline"
             />
             
             {/* Forgot Password Link */}

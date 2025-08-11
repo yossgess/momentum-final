@@ -12,6 +12,7 @@ export { PhotoSelector } from './atoms/PhotoSelector';
 export { Divider } from './atoms/Divider';
 export { AgeRangeSelector } from './atoms/AgeRangeSelector';
 export { DistanceRangeSelector } from './atoms/DistanceRangeSelector';
+export { AvailabilitySelector } from './atoms/AvailabilitySelector';
 export { NotificationButton } from './atoms/NotificationButton';
 export { SettingsButton } from './atoms/SettingsButton';
 export { EditProfileButton } from './atoms/EditProfileButton';

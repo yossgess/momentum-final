@@ -15,6 +15,7 @@ export interface OnboardingFormData {
   availability: {
     days: string[];
     periods: string[];
+    slots?: string[]; // Individual slot selections like ["monday-morning", "tuesday-evening"]
   };
   photos: PhotoData[];
   mainPhotoIndex: number;

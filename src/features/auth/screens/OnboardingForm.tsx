@@ -18,6 +18,7 @@ import {
   Button,
   Tag,
   Loader,
+  AvailabilitySelector,
 } from '../../../components';
 import { SportChip } from '../../../components/business/SportChip';
 import { PhotoSelector } from '../../../components/atoms/PhotoSelector';
@@ -74,8 +75,6 @@ export const OnboardingForm: React.FC = () => {
   } = useOnboardingStore();
 
   const [selectedSportsCategory, setSelectedSportsCategory] = useState(0);
-  const [selectedDays, setSelectedDays] = useState<string[]>(formData.availability.days);
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>(formData.availability.periods);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const submitMutation = useMutation({
@@ -242,8 +241,8 @@ export const OnboardingForm: React.FC = () => {
         }
         break;
       case 2:
-        if (selectedDays.length === 0 || selectedPeriods.length === 0) {
-          errors.availability = t('onboarding.form.error.selectAvailability');
+        if (formData.availability.days.length === 0 || formData.availability.periods.length === 0) {
+          errors.availability = t('onboarding.form.errors.availabilityRequired');
         }
         break;
     }
@@ -301,24 +300,14 @@ export const OnboardingForm: React.FC = () => {
     });
   };
 
-  const handleDayToggle = (day: string) => {
-    const newDays = selectedDays.includes(day)
-      ? selectedDays.filter(d => d !== day)
-      : [...selectedDays, day];
-    
-    setSelectedDays(newDays);
-    updateFormData({ availability: { ...formData.availability, days: newDays } });
-    logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'availabilityDays', value: newDays.join(',') });
-  };
-
-  const handlePeriodToggle = (period: string) => {
-    const newPeriods = selectedPeriods.includes(period)
-      ? selectedPeriods.filter(p => p !== period)
-      : [...selectedPeriods, period];
-    
-    setSelectedPeriods(newPeriods);
-    updateFormData({ availability: { ...formData.availability, periods: newPeriods } });
-    logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'availabilityPeriods', value: newPeriods.join(',') });
+  const handleAvailabilityChange = (availability: { days: string[]; periods: string[] }) => {
+    updateFormData({ availability });
+    logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { 
+      field: 'availability', 
+      days: availability.days.join(','),
+      periods: availability.periods.join(','),
+      totalSlots: availability.days.length * availability.periods.length
+    });
   };
 
   const renderStep = () => {
@@ -453,51 +442,12 @@ export const OnboardingForm: React.FC = () => {
           <View style={{ gap: theme.spacing.lg }}>
             <Typography variant="h3">{t('onboarding.form.availability')}</Typography>
             
-            <View>
-              <Typography variant="body" style={{ marginBottom: theme.spacing.sm }}>
-                {t('onboarding.form.days')}
-              </Typography>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
-                {DAYS_OF_WEEK.map(({ key, label }) => {
-                  const isSelected = selectedDays.includes(key);
-                  return (
-                    <TouchableOpacity
-                      key={key}
-                      onPress={() => handleDayToggle(key)}
-                    >
-                      <Tag
-                        label={label}
-                        variant={isSelected ? 'filled' : 'outlined'}
-                        onPress={() => handleDayToggle(key)}
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-
-            <View>
-              <Typography variant="body" style={{ marginBottom: theme.spacing.sm }}>
-                {t('onboarding.form.periods')}
-              </Typography>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm }}>
-                {TIME_PERIODS.map(({ key, label }) => {
-                  const isSelected = selectedPeriods.includes(key);
-                  return (
-                    <TouchableOpacity
-                      key={key}
-                      onPress={() => handlePeriodToggle(key)}
-                    >
-                      <Tag
-                        label={label}
-                        variant={isSelected ? 'filled' : 'outlined'}
-                        onPress={() => handlePeriodToggle(key)}
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
+            <AvailabilitySelector
+              availability={formData.availability}
+              onChange={handleAvailabilityChange}
+              mode="edit"
+              testID="onboarding-availability-selector"
+            />
 
             {formErrors.availability && (
               <Typography variant="caption" style={{ color: '#FF6B6B' }}>

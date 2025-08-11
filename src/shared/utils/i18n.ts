@@ -1088,6 +1088,12 @@ export const translations: Translations = {
     en: 'Error',
     fr: 'Erreur',
   },
+
+  // Availability translations
+  'availability.displayMode': {
+    en: 'Display Mode',
+    fr: 'Mode Affichage',
+  },
 };
 
 class I18nService {

@@ -1,5 +1,7 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { theme } from '../../../theme';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   overlay: {
@@ -56,7 +58,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 120, // Space for floating action buttons
   },
   imageCarouselContainer: {
-    height: 400,
+    height: SCREEN_HEIGHT * 0.65, // Match SwipeCard's fullScreenImageCarousel height
     backgroundColor: theme.colors.surface.secondary,
   },
   profileInfo: {
@@ -99,29 +101,9 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: theme.spacing.sm,
   },
-  sportTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface.secondary,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.spacing.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border.primary,
-  },
-  sharedSportTag: {
-    backgroundColor: theme.colors.primary.light,
-    borderColor: theme.colors.primary.main,
-  },
-  sportIcon: {
-    marginRight: theme.spacing.xs,
-  },
-  sportText: {
-    fontSize: 14,
-  },
-  sharedSportText: {
-    color: theme.colors.primary.main,
-    fontWeight: '600',
+  sportChip: {
+    marginRight: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
   },
   availabilityContainer: {
     flexDirection: 'row',

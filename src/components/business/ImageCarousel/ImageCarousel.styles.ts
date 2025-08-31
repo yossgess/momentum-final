@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     position: 'relative',
   },
   scrollView: {
-    height: 400,
+    height: '100%',
   },
   imageContainer: {
     height: '100%',

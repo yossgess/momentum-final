@@ -10,6 +10,7 @@ import { ImageCarousel } from '../ImageCarousel';
 import { ChallengeButton } from '../ChallengeButton';
 import { NopeButton } from '../NopeButton';
 import { RevertButton } from '../RevertButton';
+import { SportChip } from '../SportChip';
 import { logEvent, Events } from '../../../shared/utils/analytics';
 import { t } from '../../../shared/utils/i18n';
 import { formatDistance } from '../../../shared/utils/formatDistance';
@@ -166,26 +167,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   {t('profile.sports')}
                 </Typography>
                 <View style={styles.sportsContainer}>
-                  {((profile as any).user_sports || []).map((sport: string, index: number) => {
-                    const isShared = ((profile as any).common_sports || []).includes(sport);
+                  {((profile as any).user_sports || []).map((sportName: string, index: number) => {
+                    const isShared = ((profile as any).common_sports || []).includes(sportName);
+                    const sportObj = {
+                      id: sportName.toLowerCase().replace(/\s+/g, '_'),
+                      name: sportName,
+                      icon: 'fitness-outline' // Default icon
+                    };
                     return (
-                      <View 
-                        key={index} 
-                        style={[
-                          styles.sportTag, 
-                          isShared && styles.sharedSportTag
-                        ]}
-                      >
-                        <Typography 
-                          variant="caption" 
-                          style={isShared ? 
-                            {...styles.sportText, ...styles.sharedSportText} : 
-                            styles.sportText
-                          }
-                        >
-                          {sport}
-                        </Typography>
-                      </View>
+                      <SportChip
+                        key={index}
+                        sport={sportObj}
+                        selected={isShared}
+                        variant={isShared ? 'gradient' : 'outlined'}
+                        size="sm"
+                        style={styles.sportChip}
+                      />
                     );
                   })}
                 </View>

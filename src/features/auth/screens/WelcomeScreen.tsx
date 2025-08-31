@@ -97,9 +97,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: theme.spacing.lg,
   },
   logoContainer: {
     marginBottom: theme.spacing.xl,
@@ -107,17 +106,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: screenWidth * 1.1,
-    height: screenWidth * 1.1,
-    maxWidth: 550,
-    maxHeight: 550,
-    minWidth: 400,
-    minHeight: 400,
+    width: 300, // Fixed size instead of dynamic calculation
+    height: 300,
+    aspectRatio: 1, // Maintain aspect ratio
   },
   textContainer: {
+    marginTop: theme.spacing.xl,
     marginBottom: theme.spacing['2xl'],
     alignItems: 'center',
     paddingHorizontal: theme.spacing.md,
+    width: '100%',
   },
   subtitle: {
     marginBottom: theme.spacing.md,

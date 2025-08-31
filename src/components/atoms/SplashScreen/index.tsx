@@ -14,14 +14,6 @@ export const SplashScreen: React.FC = () => {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Typography 
-          variant="h2" 
-          color={theme.colors.text.primary} 
-          align="center"
-          style={styles.appName}
-        >
-          Momentum
-        </Typography>
       </View>
     </View>
   );
@@ -46,9 +38,5 @@ const styles = StyleSheet.create({
     minWidth: 400,
     minHeight: 400,
     marginBottom: theme.spacing.xl,
-  },
-  appName: {
-    marginTop: theme.spacing.lg,
-    fontWeight: 'bold',
   },
 });

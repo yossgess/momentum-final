@@ -344,13 +344,8 @@ export const DiscoveryScreen: React.FC = () => {
       unreadCount: notificationCount,
     });
     
-    // Navigate to notifications screen in Profile tab through Main navigator
-    navigation.navigate('Main', { 
-      screen: 'Profile',
-      params: {
-        screen: 'Notifications'
-      }
-    });
+    // Navigate to independent notifications screen
+    navigation.navigate('Notifications');
   };
 
   // Handle Match Modal actions

@@ -7,6 +7,7 @@ export type RootStackParamList = {
   WelcomeNew: { userName: string };
   WelcomeBack: { userName: string };
   Main: NavigatorScreenParams<MainTabParamList>;
+  Notifications: undefined;
 };
 
 export type AuthStackParamList = {
@@ -58,7 +59,6 @@ export type ProfileStackParamList = {
   ProfileScreen: undefined;
   EditProfile: undefined;
   Settings: undefined;
-  Notifications: undefined;
   HelpSupport: undefined;
 };
 

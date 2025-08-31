@@ -121,9 +121,9 @@ export const WelcomeBackScreen: React.FC<Props> = ({ route }) => {
       userName: userName 
     });
     
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Main' }],
+    navigation.navigate('Main', { 
+      screen: 'Discovery',
+      params: { screen: 'DiscoveryScreen' }
     });
   };
 
@@ -135,9 +135,9 @@ export const WelcomeBackScreen: React.FC<Props> = ({ route }) => {
     });
     
     // Navigate to main app
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Main' }],
+    navigation.navigate('Main', { 
+      screen: 'Discovery',
+      params: { screen: 'DiscoveryScreen' }
     });
   };
 

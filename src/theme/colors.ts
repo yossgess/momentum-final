@@ -38,28 +38,28 @@ const colors = {
   },
 
   background: {
-    primary: '#0F1F4A',
-    secondary: '#1A2332',
-    tertiary: '#243041',
+    primary: '#FFFFFF',
+    secondary: '#F8F9FA',
+    tertiary: '#F1F3F5',
   },
 
   surface: {
-    primary: '#1A2332',
-    secondary: '#243041',
-    tertiary: '#2E3D50',
+    primary: '#FFFFFF',
+    secondary: '#F8F9FA',
+    tertiary: '#E9ECEF',
   },
 
   text: {
-    primary: '#FFFFFF',
-    secondary: '#B8C5D6',
-    tertiary: '#8A9BAE',
-    inverse: '#0F1F4A',
+    primary: '#0F1F4A',
+    secondary: '#495057',
+    tertiary: '#6C757D',
+    inverse: '#FFFFFF',
   },
 
   border: {
-    primary: '#243041',
-    secondary: '#2E3D50',
-    tertiary: '#384A5F',
+    primary: '#DEE2E6',
+    secondary: '#CED4DA',
+    tertiary: '#ADB5BD',
   },
 
   status: {
@@ -70,16 +70,16 @@ const colors = {
   },
 
   overlay: {
-    light: 'rgba(255, 255, 255, 0.1)',
-    medium: 'rgba(255, 255, 255, 0.2)',
-    dark: 'rgba(15, 31, 74, 0.5)',
-    darker: 'rgba(15, 31, 74, 0.8)',
+    light: 'rgba(0, 0, 0, 0.05)',
+    medium: 'rgba(0, 0, 0, 0.1)',
+    dark: 'rgba(0, 0, 0, 0.3)',
+    darker: 'rgba(0, 0, 0, 0.5)',
   },
 
   shadow: {
-    light: 'rgba(15, 31, 74, 0.1)',
-    medium: 'rgba(15, 31, 74, 0.2)',
-    dark: 'rgba(15, 31, 74, 0.4)',
+    light: 'rgba(0, 0, 0, 0.08)',
+    medium: 'rgba(0, 0, 0, 0.12)',
+    dark: 'rgba(0, 0, 0, 0.16)',
   },
 } as const;
 

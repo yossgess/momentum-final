@@ -14,6 +14,7 @@ import { WelcomeBackScreen } from '../features/auth/screens/WelcomeBackScreen';
 import { RootStackParamList } from '../shared/types/navigation';
 import { AuthNavigator } from './AuthNavigator';
 import { TabNavigator } from './TabNavigator';
+import { NotificationsScreen } from '../features/notifications/NotificationsScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -155,6 +156,9 @@ export const AppNavigator: React.FC = () => {
           {/* Welcome screens - available for navigation */}
           <Stack.Screen name="WelcomeNew" component={WelcomeNewScreen} />
           <Stack.Screen name="WelcomeBack" component={WelcomeBackScreen} />
+          
+          {/* Independent screens */}
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       

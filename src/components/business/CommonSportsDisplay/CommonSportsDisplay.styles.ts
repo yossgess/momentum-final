@@ -14,6 +14,7 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: theme.spacing.sm,
     marginLeft: theme.spacing.sm,
+    color: theme.colors.text.inverse,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,

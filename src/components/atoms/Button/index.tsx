@@ -58,7 +58,9 @@ const getButtonStyle = (
       backgroundColor: disabled ? theme.colors.secondary[300] : theme.colors.primary.main,
     },
     secondary: {
-      backgroundColor: disabled ? theme.colors.secondary[200] : theme.colors.secondary.main,
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: disabled ? theme.colors.secondary[300] : theme.colors.secondary.main,
     },
     outline: {
       backgroundColor: 'transparent',
@@ -97,7 +99,7 @@ const getTextColor = (variant: ButtonProps['variant'], disabled: boolean): strin
     case 'primary':
       return theme.colors.text.primary;
     case 'secondary':
-      return theme.colors.text.primary;
+      return theme.colors.secondary.main;
     case 'outline':
       return theme.colors.primary.main;
     case 'ghost':

@@ -107,9 +107,9 @@ export const WelcomeNewScreen: React.FC<Props> = ({ route }) => {
       userName: userName 
     });
     
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Main' }],
+    navigation.navigate('Main', { 
+      screen: 'Discovery',
+      params: { screen: 'DiscoveryScreen' }
     });
   };
 

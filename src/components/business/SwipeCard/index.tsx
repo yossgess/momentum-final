@@ -44,13 +44,13 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({
 
       {/* Single consolidated text container at bottom left */}
       <View style={styles.bottomLeftContainer}>
-        <Typography variant="h2" color="primary" weight="bold" style={styles.nameText}>
+        <Typography variant="h2" color="inverse" weight="bold" style={styles.nameText}>
           {profile.name}, {profile.age}
         </Typography>
         
         <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={16} color={theme.colors.text.primary} />
-          <Typography variant="body" color="primary" style={styles.locationText}>
+          <Ionicons name="location-outline" size={16} color={theme.colors.text.inverse} />
+          <Typography variant="body" color="inverse" style={styles.locationText}>
             {profile.distanceInKm !== undefined ? 
               `${formatDistance(profile.distanceInKm)} away` : 
               profile.location || 'Location unknown'

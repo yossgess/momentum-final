@@ -48,7 +48,21 @@ export const EmailConfirmationScreen: React.FC = () => {
       logEvent(Events.EMAIL_CONFIRMATION_RESENT, { email });
     } catch (error) {
       const errorMessage = AuthValidation.parseAuthError(error);
-      Alert.alert('Error', errorMessage);
+      
+      // Check if email is already confirmed
+      if (errorMessage.includes('already confirmed') || errorMessage.includes('already verified')) {
+        Alert.alert(
+          t('auth.emailConfirmation.alreadyConfirmed'),
+          '',
+          [
+            { text: t('common.ok'), style: 'default' },
+            { text: t('auth.signIn'), onPress: () => navigation.navigate('SignIn') },
+          ]
+        );
+      } else {
+        Alert.alert('Error', errorMessage);
+      }
+      
       logEvent(Events.EMAIL_CONFIRMATION_FAILED, { email, error: errorMessage });
     } finally {
       setIsLoading(false);

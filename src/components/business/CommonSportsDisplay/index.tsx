@@ -22,13 +22,13 @@ export const CommonSportsDisplay: React.FC<CommonSportsDisplayProps> = ({
   return (
     <View style={[styles.container, style]}>
       {showTitle && (
-        <Typography variant="body" color="primary" weight="medium" style={styles.title}>
+        <Typography variant="body" color="inverse" weight="medium" style={styles.title}>
           {title || t('profile.sports')}
         </Typography>
       )}
       
       <View style={styles.section}>
-        <Typography variant="caption" color="success" style={styles.sectionTitle}>
+        <Typography variant="caption" color="inverse" style={styles.sectionTitle}>
           {t('discovery.commonSports')} ({sharedSports.length})
         </Typography>
         

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Notification, NOTIFICATION_ICONS } from '../constants/notificationTypes';
 import { t, i18n } from '../../../shared/utils/i18n';
 import { logEvent } from '../../../shared/utils/analytics';
+import { theme } from '../../../theme';
 
 interface NotificationCardProps {
   notification: Notification;
@@ -15,7 +16,7 @@ interface NotificationCardProps {
   onDelete?: (notificationId: string) => void;
 }
 
-const getNotificationIcon = (type: Notification['type'], size: number = 24, color: string = '#00A89D') => {
+const getNotificationIcon = (type: Notification['type'], size: number = 24, color: string = theme.colors.primary.main) => {
   switch (type) {
     case 'match':
       return <Ionicons name="flash" size={size} color={color} />;
@@ -91,22 +92,22 @@ const getNotificationSubtitle = (notification: Notification): string => {
 };
 
 const getIconColor = (type: Notification['type'], isRead: boolean): string => {
-  if (isRead) return '#6B6E75'; // theme.colors.text.tertiary
+  if (isRead) return theme.colors.text.tertiary;
   
   switch (type) {
     case 'match':
     case 'challenge-received':
-      return '#00A89D'; // theme.colors.primary.main
+      return theme.colors.primary.main;
     case 'message':
-      return '#A9EAE7'; // theme.colors.accent.main
+      return theme.colors.accent.main;
     case 'event-invite':
-      return '#00A89D'; // theme.colors.status.info
+      return theme.colors.status.info;
     case 'event-update':
-      return '#FF9100'; // theme.colors.status.warning
+      return theme.colors.status.warning;
     case 'profile-view':
-      return '#A4A6AC'; // theme.colors.text.secondary
+      return theme.colors.text.secondary;
     default:
-      return '#00A89D';
+      return theme.colors.primary.main;
   }
 };
 
@@ -183,7 +184,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
       {/* Arrow icon */}
       <View style={styles.arrowContainer}>
-        <Ionicons name="chevron-forward" size={16} color="#6B6E75" />
+        <Ionicons name="chevron-forward" size={16} color={theme.colors.text.tertiary} />
       </View>
     </TouchableOpacity>
   );
@@ -195,13 +196,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#1C1E22', // theme.colors.surface.primary
+    backgroundColor: theme.colors.surface.primary,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2D33', // theme.colors.border.primary
+    borderBottomColor: theme.colors.border.primary,
     position: 'relative',
   },
   unreadContainer: {
-    backgroundColor: '#2A2D33', // theme.colors.surface.secondary
+    backgroundColor: theme.colors.surface.secondary,
   },
   unreadIndicator: {
     position: 'absolute',
@@ -211,19 +212,19 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#00A89D', // theme.colors.primary.main
+    backgroundColor: theme.colors.primary.main,
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#3A3D44', // theme.colors.surface.tertiary
+    backgroundColor: theme.colors.surface.tertiary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
   unreadIconContainer: {
-    backgroundColor: '#00A89D20', // theme.colors.primary.main with opacity
+    backgroundColor: `${theme.colors.primary.main}20`,
   },
   content: {
     flex: 1,
@@ -238,25 +239,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#A4A6AC', // theme.colors.text.secondary
+    color: theme.colors.text.secondary,
     flex: 1,
     marginRight: 8,
   },
   unreadTitle: {
-    color: '#FFFFFF', // theme.colors.text.primary
+    color: theme.colors.text.primary,
     fontWeight: '700',
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B6E75', // theme.colors.text.tertiary
+    color: theme.colors.text.tertiary,
     lineHeight: 20,
   },
   unreadSubtitle: {
-    color: '#A4A6AC', // theme.colors.text.secondary
+    color: theme.colors.text.secondary,
   },
   timestamp: {
     fontSize: 12,
-    color: '#6B6E75', // theme.colors.text.tertiary
+    color: theme.colors.text.tertiary,
     fontWeight: '400',
   },
   arrowContainer: {

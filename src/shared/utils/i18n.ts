@@ -953,6 +953,10 @@ export const translations: Translations = {
     en: 'Confirmation email sent successfully!',
     fr: 'Email de confirmation envoyé avec succès !',
   },
+  'auth.emailConfirmation.alreadyConfirmed': {
+    en: 'Your email address is already confirmed. You can now sign in to your account.',
+    fr: 'Votre adresse email est déjà confirmée. Vous pouvez maintenant vous connecter à votre compte.',
+  },
 
   // Password Reset
   'auth.passwordReset.title': {

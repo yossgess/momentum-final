@@ -16,6 +16,7 @@ import { useNotifications } from './hooks/useNotifications';
 import { Notification } from './constants/notificationTypes';
 import { t } from '../../shared/utils/i18n';
 import { logEvent } from '../../shared/utils/analytics';
+import { theme } from '../../theme';
 
 export const NotificationsScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -206,7 +207,7 @@ export const NotificationsScreen: React.FC = () => {
   const renderEmptyState = useCallback(() => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIconContainer}>
-        <Ionicons name="notifications-off" size={64} color="#6B6E75" />
+        <Ionicons name="notifications-off" size={64} color={theme.colors.text.tertiary} />
       </View>
       <Text style={styles.emptyTitle}>
         {t('notifications.empty', 'No notifications yet')}
@@ -236,7 +237,7 @@ export const NotificationsScreen: React.FC = () => {
           onPress={handleBackPress}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.text.primary} />
         </TouchableOpacity>
         
         <View style={styles.titleContainer}>
@@ -255,7 +256,7 @@ export const NotificationsScreen: React.FC = () => {
           onPress={handleOptionsPress}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
+          <Ionicons name="ellipsis-vertical" size={24} color={theme.colors.text.primary} />
         </TouchableOpacity>
       </View>
 
@@ -270,8 +271,8 @@ export const NotificationsScreen: React.FC = () => {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={onRefresh}
-            tintColor="#00A89D"
-            colors={['#00A89D']}
+            tintColor={theme.colors.primary.main}
+            colors={[theme.colors.primary.main]}
           />
         }
         ListEmptyComponent={!isLoading ? renderEmptyState : null}
@@ -285,7 +286,7 @@ export const NotificationsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B0D10', // theme.colors.background.primary
+    backgroundColor: theme.colors.background.primary,
   },
   header: {
     flexDirection: 'row',
@@ -293,9 +294,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#1C1E22', // theme.colors.surface.primary
+    backgroundColor: theme.colors.surface.primary,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2D33', // theme.colors.border.primary
+    borderBottomColor: theme.colors.border.primary,
   },
   backButton: {
     width: 40,
@@ -312,11 +313,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFFFFF', // theme.colors.text.primary
+    color: theme.colors.text.primary,
     textAlign: 'center',
   },
   badge: {
-    backgroundColor: '#FF3D3D', // theme.colors.status.error
+    backgroundColor: theme.colors.status.error,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   badgeText: {
-    color: '#FFFFFF',
+    color: theme.colors.text.inverse,
     fontSize: 12,
     fontWeight: '600',
     paddingHorizontal: 6,
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#2A2D33', // theme.colors.border.primary
+    backgroundColor: theme.colors.border.primary,
     marginLeft: 68, // Align with content after icon
   },
   emptyListContainer: {
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#2A2D33', // theme.colors.surface.secondary
+    backgroundColor: theme.colors.surface.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -365,25 +366,25 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF', // theme.colors.text.primary
+    color: theme.colors.text.primary,
     textAlign: 'center',
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: '#A4A6AC', // theme.colors.text.secondary
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
   },
   emptyButton: {
-    backgroundColor: '#00A89D', // theme.colors.primary.main
+    backgroundColor: theme.colors.primary.main,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   emptyButtonText: {
-    color: '#FFFFFF',
+    color: theme.colors.text.inverse,
     fontSize: 16,
     fontWeight: '600',
   },

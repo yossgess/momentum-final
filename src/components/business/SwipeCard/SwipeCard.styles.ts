@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
   },
   activeIndicator: {
-    backgroundColor: theme.colors.text.primary,
+    backgroundColor: theme.colors.text.inverse,
   },
   content: {
     padding: theme.spacing.lg,
@@ -100,13 +100,13 @@ export const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   nameText: {
-    color: theme.colors.text.primary,
+    color: theme.colors.text.inverse,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   bioText: {
-    color: theme.colors.text.primary,
+    color: theme.colors.text.inverse,
     lineHeight: 20,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 1 },
@@ -119,6 +119,7 @@ export const styles = StyleSheet.create({
   },
   locationText: {
     marginLeft: theme.spacing.xs,
+    color: theme.colors.text.inverse,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,

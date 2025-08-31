@@ -31,12 +31,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: screenWidth * 1.1,
-    height: screenWidth * 1.1,
-    maxWidth: 550,
-    maxHeight: 550,
-    minWidth: 400,
-    minHeight: 400,
-    marginBottom: theme.spacing.xl,
+    width: 200,
+    height: 200,
+    aspectRatio: 1,
   },
 });

@@ -106,8 +106,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 300, // Fixed size instead of dynamic calculation
-    height: 300,
+    width: 200, // Reduced from 300 to 200
+    height: 200,
     aspectRatio: 1, // Maintain aspect ratio
   },
   textContainer: {

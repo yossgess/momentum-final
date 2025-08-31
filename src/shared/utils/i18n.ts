@@ -1097,6 +1097,14 @@ export const translations: Translations = {
     en: 'Add your first photo to get started',
     fr: 'Ajoutez votre première photo pour commencer',
   },
+  'photos.add': {
+    en: 'Add Photo',
+    fr: 'Ajouter une photo',
+  },
+  'photos.delete_confirm': {
+    en: 'Do you want to delete this photo?',
+    fr: 'Voulez-vous supprimer cette photo ?',
+  },
 
   // Match translations
   'matches.title': {

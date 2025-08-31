@@ -22,8 +22,7 @@ import {
   AvailabilitySelector,
 } from '../../../components';
 import { SportChip } from '../../../components/business/SportChip';
-import { PhotoSelector } from '../../../components/atoms/PhotoSelector';
-import { PhotoData } from '../../../components/atoms/PhotoSelector/PhotoSelector.types';
+import { PhotoManagementModal } from '../../../components/molecules/PhotoManagementModal';
 
 import { useOnboardingStore } from '../../onboarding/store/onboardingStore';
 import { useAuthStore } from '../../../shared/stores/authStore';
@@ -80,6 +79,7 @@ export const OnboardingForm: React.FC = () => {
 
   const [selectedSportsCategory, setSelectedSportsCategory] = useState(0);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   const submitMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -127,21 +127,21 @@ export const OnboardingForm: React.FC = () => {
       }
 
       const uploadedPhotoUrls: string[] = [];
-      for (const photo of data.photos) {
+      for (const photoUri of data.photos.filter(p => p !== null)) {
         const fileName = `avatar_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
         try {
           const { storageService } = await import('../../../shared/services/storageService');
-          const publicUrl = await storageService.uploadAvatar(user.id, photo.uri, fileName);
+          const publicUrl = await storageService.uploadAvatar(user.id, photoUri!, fileName);
           uploadedPhotoUrls.push(publicUrl);
         } catch (error) {
           console.warn('Failed to upload photo:', error);
-          uploadedPhotoUrls.push(photo.uri);
+          uploadedPhotoUrls.push(photoUri!);
         }
       }
 
       const updatedFormData = {
         ...data,
-        photos: uploadedPhotoUrls.map((url, index) => ({ uri: url, id: `uploaded_${index}` })),
+        photos: uploadedPhotoUrls,
       };
 
       const { profilesService } = await import('../../../shared/services/profilesService');
@@ -156,7 +156,7 @@ export const OnboardingForm: React.FC = () => {
         // interested_in is now stored in filter_preferences table
         // preferred_sports is now stored in filter_preferences table as 'sports'
         availability: updatedFormData.availability,
-        avatar_urls: updatedFormData.photos.map(photo => photo.uri),
+        avatar_urls: updatedFormData.photos,
         lat: userLocation?.lat || null,
         lng: userLocation?.lng || null,
         location_permission_requested: locationPermissionRequested,
@@ -260,6 +260,9 @@ export const OnboardingForm: React.FC = () => {
         if (formData.availability.days.length === 0 || formData.availability.periods.length === 0) {
           errors.availability = t('onboarding.form.errors.availabilityRequired');
         }
+        break;
+      case 3:
+        // Photos are optional, no validation needed
         break;
     }
 
@@ -470,35 +473,33 @@ export const OnboardingForm: React.FC = () => {
                 {formErrors.availability}
               </Typography>
             )}
+          </View>
+        );
+
+      case 3:
+        return (
+          <View style={{ gap: theme.spacing.lg, alignItems: 'center' }}>
+            <Typography variant="h3" style={{ marginBottom: theme.spacing.sm }}>
+              {t('onboarding.form.photos.label')}
+            </Typography>
+            <Typography variant="body" style={{ marginBottom: theme.spacing.md, color: theme.colors.text.secondary, textAlign: 'center' }}>
+              {t('onboarding.form.photos.description')}
+            </Typography>
             
-            <View>
-              <Typography variant="h3" style={{ marginBottom: theme.spacing.sm }}>
-                {t('onboarding.form.photos.label')}
+            <Button
+              variant="primary"
+              size="lg"
+              onPress={() => setShowPhotoModal(true)}
+              style={{ marginTop: theme.spacing.lg }}
+            >
+              {formData.photos.length > 0 ? `Manage Photos (${formData.photos.length})` : t('photos.add')}
+            </Button>
+            
+            {formData.photos.length > 0 && (
+              <Typography variant="caption" color={theme.colors.text.secondary} style={{ textAlign: 'center' }}>
+                {formData.photos.length} photo{formData.photos.length !== 1 ? 's' : ''} added
               </Typography>
-              <Typography variant="body" style={{ marginBottom: theme.spacing.md, color: theme.colors.text.secondary }}>
-                {t('onboarding.form.photos.description')}
-              </Typography>
-              
-              <PhotoSelector
-                photos={formData.photos}
-                mainPhotoIndex={formData.mainPhotoIndex}
-                onPhotosChange={(photos: PhotoData[]) => {
-                  updateFormData({ photos });
-                  logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'photos', value: photos.length });
-                }}
-                onMainPhotoChange={(index: number) => {
-                  updateFormData({ mainPhotoIndex: index });
-                  logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'mainPhotoIndex', value: index });
-                }}
-                maxImages={5}
-              />
-              
-              {formErrors.photos && (
-                <Typography variant="caption" style={{ color: '#FF6B6B', marginTop: theme.spacing.sm }}>
-                  {formErrors.photos}
-                </Typography>
-              )}
-            </View>
+            )}
           </View>
         );
 
@@ -559,6 +560,18 @@ export const OnboardingForm: React.FC = () => {
 
         {/* Form Content */}
         {renderStep()}
+
+        {/* Photo Management Modal */}
+        <PhotoManagementModal
+          visible={showPhotoModal}
+          onClose={() => setShowPhotoModal(false)}
+          photos={formData.photos}
+          onPhotosChange={(photos) => {
+            updateFormData({ photos });
+            logEvent(Events.ONBOARDING_FORM_FIELD_UPDATED, { field: 'photos', value: photos.filter(p => p !== null).length });
+          }}
+          maxPhotos={6}
+        />
 
         {/* Navigation Buttons */}
         <View style={{

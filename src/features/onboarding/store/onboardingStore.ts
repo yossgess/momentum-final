@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PhotoData } from '../../../components/atoms/PhotoSelector/PhotoSelector.types';
 
 // AsyncStorage keys
 const ONBOARDING_SEEN_KEY = '@momentum/hasSeenOnboarding';
@@ -17,7 +16,7 @@ export interface OnboardingFormData {
     periods: string[];
     slots?: string[]; // Individual slot selections like ["monday-morning", "tuesday-evening"]
   };
-  photos: PhotoData[];
+  photos: (string | null)[];
   mainPhotoIndex: number;
 }
 
@@ -60,7 +59,7 @@ const initialFormData: OnboardingFormData = {
 export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   formData: initialFormData,
   currentStep: 0,
-  totalSteps: 3,
+  totalSteps: 4,
   isLoading: false,
   error: null,
   hasSeenOnboarding: false,

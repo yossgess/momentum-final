@@ -46,7 +46,6 @@ export const ProfileScreen: React.FC = () => {
     if (!user?.id) return;
     
     try {
-      // Filter out null values for storage
       const avatarUrls = newPhotos.filter(photo => photo !== null) as string[];
       
       await profilesService.updateProfile(user.id, {
@@ -55,7 +54,8 @@ export const ProfileScreen: React.FC = () => {
       
       logEvent(Events.PHOTO_UPLOADED, { 
         photoCount: avatarUrls.length,
-        context: 'profile_edit' 
+        context: 'profile_edit',
+        mainPhotoUrl: avatarUrls[0] || undefined
       });
     } catch (error) {
       console.error('Failed to update photos:', error);

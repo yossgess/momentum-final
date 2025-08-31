@@ -79,27 +79,37 @@ export const PhotoManagementModal: React.FC<PhotoManagementModalProps> = ({
           const publicUrl = await storageService.uploadAvatar(user.id, asset.uri, fileName);
           console.log('Upload successful, public URL:', publicUrl);
           
-          // Update photos array with Supabase URL
+          // Find the first empty slot to add the photo
           const newPhotos = [...photos];
-          newPhotos[index] = publicUrl;
+          const firstEmptyIndex = newPhotos.findIndex(photo => photo === null);
+          
+          if (firstEmptyIndex !== -1) {
+            // Add to first empty slot
+            newPhotos[firstEmptyIndex] = publicUrl;
+          } else {
+            // If no empty slots, replace the last photo
+            newPhotos[maxPhotos - 1] = publicUrl;
+          }
+          
           console.log('Updated photos array:', newPhotos);
           onPhotosChange(newPhotos);
           
-          // Animate photo addition
+          // Animate photo addition at the correct index
+          const targetIndex = firstEmptyIndex !== -1 ? firstEmptyIndex : maxPhotos - 1;
           Animated.sequence([
-            Animated.timing(animatedValues[index], {
+            Animated.timing(animatedValues[targetIndex], {
               toValue: 0.8,
               duration: 150,
               useNativeDriver: true,
             }),
-            Animated.timing(animatedValues[index], {
+            Animated.timing(animatedValues[targetIndex], {
               toValue: 1,
               duration: 150,
               useNativeDriver: true,
             }),
           ]).start();
 
-          logEvent(Events.PHOTO_UPLOADED, { photoIndex: index, bucketUpload: true });
+          logEvent(Events.PHOTO_UPLOADED, { photoIndex: targetIndex, bucketUpload: true });
         } catch (uploadError) {
           console.error('Failed to upload to Supabase:', uploadError);
           Alert.alert('Upload Error', 'Failed to upload photo to cloud storage. Please try again.');
@@ -133,7 +143,15 @@ export const PhotoManagementModal: React.FC<PhotoManagementModalProps> = ({
               useNativeDriver: true,
             }).start(() => {
               const newPhotos = [...photos];
-              newPhotos[index] = null;
+              
+              // Remove the photo and shift remaining photos left
+              newPhotos.splice(index, 1);
+              
+              // Fill array back to maxPhotos length with nulls
+              while (newPhotos.length < maxPhotos) {
+                newPhotos.push(null);
+              }
+              
               onPhotosChange(newPhotos);
               
               // Reset animation value
@@ -225,6 +243,15 @@ export const PhotoManagementModal: React.FC<PhotoManagementModalProps> = ({
                   console.log('Image loaded successfully:', photo);
                 }}
               />
+              {index === 0 && (
+                <View style={styles.mainPhotoBadge}>
+                  <Ionicons 
+                    name="star" 
+                    size={12} 
+                    color={theme.colors.text.inverse} 
+                  />
+                </View>
+              )}
               {!isReorderMode && (
                 <TouchableOpacity
                   style={styles.deleteButton}
@@ -303,6 +330,19 @@ export const PhotoManagementModal: React.FC<PhotoManagementModalProps> = ({
           <View style={styles.photosGrid}>
             {Array.from({ length: maxPhotos }, (_, index) => renderPhotoSlot(index))}
           </View>
+          
+          {photos.filter(p => p !== null).length > 0 && (
+            <View style={styles.mainPhotoIndicator}>
+              <Ionicons 
+                name="star" 
+                size={16} 
+                color={theme.colors.primary.main} 
+              />
+              <Typography variant="caption" color={theme.colors.text.secondary} style={{ marginLeft: theme.spacing.xs }}>
+                First photo is your main profile picture
+              </Typography>
+            </View>
+          )}
         </View>
 
         <View style={styles.footer}>
@@ -406,6 +446,24 @@ const styles = StyleSheet.create({
   photosContainer: {
     flex: 1,
     padding: theme.spacing.lg,
+  },
+  mainPhotoIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  mainPhotoBadge: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: theme.colors.primary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   footer: {
     padding: theme.spacing.lg,

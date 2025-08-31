@@ -16,7 +16,7 @@ import { theme } from '../../../theme';
 import { t } from '../../../shared/utils/i18n';
 import { onboardingSlides } from '../data/onboardingSlides';
 import { logEvent, Events } from '../../../shared/utils/analytics';
-import { useOnboardingStore } from '../../onboarding/store/onboardingStore';
+import { useOnboardingStore } from '../../../stores/onboardingStore';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -24,7 +24,7 @@ export const OnboardingSlider: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const pagerRef = useRef<PagerView>(null);
   const navigation = useNavigation();
-  const { markOnboardingAsSeen } = useOnboardingStore();
+  const { setHasSeenOnboarding } = useOnboardingStore();
 
   useEffect(() => {
     // Log onboarding started
@@ -60,7 +60,7 @@ export const OnboardingSlider: React.FC = () => {
     await navigationService.markOnboardingSeen();
     
     // Mark onboarding as seen in the store as well (for backward compatibility)
-    markOnboardingAsSeen();
+    setHasSeenOnboarding(true);
     
     // The AppNavigator will automatically re-evaluate and show Auth screen
     // when hasSeenOnboarding becomes true

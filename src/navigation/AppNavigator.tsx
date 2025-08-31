@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, StyleSheet } from 'react-native';
 import { useAuthStore } from '../shared/stores/authStore';
 import { useUserStore } from '../shared/stores/userStore';
-import { useOnboardingStore } from '../features/onboarding/store/onboardingStore';
+import { useOnboardingStore } from '../stores/onboardingStore';
 import { navigationService, NavigationScreen } from '../shared/services/navigationService';
 import { logEvent, Events } from '../shared/utils/analytics';
 import { OnboardingSlider } from '../features/auth/screens/OnboardingSlider';

@@ -1,10 +1,12 @@
 const gradients = {
-  primary: ['#00A89D', '#6FD9D1'],
-  secondary: ['#1B1B1B', '#2F2F2F'],
-  accent: ['#A9EAE7', '#D0F6F4'],
-  energy: ['#00A89D', '#A9EAE7', '#6FD9D1'],
-  challenge: ['#0F4E4D', '#00A89D', '#6FD9D1'],
-  dark: ['#0B0D10', '#1C1E22', '#2A2D33'],
+  primary: ['#FDBA52', '#FED485'],
+  secondary: ['#4855A4', '#6B76B8'],
+  accent: ['#2A9CDA', '#5BB3E3'],
+  energy: ['#FDBA52', '#2A9CDA', '#5BB3E3'],
+  challenge: ['#4855A4', '#FDBA52', '#FED485'],
+  dark: ['#0F1F4A', '#1A2332', '#243041'],
+  sunset: ['#FDBA52', '#E5A03D', '#CC8A2B'],
+  ocean: ['#2A9CDA', '#4855A4', '#3A4485'],
 } as const;
 
 export type Gradients = typeof gradients;

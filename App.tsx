@@ -94,15 +94,11 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView 
+    <SafeAreaView
       style={{ flex: 1, backgroundColor: '#FFFFFF' }}
       edges={['top', 'left', 'right']}
-      mode='margin'
     >
-      <View style={{
-        flex: 1,
-        paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0
-      }}>
+      <View style={{ flex: 1 }}>
         <QueryClientProvider client={queryClient}>
           <AppNavigator />
           <StatusBar style="dark" backgroundColor="#FFFFFF" />

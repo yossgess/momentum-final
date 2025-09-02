@@ -2,7 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logEvent, Events } from '../utils/analytics';
 
 // AsyncStorage keys
-const ONBOARDING_SEEN_KEY = '@momentum/onboarding_seen';
+// IMPORTANT: Keep this key consistent with `src/features/onboarding/store/onboardingStore.ts`
+const ONBOARDING_SEEN_KEY = '@momentum/hasSeenOnboarding';
 
 // Navigation state types
 export type NavigationScreen = 

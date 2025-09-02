@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, StyleSheet } from 'react-native';
 import { useAuthStore } from '../shared/stores/authStore';
 import { useUserStore } from '../shared/stores/userStore';
-import { useOnboardingStore } from '../stores/onboardingStore';
 import { navigationService, NavigationScreen } from '../shared/services/navigationService';
 import { logEvent, Events } from '../shared/utils/analytics';
 import { OnboardingSlider } from '../features/auth/screens/OnboardingSlider';
@@ -20,7 +19,6 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export const AppNavigator: React.FC = () => {
   const { isAuthenticated, hasCompletedProfile, user } = useAuthStore();
-  const { hasSeenOnboarding } = useOnboardingStore();
   const [currentScreen, setCurrentScreen] = React.useState<NavigationScreen | null>(null);
 
   // Determine navigation screen based on current auth state
@@ -43,7 +41,7 @@ export const AppNavigator: React.FC = () => {
     };
 
     determineScreen();
-  }, [isAuthenticated, hasCompletedProfile, user, hasSeenOnboarding]);
+  }, [isAuthenticated, hasCompletedProfile, user]);
 
   // Load user profile when authenticated
   React.useEffect(() => {
